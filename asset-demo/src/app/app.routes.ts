@@ -21,7 +21,7 @@ export const routes: Routes = [
       },
       {
         path: 'assets/:id',
-        loadComponent: () => import('./knodtec/features/assets/assets.component').then(m => m.AssetsComponent)
+        loadComponent: () => import('./knodtec/features/assets/asset-details.component').then(m => m.AssetDetailsComponent)
       },
       {
         path: 'requests',
@@ -29,11 +29,31 @@ export const routes: Routes = [
       },
       {
         path: 'requests/new',
-        loadComponent: () => import('./knodtec/features/requests/requests.component').then(m => m.RequestsComponent)
+        loadComponent: () => import('./knodtec/features/raise-request/raise-request.component').then(m => m.RaiseRequestComponent)
       },
       {
         path: 'requests/:id',
         loadComponent: () => import('./knodtec/features/requests/requests.component').then(m => m.RequestsComponent)
+      },
+      {
+        path: 'tickets',
+        loadComponent: () => import('./knodtec/features/tickets/tickets.component').then(m => m.TicketsComponent)
+      },
+      {
+        path: 'tickets/new',
+        loadComponent: () => import('./knodtec/features/raise-ticket/raise-ticket.component').then(m => m.RaiseTicketComponent)
+      },
+      {
+        path: 'tickets/:id',
+        loadComponent: () => import('./knodtec/features/tickets/tickets.component').then(m => m.TicketsComponent)
+      },
+      {
+        path: 'raise-ticket',
+        loadComponent: () => import('./knodtec/features/raise-ticket/raise-ticket.component').then(m => m.RaiseTicketComponent)
+      },
+      {
+        path: 'raise-request',
+        loadComponent: () => import('./knodtec/features/raise-request/raise-request.component').then(m => m.RaiseRequestComponent)
       },
       {
         path: 'reports',
@@ -50,6 +70,14 @@ export const routes: Routes = [
       {
         path: 'exit-clearance/:id',
         loadComponent: () => import('./knodtec/features/exit-clearance/exit-clearance.component').then(m => m.ExitClearanceComponent)
+      },
+      {
+        path: 'onboarding',
+        loadComponent: () => import('./knodtec/features/onboarding/onboarding.component').then(m => m.OnboardingComponent)
+      },
+      {
+        path: 'offboarding',
+        loadComponent: () => import('./knodtec/features/offboarding/offboarding.component').then(m => m.OffboardingComponent)
       },
       {
         path: '**',
