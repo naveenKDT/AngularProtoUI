@@ -2,11 +2,17 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
 interface NavItem {
   key: string;
   label: string;
   icon: string;
   route: string;
+  badge?: number;
 }
 
 interface User {
@@ -39,7 +45,7 @@ interface User {
             @if (!sidebarCollapsed()) {
               <div class="logo-text">
                 <span class="logo-brand">KNODTEC</span>
-                <span class="logo-module">Asset Management</span>
+                <span class="logo-module">Enterprise Suite</span>
               </div>
             }
           </div>
@@ -56,32 +62,40 @@ interface User {
 
         <!-- Navigation -->
         <nav class="sidebar-nav">
-          @for (item of navItems(); track item.key) {
-            <a 
-              class="nav-item"
-              [class.active]="activeRoute() === item.route"
-              [routerLink]="item.route"
-              (click)="setActiveRoute(item.route)">
-              <span class="nav-icon" [innerHTML]="item.icon"></span>
-              @if (!sidebarCollapsed()) {
-                <span class="nav-label">{{ item.label }}</span>
-              }
-              @if (item.key === 'requests' && pendingCount() > 0) {
-                <span class="nav-badge">{{ pendingCount() }}</span>
-              }
-            </a>
+          @for (section of navSections(); track section.label) {
+            @if (!sidebarCollapsed()) {
+              <div class="nav-section-label">{{ section.label }}</div>
+            }
+            @for (item of section.items; track item.key) {
+              <a 
+                class="nav-item"
+                [class.active]="isActiveRoute(item.route)"
+                [routerLink]="item.route"
+                (click)="setActiveRoute(item.route)">
+                <span class="nav-icon" [innerHTML]="item.icon"></span>
+                @if (!sidebarCollapsed()) {
+                  <span class="nav-label">{{ item.label }}</span>
+                }
+                @if (item.badge && item.badge > 0) {
+                  <span class="nav-badge" [class.important]="item.key === 'tickets'">{{ item.badge }}</span>
+                }
+              </a>
+            }
           }
         </nav>
 
         <!-- User Section -->
         <div class="sidebar-footer">
-          <div class="user-card" (click)="toggleUserMenu()">
+          <div class="user-card" (click)="navigateTo('/profile')">
             <div class="user-avatar">{{ currentUser().avatar }}</div>
             @if (!sidebarCollapsed()) {
               <div class="user-info">
                 <span class="user-name">{{ currentUser().name }}</span>
                 <span class="user-role">{{ currentUser().role }}</span>
               </div>
+              <svg class="user-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
             }
           </div>
         </div>
@@ -101,23 +115,28 @@ interface User {
             </div>
           </div>
           <div class="header-right">
-            <button class="header-action" title="Search">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="header-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="M21 21l-4.35-4.35"/>
               </svg>
-            </button>
+              <input type="text" placeholder="Search..." class="header-search-input">
+              <span class="header-search-shortcut">⌘K</span>
+            </div>
             <button class="header-action" title="Notifications">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
               </svg>
-              <span class="notification-dot"></span>
+              @if (notificationCount() > 0) {
+                <span class="notification-badge">{{ notificationCount() }}</span>
+              }
             </button>
-            <button class="header-action" title="Settings">
+            <button class="header-action" title="Help">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
             </button>
           </div>
@@ -137,7 +156,6 @@ interface User {
       background: var(--color-slate-50);
     }
 
-    /* Sidebar */
     .sidebar {
       width: var(--sidebar-width);
       background: white;
@@ -215,7 +233,6 @@ interface User {
       color: var(--color-slate-600);
     }
 
-    /* Navigation */
     .sidebar-nav {
       flex: 1;
       padding: 16px 12px;
@@ -223,6 +240,15 @@ interface User {
       flex-direction: column;
       gap: 4px;
       overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--color-slate-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 16px 12px 8px;
     }
 
     .nav-item {
@@ -271,8 +297,8 @@ interface User {
     }
 
     .nav-badge {
-      background: var(--color-red-500);
-      color: white;
+      background: var(--color-slate-200);
+      color: var(--color-slate-600);
       font-size: 10px;
       font-weight: 600;
       padding: 2px 6px;
@@ -281,7 +307,11 @@ interface User {
       text-align: center;
     }
 
-    /* Footer */
+    .nav-badge.important {
+      background: var(--color-red-500);
+      color: white;
+    }
+
     .sidebar-footer {
       padding: 12px;
       border-top: 1px solid var(--color-slate-100);
@@ -315,6 +345,7 @@ interface User {
     }
 
     .user-info {
+      flex: 1;
       display: flex;
       flex-direction: column;
     }
@@ -330,7 +361,10 @@ interface User {
       color: var(--color-slate-500);
     }
 
-    /* Main Area */
+    .user-arrow {
+      color: var(--color-slate-400);
+    }
+
     .main-area {
       flex: 1;
       margin-left: var(--sidebar-width);
@@ -343,7 +377,6 @@ interface User {
       margin-left: 72px;
     }
 
-    /* Header */
     .header {
       height: var(--header-height);
       background: white;
@@ -386,7 +419,42 @@ interface User {
     .header-right {
       display: flex;
       align-items: center;
+      gap: 12px;
+    }
+
+    .header-search {
+      display: flex;
+      align-items: center;
       gap: 8px;
+      padding: 8px 12px;
+      background: var(--color-slate-50);
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      width: 280px;
+    }
+
+    .header-search svg {
+      color: var(--color-slate-400);
+    }
+
+    .header-search-input {
+      flex: 1;
+      border: none;
+      background: none;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .header-search-input::placeholder {
+      color: var(--color-slate-400);
+    }
+
+    .header-search-shortcut {
+      font-size: 11px;
+      color: var(--color-slate-400);
+      background: var(--color-slate-200);
+      padding: 2px 6px;
+      border-radius: 4px;
     }
 
     .header-action {
@@ -406,18 +474,22 @@ interface User {
       color: var(--color-slate-700);
     }
 
-    .notification-dot {
+    .notification-badge {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 8px;
-      height: 8px;
+      top: 6px;
+      right: 6px;
+      min-width: 16px;
+      height: 16px;
       background: var(--color-red-500);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
       border-radius: 50%;
-      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Content */
     .content {
       flex: 1;
       padding: 24px;
@@ -425,10 +497,10 @@ interface User {
   `]
 })
 export class MainLayoutComponent {
+  private router: Router;
+
   readonly sidebarCollapsed = signal(false);
-  readonly activeRoute = signal('/dashboard');
-  readonly userMenuOpen = signal(false);
-  readonly pendingCount = signal(12);
+  readonly notificationCount = signal(5);
 
   readonly currentUser = signal<User>({
     id: 'EMP-2007',
@@ -439,72 +511,123 @@ export class MainLayoutComponent {
     department: 'Information Technology'
   });
 
-  readonly navItems = signal<NavItem[]>([
+  readonly navSections = signal<NavSection[]>([
     {
-      key: 'dashboard',
-      label: 'Dashboard',
-      route: '/dashboard',
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>'
+      label: 'Overview',
+      items: [
+        {
+          key: 'dashboard',
+          label: 'Dashboard',
+          route: '/dashboard',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>'
+        }
+      ]
     },
     {
-      key: 'assets',
-      label: 'Asset Inventory',
-      route: '/assets',
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>'
+      label: 'Asset Management',
+      items: [
+        {
+          key: 'assets',
+          label: 'Asset Inventory',
+          route: '/assets',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>'
+        },
+        {
+          key: 'requests',
+          label: 'Requests',
+          route: '/requests',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+        },
+        {
+          key: 'tickets',
+          label: 'Tickets',
+          route: '/tickets',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+          badge: 8
+        },
+        {
+          key: 'reports',
+          label: 'Reports',
+          route: '/reports',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
+        },
+        {
+          key: 'exit-clearance',
+          label: 'Exit Clearance',
+          route: '/exit-clearance',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'
+        }
+      ]
     },
     {
-      key: 'requests',
-      label: 'Support & Requests',
-      route: '/requests',
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+      label: 'HR Operations',
+      items: [
+        {
+          key: 'onboarding',
+          label: 'Onboarding',
+          route: '/onboarding',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>'
+        },
+        {
+          key: 'offboarding',
+          label: 'Offboarding',
+          route: '/offboarding',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg>'
+        }
+      ]
     },
     {
-      key: 'reports',
-      label: 'Reports',
-      route: '/reports',
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
-    },
-    {
-      key: 'profile',
-      label: 'My Profile',
-      route: '/profile',
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
-    },
-    {
-      key: 'exit',
-      label: 'Exit Clearance',
-      route: '/exit-clearance',
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'
+      label: 'Personal',
+      items: [
+        {
+          key: 'profile',
+          label: 'My Profile',
+          route: '/profile',
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+        }
+      ]
     }
   ]);
 
   readonly moduleName = computed(() => {
-    const route = this.activeRoute();
-    if (route.includes('profile')) return 'HR';
-    if (route.includes('exit')) return 'HR Operations';
+    const route = this.router.url;
+    if (route.includes('/profile')) return 'HR';
+    if (route.includes('/onboarding') || route.includes('/offboarding')) return 'HR Operations';
+    if (route.includes('/exit-clearance')) return 'HR Operations';
     return 'Asset Management';
   });
 
   readonly pageName = computed(() => {
-    const route = this.activeRoute();
-    if (route === '/dashboard') return 'Dashboard';
-    if (route === '/assets') return 'Asset Inventory';
-    if (route === '/requests') return 'Support & Requests';
-    if (route === '/reports') return 'Reports';
-    if (route === '/profile') return 'My Profile';
-    if (route === '/exit-clearance') return 'Exit Clearance';
+    const route = this.router.url;
+    if (route === '/dashboard' || route === '/') return 'Dashboard';
+    if (route.includes('/assets')) return 'Asset Inventory';
+    if (route.includes('/requests')) return 'Requests';
+    if (route.includes('/tickets')) return 'Tickets';
+    if (route.includes('/reports')) return 'Reports';
+    if (route.includes('/exit-clearance')) return 'Exit Clearance';
+    if (route.includes('/onboarding')) return 'Onboarding';
+    if (route.includes('/offboarding')) return 'Offboarding';
+    if (route.includes('/profile')) return 'My Profile';
     return '';
   });
+
+  constructor(router: Router) {
+    this.router = router;
+  }
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);
   }
 
-  setActiveRoute(route: string): void {
-    this.activeRoute.set(route);
+  isActiveRoute(route: string): boolean {
+    return this.router.url.startsWith(route);
   }
 
-  toggleUserMenu(): void {
-    this.userMenuOpen.update(v => !v);
+  setActiveRoute(route: string): void {
+    this.router.navigate([route]);
+  }
+
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
   }
 }
