@@ -54,7 +54,7 @@ interface ExitCase {
 }
 
 @Component({
-  selector: 'knodtec-exit-clearance',
+  selector: 'knodtec-it-clearance',
   standalone: true,
   imports: [
     CommonModule,
@@ -70,12 +70,12 @@ interface ExitCase {
     SearchComponent
   ],
   template: `
-    <div class="exit-page">
+    <div class="it-clearance-page">
       <!-- Page Header -->
       <div class="page-header">
         <div class="header-content">
-          <h1 class="page-title">Exit Clearance</h1>
-          <p class="page-subtitle">Manage employee offboarding and asset recovery</p>
+          <h1 class="page-title">IT Clearance</h1>
+          <p class="page-subtitle">Manage IT asset clearance for departing employees</p>
         </div>
         <div class="header-actions">
           <knod-button variant="outline" [icon]="exportIcon">Export Report</knod-button>
@@ -241,14 +241,14 @@ interface ExitCase {
                 @case ('clearance') {
                   <ng-container *ngTemplateOutlet="clearanceStage"></ng-container>
                 }
-                @case ('workflow') {
-                  <ng-container *ngTemplateOutlet="workflowStage"></ng-container>
-                }
                 @case ('assets') {
                   <ng-container *ngTemplateOutlet="assetsStage"></ng-container>
                 }
-                @case ('documents') {
-                  <ng-container *ngTemplateOutlet="documentsStage"></ng-container>
+                @case ('verification') {
+                  <ng-container *ngTemplateOutlet="verificationStage"></ng-container>
+                }
+                @case ('comments') {
+                  <ng-container *ngTemplateOutlet="commentsStage"></ng-container>
                 }
               }
             </div>
@@ -273,64 +273,71 @@ interface ExitCase {
       <ng-template #clearanceStage>
         @if (selectedCase(); as exitCase) {
           <div class="clearance-container">
-            <!-- Stage Overview -->
-            <div class="stage-overview">
-              <h4>Clearance Progress</h4>
-              <div class="stage-progress-grid">
-                @for (stage of getStages(exitCase); track stage.name) {
-                  <div class="stage-card" [ngClass]="'stage-' + stage.status">
-                    <div class="stage-icon">
-                      @if (stage.status === 'completed') {
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                      } @else if (stage.status === 'active') {
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                      } @else if (stage.status === 'blocked') {
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <line x1="12" y1="8" x2="12" y2="12"/>
-                          <line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                      } @else {
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <circle cx="12" cy="12" r="10"/>
-                        </svg>
-                      }
-                    </div>
-                    <div class="stage-info">
-                      <span class="stage-name">{{ stage.name }}</span>
-                      @if (stage.completedOn) {
-                        <span class="stage-date">Completed {{ stage.completedOn | date:'short' }}</span>
-                      } @else if (stage.status === 'blocked') {
-                        <span class="stage-blocker">Requires attention</span>
-                      } @else if (stage.status === 'active') {
-                        <span class="stage-active">In progress</span>
-                      } @else {
-                        <span class="stage-pending">Pending</span>
-                      }
-                    </div>
+            <!-- IT Clearance Overview -->
+            <div class="clearance-overview">
+              <div class="clearance-header">
+                <h4>IT Asset Clearance Status</h4>
+                <knod-button variant="outline" size="sm" (click)="updateClearanceStatus(exitCase.id)">
+                  Update Clearance
+                </knod-button>
+              </div>
+              
+              <!-- Clearance Progress -->
+              <div class="clearance-progress">
+                <div class="progress-indicator">
+                  <div class="progress-circle" [ngClass]="'status-' + exitCase.assetClearance.status">
+                    @if (exitCase.assetClearance.status === 'completed') {
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    } @else {
+                      <span>{{ getAssetClearanceProgress(exitCase) }}%</span>
+                    }
                   </div>
-                }
+                  <div class="progress-label">
+                    @if (exitCase.assetClearance.status === 'completed') {
+                      <span class="status-text completed">Clearance Complete</span>
+                    } @else {
+                      <span class="status-text">In Progress</span>
+                      <span class="status-sub">{{ getPendingActions(exitCase) }} assets pending return</span>
+                    }
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <!-- Action Summary -->
-            <div class="action-summary">
-              <div class="summary-card pending">
-                <span class="summary-value">{{ getPendingActions(exitCase) }}</span>
-                <span class="summary-label">Pending Actions</span>
+              <!-- Key Information -->
+              <div class="clearance-info-grid">
+                <div class="info-card">
+                  <span class="info-label">Employee ID</span>
+                  <span class="info-value">{{ exitCase.employeeId }}</span>
+                </div>
+                <div class="info-card">
+                  <span class="info-label">Total Assigned Assets</span>
+                  <span class="info-value">{{ exitCase.assets.length }}</span>
+                </div>
+                <div class="info-card">
+                  <span class="info-label">Assets Returned</span>
+                  <span class="info-value success">{{ getReturnedAssets(exitCase) }}</span>
+                </div>
+                <div class="info-card">
+                  <span class="info-label">Assets Pending</span>
+                  <span class="info-value warning">{{ getPendingActions(exitCase) }}</span>
+                </div>
               </div>
-              <div class="summary-card blocked">
-                <span class="summary-value">{{ getBlockedItems(exitCase) }}</span>
-                <span class="summary-label">Blocked Items</span>
-              </div>
-              <div class="summary-card completed">
-                <span class="summary-value">{{ getCompletedItems(exitCase) }}</span>
-                <span class="summary-label">Completed</span>
+
+              <!-- Remarks Section -->
+              <div class="remarks-section">
+                <h5>IT Clearance Remarks</h5>
+                <textarea 
+                  class="form-textarea" 
+                  rows="3" 
+                  placeholder="Add remarks about the IT clearance process..."
+                  [ngModel]="clearanceRemarks()"
+                  (ngModelChange)="clearanceRemarks.set($event)">
+                </textarea>
+                <knod-button variant="primary" size="sm" (click)="saveClearanceRemarks(exitCase.id)">
+                  Save Remarks
+                </knod-button>
               </div>
             </div>
           </div>
@@ -388,25 +395,67 @@ interface ExitCase {
         @if (selectedCase(); as exitCase) {
           <div class="assets-container">
             <div class="assets-header">
-              <h4>Asset Recovery</h4>
-              <knod-button variant="outline" size="sm" [icon]="refreshIcon">Refresh Status</knod-button>
+              <h4>IT Assets to Return</h4>
+              <p class="stage-description">All IT assets currently assigned to this employee that need to be returned</p>
             </div>
+            
+            <!-- Assets Summary -->
+            <div class="assets-summary">
+              <div class="summary-item" [class.has-pending]="getPendingActions(exitCase) > 0">
+                <div class="summary-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                </div>
+                <div class="summary-content">
+                  <span class="summary-count">{{ exitCase.assets.length }}</span>
+                  <span class="summary-label">Total Assets</span>
+                </div>
+              </div>
+              <div class="summary-item returned">
+                <div class="summary-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div class="summary-content">
+                  <span class="summary-count">{{ getReturnedAssets(exitCase) }}</span>
+                  <span class="summary-label">Returned</span>
+                </div>
+              </div>
+              <div class="summary-item pending">
+                <div class="summary-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                </div>
+                <div class="summary-content">
+                  <span class="summary-count">{{ getPendingActions(exitCase) }}</span>
+                  <span class="summary-label">Pending Return</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Assets Table -->
             <div class="assets-table">
               <table>
                 <thead>
                   <tr>
-                    <th>Asset</th>
-                    <th>Tag</th>
-                    <th>Status</th>
+                    <th>Asset Details</th>
+                    <th>Asset Tag</th>
+                    <th>Return Status</th>
                     <th>Condition</th>
-                    <th>Action Required</th>
+                    <th>Returned On</th>
                     <th>Verified By</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (asset of exitCase.assets; track asset.assetId) {
-                    <tr>
+                    <tr [class.pending-row]="asset.status === 'pending_return'">
                       <td>
                         <div class="asset-cell">
                           <span class="asset-name">{{ asset.assetName }}</span>
@@ -429,9 +478,11 @@ interface ExitCase {
                         }
                       </td>
                       <td>
-                        <span class="action-text" [class.action-needed]="needsAction(asset.status)">
-                          {{ asset.actionRequired }}
-                        </span>
+                        @if (asset.returnedOn) {
+                          {{ asset.returnedOn | date:'mediumDate' }}
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
                       </td>
                       <td>
                         @if (asset.verifiedBy) {
@@ -442,7 +493,7 @@ interface ExitCase {
                       </td>
                       <td>
                         <knod-button variant="ghost" size="sm" (click)="openAssetOutcome(asset)">
-                          Update
+                          Update Status
                         </knod-button>
                       </td>
                     </tr>
@@ -454,32 +505,149 @@ interface ExitCase {
         }
       </ng-template>
 
-      <!-- Documents Stage Template -->
-      <ng-template #documentsStage>
+      <!-- Verification Stage Template -->
+      <ng-template #verificationStage>
         @if (selectedCase(); as exitCase) {
-          <div class="documents-container">
-            <h4>Exit Documents</h4>
-            <div class="documents-list">
-              @for (doc of exitDocuments(); track doc.name) {
-                <div class="document-item">
-                  <div class="document-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                    </svg>
-                  </div>
-                  <div class="document-info">
-                    <span class="document-name">{{ doc.name }}</span>
-                    <span class="document-meta">Issued {{ doc.issuedOn | date:'mediumDate' }}</span>
-                  </div>
-                  <div class="document-status">
-                    <knod-badge [color]="doc.status === 'issued' ? 'green' : 'amber'">
-                      {{ doc.status | titlecase }}
-                    </knod-badge>
-                  </div>
-                  <knod-button variant="ghost" size="sm" [icon]="downloadIcon">Download</knod-button>
+          <div class="verification-container">
+            <div class="verification-header">
+              <h4>IT Clearance Verification</h4>
+              <p class="stage-description">Verify and approve the IT asset clearance for this employee</p>
+            </div>
+
+            <!-- Verification Status -->
+            <div class="verification-status-card">
+              <div class="status-header">
+                <span class="status-label">Verification Status</span>
+                <knod-badge [color]="getVerificationStatusColor(exitCase.assetClearance.status)">
+                  {{ exitCase.assetClearance.status === 'completed' ? 'Verified' : 'Pending Verification' }}
+                </knod-badge>
+              </div>
+              @if (exitCase.assetClearance.completedOn) {
+                <div class="verification-meta">
+                  <span>Verified by {{ exitCase.assetClearance.completedBy }}</span>
+                  <span>on {{ exitCase.assetClearance.completedOn | date:'mediumDate' }}</span>
                 </div>
               }
+            </div>
+
+            <!-- Verification Checklist -->
+            <div class="verification-checklist">
+              <h5>Verification Checklist</h5>
+              <div class="checklist-item" [class.completed]="isAllAssetsReturned(exitCase)">
+                <div class="checklist-icon">
+                  @if (isAllAssetsReturned(exitCase)) {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  } @else {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                  }
+                </div>
+                <span>All assets returned and accounted for</span>
+              </div>
+              <div class="checklist-item" [class.completed]="exitCase.assetClearance.status === 'completed'">
+                <div class="checklist-icon">
+                  @if (exitCase.assetClearance.status === 'completed') {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  } @else {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                  }
+                </div>
+                <span>Asset condition verified and documented</span>
+              </div>
+              <div class="checklist-item" [class.completed]="exitCase.assetClearance.status === 'completed'">
+                <div class="checklist-icon">
+                  @if (exitCase.assetClearance.status === 'completed') {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  } @else {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                  }
+                </div>
+                <span>Access revoked and verified</span>
+              </div>
+              <div class="checklist-item" [class.completed]="exitCase.assetClearance.status === 'completed'">
+                <div class="checklist-icon">
+                  @if (exitCase.assetClearance.status === 'completed') {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  } @else {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                  }
+                </div>
+                <span>Final IT clearance approved</span>
+              </div>
+            </div>
+
+            <!-- Verification Actions -->
+            <div class="verification-actions">
+              @if (exitCase.assetClearance.status !== 'completed') {
+                <knod-button variant="primary" (click)="completeClearance(exitCase.id)">
+                  Mark as Verified & Complete
+                </knod-button>
+              } @else {
+                <knod-button variant="outline" (click)="reopenClearance(exitCase.id)">
+                  Reopen Verification
+                </knod-button>
+              }
+            </div>
+          </div>
+        }
+      </ng-template>
+
+      <!-- Comments Stage Template -->
+      <ng-template #commentsStage>
+        @if (selectedCase(); as exitCase) {
+          <div class="comments-container">
+            <div class="comments-header">
+              <h4>IT Clearance Comments</h4>
+              <p class="stage-description">Communication and notes regarding this IT clearance process</p>
+            </div>
+
+            <!-- Comments List -->
+            <div class="comments-list">
+              @for (comment of getComments(exitCase); track comment.id) {
+                <div class="comment-item">
+                  <knod-avatar [name]="comment.author" size="sm"></knod-avatar>
+                  <div class="comment-content">
+                    <div class="comment-header">
+                      <span class="comment-author">{{ comment.author }}</span>
+                      <span class="comment-role">{{ comment.role }}</span>
+                      <span class="comment-time">{{ comment.timestamp | date:'short' }}</span>
+                    </div>
+                    <p class="comment-text">{{ comment.message }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Add Comment -->
+            <div class="add-comment">
+              <h5>Add Comment</h5>
+              <textarea 
+                class="form-textarea" 
+                rows="3" 
+                placeholder="Enter your comment or note..."
+                [ngModel]="newComment()"
+                (ngModelChange)="newComment.set($event)">
+              </textarea>
+              <div class="comment-actions">
+                <knod-button variant="primary" size="sm" (click)="addComment(exitCase.id)">
+                  Add Comment
+                </knod-button>
+              </div>
             </div>
           </div>
         }
@@ -487,9 +655,417 @@ interface ExitCase {
     </div>
   `,
   styles: [`
-    .exit-page {
+    .it-clearance-page {
       max-width: 1440px;
       margin: 0 auto;
+    }
+
+    /* Clearance Stage Styles */
+    .clearance-container {
+      padding: 8px 0;
+    }
+
+    .clearance-overview {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .clearance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .clearance-header h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-slate-900);
+      margin: 0;
+    }
+
+    .clearance-progress {
+      background: var(--color-slate-50);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .progress-indicator {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .progress-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .progress-circle.status-completed {
+      background: var(--color-success-100);
+      color: var(--color-success-600);
+    }
+
+    .progress-circle.status-active {
+      background: var(--color-primary-100);
+      color: var(--color-primary-600);
+    }
+
+    .progress-circle.status-waiting {
+      background: var(--color-slate-100);
+      color: var(--color-slate-600);
+    }
+
+    .progress-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .status-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-slate-900);
+    }
+
+    .status-text.completed {
+      color: var(--color-success-600);
+    }
+
+    .status-sub {
+      font-size: 12px;
+      color: var(--color-slate-500);
+    }
+
+    .clearance-info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .info-card {
+      background: white;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-slate-900);
+    }
+
+    .info-value.success { color: var(--color-success-600); }
+    .info-value.warning { color: var(--color-warning-600); }
+
+    .remarks-section {
+      background: white;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .remarks-section h5 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-slate-700);
+      margin: 0 0 12px 0;
+    }
+
+    /* Assets Stage Styles */
+    .assets-container {
+      padding: 8px 0;
+    }
+
+    .assets-header {
+      margin-bottom: 20px;
+    }
+
+    .assets-header h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-slate-900);
+      margin: 0 0 4px 0;
+    }
+
+    .stage-description {
+      font-size: 13px;
+      color: var(--color-slate-500);
+      margin: 0;
+    }
+
+    .assets-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .summary-item {
+      background: white;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .summary-item.has-pending {
+      border-color: var(--color-warning-300);
+      background: var(--color-warning-50);
+    }
+
+    .summary-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-slate-100);
+      color: var(--color-slate-600);
+    }
+
+    .summary-item.returned .summary-icon {
+      background: var(--color-success-100);
+      color: var(--color-success-600);
+    }
+
+    .summary-item.pending .summary-icon {
+      background: var(--color-warning-100);
+      color: var(--color-warning-600);
+    }
+
+    .summary-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .summary-count {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-slate-900);
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: var(--color-slate-500);
+    }
+
+    .pending-row {
+      background: var(--color-warning-50);
+    }
+
+    /* Verification Stage Styles */
+    .verification-container {
+      padding: 8px 0;
+    }
+
+    .verification-header {
+      margin-bottom: 24px;
+    }
+
+    .verification-header h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-slate-900);
+      margin: 0 0 4px 0;
+    }
+
+    .verification-status-card {
+      background: white;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .verification-status-card .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-slate-700);
+    }
+
+    .verification-meta {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--color-slate-500);
+    }
+
+    .verification-checklist {
+      background: white;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .verification-checklist h5 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-slate-700);
+      margin: 0 0 16px 0;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-slate-100);
+    }
+
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+
+    .checklist-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-slate-400);
+    }
+
+    .checklist-item.completed .checklist-icon {
+      color: var(--color-success-600);
+    }
+
+    .verification-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Comments Stage Styles */
+    .comments-container {
+      padding: 8px 0;
+    }
+
+    .comments-header {
+      margin-bottom: 24px;
+    }
+
+    .comments-header h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-slate-900);
+      margin: 0 0 4px 0;
+    }
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 12px;
+    }
+
+    .comment-content {
+      flex: 1;
+      background: white;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .comment-author {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-slate-800);
+    }
+
+    .comment-role {
+      font-size: 11px;
+      color: var(--color-slate-500);
+    }
+
+    .comment-time {
+      font-size: 11px;
+      color: var(--color-slate-400);
+      margin-left: auto;
+    }
+
+    .comment-text {
+      font-size: 13px;
+      color: var(--color-slate-600);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .add-comment {
+      background: white;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .add-comment h5 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-slate-700);
+      margin: 0 0 12px 0;
+    }
+
+    .comment-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
+    /* Form Textarea */
+    .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary-500);
+      box-shadow: 0 0 0 3px var(--color-primary-100);
     }
 
     /* Page Header */
@@ -1195,7 +1771,7 @@ interface ExitCase {
     }
   `]
 })
-export class ExitClearanceComponent {
+export class ITClearnaceComponent {
   private router: Router;
 
   readonly exportIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
@@ -1208,10 +1784,10 @@ export class ExitClearanceComponent {
   readonly activeStage = signal('clearance');
 
   readonly stageTabs = [
-    { key: 'clearance', label: 'Clearance' },
-    { key: 'workflow', label: 'Workflow' },
-    { key: 'assets', label: 'Assets' },
-    { key: 'documents', label: 'Documents' }
+    { key: 'clearance', label: 'IT Clearance' },
+    { key: 'assets', label: 'Assigned Assets' },
+    { key: 'verification', label: 'Verification' },
+    { key: 'comments', label: 'Comments' }
   ];
 
   readonly exitCases = signal<ExitCase[]>([
@@ -1471,5 +2047,94 @@ export class ExitClearanceComponent {
 
   openAssetOutcome(asset: AssetClearance): void {
     // Open asset outcome dialog
+  }
+
+  // New signals for IT Clearance
+  readonly clearanceRemarks = signal('');
+  readonly newComment = signal('');
+
+  // Helper methods for IT Clearance
+  getReturnedAssets(exitCase: ExitCase): number {
+    return exitCase.assets.filter(a => a.status === 'returned_verified' || a.status === 'returned_pending').length;
+  }
+
+  getAssetClearanceProgress(exitCase: ExitCase): number {
+    if (exitCase.assets.length === 0) return 100;
+    const returned = this.getReturnedAssets(exitCase);
+    return Math.round((returned / exitCase.assets.length) * 100);
+  }
+
+  isAllAssetsReturned(exitCase: ExitCase): boolean {
+    return exitCase.assets.every(a => a.status === 'returned_verified' || a.status === 'returned_pending');
+  }
+
+  getVerificationStatusColor(status: string): 'green' | 'amber' | 'blue' | 'slate' {
+    const colors: Record<string, 'green' | 'amber' | 'blue' | 'slate'> = {
+      'completed': 'green',
+      'active': 'amber',
+      'waiting': 'blue',
+      'blocked': 'amber'
+    };
+    return colors[status] || 'slate';
+  }
+
+  getComments(exitCase: ExitCase) {
+    return [
+      { id: '1', author: 'Priya Sharma', role: 'HR Manager', timestamp: new Date('2026-06-01T10:00:00'), message: 'IT clearance process initiated. Please ensure all assets are returned before the last working day.' },
+      { id: '2', author: 'IT Asset Team', role: 'IT Support', timestamp: new Date('2026-06-02T14:30:00'), message: 'Asset list verified. Contacted employee for return scheduling.' },
+      { id: '3', author: 'Amit Singh', role: 'Employee', timestamp: new Date('2026-06-03T09:00:00'), message: 'Will return all assets on June 14th (last working day).' }
+    ];
+  }
+
+  saveClearanceRemarks(caseId: string): void {
+    console.log(`Saving clearance remarks for case ${caseId}: ${this.clearanceRemarks()}`);
+    this.clearanceRemarks.set('');
+  }
+
+  updateClearanceStatus(caseId: string): void {
+    console.log(`Updating clearance status for case ${caseId}`);
+  }
+
+  completeClearance(caseId: string): void {
+    const cases = this.exitCases();
+    const index = cases.findIndex(c => c.id === caseId);
+    if (index !== -1) {
+      const updatedCase = {
+        ...cases[index],
+        assetClearance: { status: 'completed' as const, completedOn: new Date().toISOString().split('T')[0], completedBy: 'IT Asset Team' }
+      };
+      const newCases = [...cases];
+      newCases[index] = updatedCase;
+      this.exitCases.set(newCases);
+      
+      if (this.selectedCase()?.id === caseId) {
+        this.selectedCase.set(updatedCase);
+      }
+    }
+  }
+
+  reopenClearance(caseId: string): void {
+    const cases = this.exitCases();
+    const index = cases.findIndex(c => c.id === caseId);
+    if (index !== -1) {
+      const updatedCase = {
+        ...cases[index],
+        assetClearance: { status: 'active' as const, notes: 'Clearance reopened for verification' }
+      };
+      const newCases = [...cases];
+      newCases[index] = updatedCase;
+      this.exitCases.set(newCases);
+      
+      if (this.selectedCase()?.id === caseId) {
+        this.selectedCase.set(updatedCase);
+      }
+    }
+  }
+
+  addComment(caseId: string): void {
+    const comment = this.newComment();
+    if (!comment.trim()) return;
+    console.log(`Adding comment to case ${caseId}: ${comment}`);
+    this.newComment.set('');
   }
 }

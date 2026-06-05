@@ -552,9 +552,9 @@ export class MainLayoutComponent {
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
         },
         {
-          key: 'exit-clearance',
-          label: 'Exit Clearance',
-          route: '/exit-clearance',
+          key: 'it-clearance',
+          label: 'IT Clearance',
+          route: '/it-clearance',
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M9 21v-4a3 3 0 0 1 6 0v4"/></svg>'
         }
       ]
@@ -608,7 +608,7 @@ export class MainLayoutComponent {
     if (route.includes('/raise-ticket')) return 'Raise Ticket';
     if (route.includes('/raise-request')) return 'Raise Request';
     if (route.includes('/reports')) return 'Reports';
-    if (route.includes('/exit-clearance')) return 'Exit Clearance';
+    if (route.includes('/it-clearance')) return 'IT Clearance';
     if (route.includes('/onboarding')) return 'Onboarding';
     if (route.includes('/offboarding')) return 'Offboarding';
     if (route.includes('/profile')) return 'My Profile';

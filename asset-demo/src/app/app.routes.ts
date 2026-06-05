@@ -20,6 +20,10 @@ export const routes: Routes = [
         loadComponent: () => import('./knodtec/features/assets/assets.component').then(m => m.AssetsComponent)
       },
       {
+        path: 'assets/new',
+        loadComponent: () => import('./knodtec/features/add-asset/add-asset.component').then(m => m.AddAssetComponent)
+      },
+      {
         path: 'assets/:id',
         loadComponent: () => import('./knodtec/features/assets/asset-details.component').then(m => m.AssetDetailsComponent)
       },
@@ -64,12 +68,12 @@ export const routes: Routes = [
         loadComponent: () => import('./knodtec/features/profile/profile.component').then(m => m.ProfileComponent)
       },
       {
-        path: 'exit-clearance',
-        loadComponent: () => import('./knodtec/features/exit-clearance/exit-clearance.component').then(m => m.ExitClearanceComponent)
+        path: 'it-clearance',
+        loadComponent: () => import('./knodtec/features/it-clearance/it-clearance.component').then(m => m.ITClearnaceComponent)
       },
       {
-        path: 'exit-clearance/:id',
-        loadComponent: () => import('./knodtec/features/exit-clearance/exit-clearance.component').then(m => m.ExitClearanceComponent)
+        path: 'it-clearance/:id',
+        loadComponent: () => import('./knodtec/features/it-clearance/it-clearance.component').then(m => m.ITClearnaceComponent)
       },
       {
         path: 'onboarding',

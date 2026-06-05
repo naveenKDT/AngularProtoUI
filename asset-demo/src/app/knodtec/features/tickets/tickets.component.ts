@@ -76,7 +76,7 @@ interface ActivityLog {
         </div>
         <div class="header-actions">
           <knod-button variant="outline" [icon]="filterIcon">Filters</knod-button>
-          <knod-button variant="primary" [icon]="plusIcon">New Ticket</knod-button>
+          <knod-button variant="primary" [icon]="plusIcon" (click)="navigateToNewTicket()">New Ticket</knod-button>
         </div>
       </div>
 
@@ -1638,5 +1638,9 @@ export class TicketsComponent {
   sendReply(): void {
     // Send reply logic
     this.replyMessage.set('');
+  }
+
+  navigateToNewTicket(): void {
+    this.router.navigate(['/tickets/new']);
   }
 }

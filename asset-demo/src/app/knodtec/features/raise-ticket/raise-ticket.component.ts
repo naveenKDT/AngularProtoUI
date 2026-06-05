@@ -68,6 +68,26 @@ interface Asset {
 
       <!-- Form -->
       <div class="form-container">
+        <!-- Ticket Workflow Info -->
+        <div class="workflow-banner">
+          <div class="workflow-item">
+            <span class="workflow-label">Ticket Type</span>
+            <knod-badge color="blue">Support Ticket</knod-badge>
+          </div>
+          <div class="workflow-item">
+            <span class="workflow-label">Initial Status</span>
+            <knod-badge color="amber">Open</knod-badge>
+          </div>
+          <div class="workflow-item">
+            <span class="workflow-label">SLA Response</span>
+            <span class="sla-value">{{ getSlaTime() }}</span>
+          </div>
+          <div class="workflow-item">
+            <span class="workflow-label">Assigned To</span>
+            <span class="assigned-value">IT Support Team</span>
+          </div>
+        </div>
+
         <knod-card title="Ticket Information">
           <div class="form-grid">
             <!-- Asset Selection -->
@@ -356,8 +376,46 @@ interface Asset {
   `,
   styles: [`
     .raise-ticket-page {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
+    }
+
+    /* Workflow Banner */
+    .workflow-banner {
+      display: flex;
+      gap: 24px;
+      padding: 16px 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .workflow-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .workflow-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sla-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-slate-700);
+    }
+
+    .assigned-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-slate-600);
     }
 
     .page-header {
