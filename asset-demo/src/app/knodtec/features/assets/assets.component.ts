@@ -61,7 +61,7 @@ interface Asset {
         </div>
         <div class="header-actions">
           <knod-button variant="outline" [icon]="exportIcon">Export</knod-button>
-          <knod-button variant="primary" [icon]="plusIcon">Add Asset</knod-button>
+          <knod-button variant="primary" [icon]="plusIcon" (click)="navigateToAddAsset()">Add Asset</knod-button>
         </div>
       </div>
 
@@ -927,5 +927,9 @@ export class AssetsComponent {
   assignAsset(event: Event, asset: Asset): void {
     event.stopPropagation();
     // Open assign dialog
+  }
+
+  navigateToAddAsset(): void {
+    this.router.navigate(['/assets/new']);
   }
 }

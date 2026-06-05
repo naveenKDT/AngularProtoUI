@@ -71,7 +71,7 @@ interface Conversation {
           <p class="page-subtitle">Manage asset-related tickets and service requests</p>
         </div>
         <div class="header-actions">
-          <knod-button variant="primary" [icon]="plusIcon">New Request</knod-button>
+          <knod-button variant="primary" [icon]="plusIcon" (click)="navigateToNewRequest()">New Request</knod-button>
         </div>
       </div>
 
@@ -315,12 +315,44 @@ interface Conversation {
 
             <!-- Actions -->
             <div class="info-section full-width">
-              <h4 class="section-title">Quick Actions</h4>
+              <h4 class="section-title">Workflow Actions</h4>
               <div class="action-buttons">
-                <knod-button variant="primary">Assign to Me</knod-button>
-                <knod-button variant="outline">Change Status</knod-button>
-                <knod-button variant="outline">Add Tag</knod-button>
-                <knod-button variant="ghost">Merge</knod-button>
+                @if (request.status === 'open') {
+                  <knod-button variant="primary" (click)="updateRequestStatus(request.id, 'in_progress')">Start Processing</knod-button>
+                  <knod-button variant="outline" (click)="updateRequestStatus(request.id, 'pending_approval')">Send for Approval</knod-button>
+                }
+                @if (request.status === 'pending_approval') {
+                  <knod-button variant="primary" (click)="updateRequestStatus(request.id, 'in_progress')">Approve</knod-button>
+                  <knod-button variant="danger" (click)="updateRequestStatus(request.id, 'rejected')">Reject</knod-button>
+                }
+                @if (request.status === 'in_progress') {
+                  <knod-button variant="primary" (click)="updateRequestStatus(request.id, 'resolved')">Mark Resolved</knod-button>
+                  <knod-button variant="outline" (click)="updateRequestStatus(request.id, 'pending_approval')">Request More Info</knod-button>
+                }
+                @if (request.status === 'rejected') {
+                  <knod-button variant="outline" (click)="updateRequestStatus(request.id, 'open')">Reopen Request</knod-button>
+                }
+                @if (request.status === 'resolved') {
+                  <knod-button variant="primary" (click)="updateRequestStatus(request.id, 'closed')">Close Request</knod-button>
+                  <knod-button variant="outline" (click)="updateRequestStatus(request.id, 'in_progress')">Reopen</knod-button>
+                }
+                @if (request.status === 'closed') {
+                  <knod-button variant="outline" (click)="updateRequestStatus(request.id, 'open')">Reopen Request</knod-button>
+                }
+              </div>
+              <div class="assign-section">
+                <label class="form-label">Assign to</label>
+                <div class="assign-options">
+                  <select class="form-select" [ngModel]="selectedAssignee()" (ngModelChange)="selectedAssignee.set($event)">
+                    <option value="">Select team member</option>
+                    <option value="Rahul Jain">Rahul Jain</option>
+                    <option value="Priya Patel">Priya Patel</option>
+                    <option value="Amit Singh">Amit Singh</option>
+                    <option value="IT Asset Team">IT Asset Team</option>
+                    <option value="IT Support">IT Support</option>
+                  </select>
+                  <knod-button variant="outline" (click)="assignRequest(request.id)">Assign</knod-button>
+                </div>
               </div>
             </div>
           </div>
@@ -939,6 +971,34 @@ interface Conversation {
       flex-wrap: wrap;
     }
 
+    .assign-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-slate-100);
+    }
+
+    .assign-section .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-slate-600);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .assign-options {
+      display: flex;
+      gap: 8px;
+    }
+
+    .assign-options .form-select {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      font-size: 13px;
+      background: white;
+    }
+
     /* Timeline */
     .timeline-container {
       padding: 8px 0;
@@ -1343,6 +1403,10 @@ export class RequestsComponent {
     // Implement status filtering
   }
 
+  navigateToNewRequest(): void {
+    this.router.navigate(['/requests/new']);
+  }
+
   selectRequest(request: Request): void {
     this.selectedRequest.set(request);
   }
@@ -1373,6 +1437,7 @@ export class RequestsComponent {
       'in_progress': 'amber',
       'pending_approval': 'violet',
       'resolved': 'green',
+      'rejected': 'red',
       'closed': 'slate'
     };
     return colors[status] || 'slate';
@@ -1400,5 +1465,67 @@ export class RequestsComponent {
 
   isOverdue(slaDate: string): boolean {
     return new Date(slaDate) < new Date();
+  }
+
+  readonly selectedAssignee = signal('');
+
+  updateRequestStatus(requestId: string, newStatus: string): void {
+    const requestList = this.requests();
+    const requestIndex = requestList.findIndex(r => r.id === requestId);
+    if (requestIndex !== -1) {
+      const updatedRequest = { ...requestList[requestIndex], status: newStatus, updatedAt: new Date().toISOString() };
+      const newList = [...requestList];
+      newList[requestIndex] = updatedRequest;
+      this.requests.set(newList);
+      
+      // Update selected request if it's the one being modified
+      if (this.selectedRequest()?.id === requestId) {
+        this.selectedRequest.set(updatedRequest);
+      }
+      
+      // Add activity log entry
+      console.log(`Request ${requestId} status updated to: ${newStatus}`);
+    }
+  }
+
+  assignRequest(requestId: string): void {
+    const assignee = this.selectedAssignee();
+    if (!assignee) {
+      alert('Please select a team member to assign');
+      return;
+    }
+    
+    const requestList = this.requests();
+    const requestIndex = requestList.findIndex(r => r.id === requestId);
+    if (requestIndex !== -1) {
+      const updatedRequest = { ...requestList[requestIndex], assignedTo: assignee, updatedAt: new Date().toISOString() };
+      const newList = [...requestList];
+      newList[requestIndex] = updatedRequest;
+      this.requests.set(newList);
+      
+      if (this.selectedRequest()?.id === requestId) {
+        this.selectedRequest.set(updatedRequest);
+      }
+      
+      this.selectedAssignee.set('');
+      console.log(`Request ${requestId} assigned to: ${assignee}`);
+    }
+  }
+
+  updatePriority(requestId: string, newPriority: 'high' | 'medium' | 'low'): void {
+    const requestList = this.requests();
+    const requestIndex = requestList.findIndex(r => r.id === requestId);
+    if (requestIndex !== -1) {
+      const updatedRequest = { ...requestList[requestIndex], priority: newPriority, updatedAt: new Date().toISOString() };
+      const newList = [...requestList];
+      newList[requestIndex] = updatedRequest;
+      this.requests.set(newList);
+      
+      if (this.selectedRequest()?.id === requestId) {
+        this.selectedRequest.set(updatedRequest);
+      }
+      
+      console.log(`Request ${requestId} priority updated to: ${newPriority}`);
+    }
   }
 }
