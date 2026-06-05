@@ -536,7 +536,7 @@ export class MainLayoutComponent {
           key: 'requests',
           label: 'Requests',
           route: '/requests',
-          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>'
         },
         {
           key: 'tickets',
@@ -555,7 +555,7 @@ export class MainLayoutComponent {
           key: 'exit-clearance',
           label: 'Exit Clearance',
           route: '/exit-clearance',
-          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M9 21v-4a3 3 0 0 1 6 0v4"/></svg>'
         }
       ]
     },
@@ -591,18 +591,22 @@ export class MainLayoutComponent {
 
   readonly moduleName = computed(() => {
     const route = this.router.url;
-    if (route.includes('/profile')) return 'HR';
-    if (route.includes('/onboarding') || route.includes('/offboarding')) return 'HR Operations';
-    if (route.includes('/exit-clearance')) return 'HR Operations';
-    return 'Asset Management';
+    if (route.includes('/profile')) return 'Personal';
+    if (route.includes('/onboarding')) return 'HR Operations';
+    if (route.includes('/offboarding')) return 'HR Operations';
+    if (route.includes('/exit-clearance')) return 'Asset Management';
+    if (route.includes('/assets') || route.includes('/requests') || route.includes('/tickets') || route.includes('/reports')) return 'Asset Management';
+    return 'Overview';
   });
 
   readonly pageName = computed(() => {
     const route = this.router.url;
     if (route === '/dashboard' || route === '/') return 'Dashboard';
-    if (route.includes('/assets')) return 'Asset Inventory';
-    if (route.includes('/requests')) return 'Requests';
-    if (route.includes('/tickets')) return 'Tickets';
+    if (route.includes('/assets')) return route.match(/\/assets\/[^/]+/) ? 'Asset Details' : 'Asset Inventory';
+    if (route.includes('/requests')) return route.includes('/new') ? 'New Request' : 'Requests';
+    if (route.includes('/tickets')) return route.includes('/new') ? 'New Ticket' : 'Tickets';
+    if (route.includes('/raise-ticket')) return 'Raise Ticket';
+    if (route.includes('/raise-request')) return 'Raise Request';
     if (route.includes('/reports')) return 'Reports';
     if (route.includes('/exit-clearance')) return 'Exit Clearance';
     if (route.includes('/onboarding')) return 'Onboarding';
