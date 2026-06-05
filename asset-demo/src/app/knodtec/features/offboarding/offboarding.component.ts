@@ -72,7 +72,7 @@ interface OffboardingRecord {
         </div>
         <div class="header-actions">
           <knod-button variant="outline" [icon]="reportIcon">Reports</knod-button>
-          <knod-button variant="primary" [icon]="plusIcon">Initiate Offboarding</knod-button>
+          <knod-button variant="primary" [icon]="plusIcon" (click)="navigateToInitiate()">Initiate Offboarding</knod-button>
         </div>
       </div>
 
@@ -525,13 +525,66 @@ interface OffboardingRecord {
     .offboarding-page {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      .offboarding-page {
+        gap: 20px;
+      }
+    }
+
+    .page-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .header-content {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-slate-900);
+      margin: 0 0 4px 0;
+    }
+
+    @media (min-width: 768px) {
+      .page-title {
+        font-size: 24px;
+      }
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--color-slate-500);
+      margin: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 768px) {
+      .stats-row {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
     }
 
     .stat-card {
@@ -576,9 +629,15 @@ interface OffboardingRecord {
 
     .content-layout {
       display: grid;
-      grid-template-columns: 1fr 1.5fr;
+      grid-template-columns: 1fr;
       gap: 20px;
       min-height: 600px;
+    }
+
+    @media (min-width: 1280px) {
+      .content-layout {
+        grid-template-columns: 380px 1fr;
+      }
     }
 
     .list-panel {
@@ -588,6 +647,13 @@ interface OffboardingRecord {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-width: 0;
+    }
+
+    @media (min-width: 768px) {
+      .list-panel {
+        padding: 20px;
+      }
     }
 
     .filters-bar {
@@ -717,18 +783,29 @@ interface OffboardingRecord {
       border-radius: 12px;
       display: flex;
       flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .record-header {
       display: flex;
+      flex-direction: column;
       align-items: flex-start;
       gap: 16px;
-      padding: 20px;
+      padding: 16px;
       border-bottom: 1px solid var(--color-slate-100);
+    }
+
+    @media (min-width: 768px) {
+      .record-header {
+        flex-direction: row;
+        padding: 20px;
+      }
     }
 
     .header-info {
       flex: 1;
+      min-width: 0;
     }
 
     .header-name {
@@ -755,20 +832,30 @@ interface OffboardingRecord {
       gap: 6px;
       font-size: 12px;
       color: var(--color-slate-500);
+      flex-wrap: wrap;
     }
 
     .header-actions {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .separation-info {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 24px;
-      padding: 16px 20px;
+      gap: 16px;
+      padding: 16px;
       background: var(--color-slate-50);
       border-bottom: 1px solid var(--color-slate-100);
+    }
+
+    @media (min-width: 768px) {
+      .separation-info {
+        gap: 24px;
+        padding: 16px 20px;
+      }
     }
 
     .separation-type {
@@ -777,7 +864,14 @@ interface OffboardingRecord {
 
     .separation-dates {
       display: flex;
-      gap: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .separation-dates {
+        gap: 24px;
+      }
     }
 
     .date-item {
@@ -790,6 +884,7 @@ interface OffboardingRecord {
       font-size: 10px;
       color: var(--color-slate-500);
       text-transform: uppercase;
+      font-weight: 500;
     }
 
     .date-value {
@@ -799,10 +894,19 @@ interface OffboardingRecord {
     }
 
     .separation-reason {
-      margin-left: auto;
+      width: 100%;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 6px;
+      margin-top: 8px;
+    }
+
+    @media (min-width: 768px) {
+      .separation-reason {
+        margin-left: auto;
+        margin-top: 0;
+        width: auto;
+      }
     }
 
     .reason-label {
@@ -817,9 +921,18 @@ interface OffboardingRecord {
 
     .progress-overview {
       display: flex;
-      gap: 24px;
-      padding: 20px;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
       border-bottom: 1px solid var(--color-slate-100);
+    }
+
+    @media (min-width: 768px) {
+      .progress-overview {
+        flex-direction: row;
+        gap: 24px;
+        padding: 20px;
+      }
     }
 
     .overall-progress {
@@ -911,22 +1024,43 @@ interface OffboardingRecord {
     }
 
     .detail-tabs {
-      padding: 0 20px;
+      padding: 0 16px;
       border-bottom: 1px solid var(--color-slate-100);
+      overflow-x: auto;
+    }
+
+    @media (min-width: 768px) {
+      .detail-tabs {
+        padding: 0 20px;
+      }
     }
 
     .tab-content {
       flex: 1;
-      padding: 20px;
+      padding: 16px;
       overflow-y: auto;
+      min-width: 0;
+    }
+
+    @media (min-width: 768px) {
+      .tab-content {
+        padding: 20px;
+      }
     }
 
     .quick-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
-      padding: 16px 20px;
+      padding: 12px 16px;
       border-top: 1px solid var(--color-slate-100);
       background: var(--color-slate-50);
+    }
+
+    @media (min-width: 768px) {
+      .quick-actions {
+        padding: 16px 20px;
+      }
     }
 
     .action-btn {
@@ -1578,6 +1712,10 @@ export class OffboardingComponent {
 
   formatStatus(status: string): string {
     return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+
+  navigateToInitiate(): void {
+    this.router.navigate(['/offboarding/initiate']);
   }
 
   sendNotification(record: OffboardingRecord): void {

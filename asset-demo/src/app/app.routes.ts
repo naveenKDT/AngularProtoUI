@@ -84,6 +84,10 @@ export const routes: Routes = [
         loadComponent: () => import('./knodtec/features/offboarding/offboarding.component').then(m => m.OffboardingComponent)
       },
       {
+        path: 'offboarding/initiate',
+        loadComponent: () => import('./knodtec/features/offboarding/initiate-offboarding.component').then(m => m.InitiateOffboardingComponent)
+      },
+      {
         path: '**',
         redirectTo: 'dashboard'
       }
