@@ -382,6 +382,20 @@ export class SidebarComponent {
       route: '/dashboard'
     },
     {
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+      label: 'Asset Management',
+      children: [
+        { icon: '', label: 'All Assets', route: '/assets' },
+        { icon: '', label: 'Add New Asset', route: '/assets/new' },
+        { icon: '', label: 'Requests', route: '/requests' },
+        { icon: '', label: 'Raise Request', route: '/raise-request' },
+        { icon: '', label: 'Tickets', route: '/tickets' },
+        { icon: '', label: 'Raise Ticket', route: '/raise-ticket' },
+        { icon: '', label: 'IT Clearance', route: '/it-clearance' },
+        { icon: '', label: 'Reports', route: '/reports' }
+      ]
+    },
+    {
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>',
       label: 'My Profile',
       route: '/profile'
@@ -408,6 +422,11 @@ export class SidebarComponent {
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
       label: 'Onboarding',
       route: '/onboarding'
+    },
+    {
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+      label: 'Offboarding',
+      route: '/offboarding'
     }
   ];
 
