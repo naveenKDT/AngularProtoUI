@@ -173,7 +173,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
 })
 export class InputComponent implements ControlValueAccessor {
   label = input<string>('');
-  type = input<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'textarea'>('text');
+  type = input<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'textarea' | 'date'>('text');
   placeholder = input<string>('');
   disabled = input(false);
   error = input<string>('');

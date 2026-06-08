@@ -1,18 +1,16 @@
 import { Component, signal, computed } from '@angular/core';
-import { CommonModule, DatePipe, TitleCasePipe, CurrencyPipe } from '@angular/common';
+import { CommonModule, DatePipe, CurrencyPipe, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
-  CardComponent,
+  PageHeaderComponent,
+  BreadcrumbComponent,
+  StatCardComponent,
   BadgeComponent,
-  AvatarComponent,
-  ProgressComponent,
-  TabsComponent,
-  ButtonComponent,
-  SearchComponent,
-  SelectComponent,
+  CardComponent,
+  ModalComponent,
   InputComponent
-} from '../../shared/components/ui/ui-components';
+} from '../../../shared/components';
 
 interface Asset {
   id: string;
@@ -32,6 +30,19 @@ interface Asset {
   warrantyStatus: string;
 }
 
+interface NewAsset {
+  tag: string;
+  name: string;
+  category: string;
+  brand: string;
+  model: string;
+  serialNumber: string;
+  purchaseDate: string;
+  purchaseCost: number;
+  location: string;
+  status: string;
+}
+
 @Component({
   selector: 'knodtec-assets',
   standalone: true,
@@ -39,89 +50,108 @@ interface Asset {
     CommonModule,
     FormsModule,
     DatePipe,
-    TitleCasePipe,
     CurrencyPipe,
-    CardComponent,
+    TitleCasePipe,
+    PageHeaderComponent,
+    BreadcrumbComponent,
+    StatCardComponent,
     BadgeComponent,
-    AvatarComponent,
-    ProgressComponent,
-    TabsComponent,
-    ButtonComponent,
-    SearchComponent,
-    SelectComponent,
+    CardComponent,
+    ModalComponent,
     InputComponent
   ],
   template: `
     <div class="assets-page">
-      <!-- Page Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">Asset Inventory</h1>
-          <p class="page-subtitle">Manage and track all company assets</p>
+      <app-breadcrumb [items]="breadcrumbs" />
+      
+      <app-page-header
+        title="Asset Inventory"
+        description="Manage and track all company assets"
+        [icon]="pageIcon"
+        iconBg="#EFF6FF"
+      >
+        <div slot="actions">
+          <button class="btn-primary" (click)="openAddAssetModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Asset
+          </button>
         </div>
-        <div class="header-actions">
-          <knod-button variant="outline" [icon]="exportIcon">Export</knod-button>
-          <knod-button variant="primary" [icon]="plusIcon" (click)="navigateToAddAsset()">Add Asset</knod-button>
-        </div>
-      </div>
+      </app-page-header>
 
-      <!-- Stats Row -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <span class="stat-value">{{ totalAssets() }}</span>
-          <span class="stat-label">Total Assets</span>
-          <div class="stat-indicator blue"></div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ availableAssets() }}</span>
-          <span class="stat-label">Available</span>
-          <div class="stat-indicator green"></div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ assignedAssets() }}</span>
-          <span class="stat-label">Assigned</span>
-          <div class="stat-indicator indigo"></div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ maintenanceAssets() }}</span>
-          <span class="stat-label">Maintenance</span>
-          <div class="stat-indicator amber"></div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value">{{ totalValue() | currency:'USD':'symbol':'1.0-0' }}</span>
-          <span class="stat-label">Total Value</span>
-          <div class="stat-indicator violet"></div>
-        </div>
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        <app-stat-card
+          [icon]="totalIcon"
+          iconBg="#EFF6FF"
+          [value]="totalAssets()"
+          label="Total Assets"
+          change="+12 this month"
+          changeType="positive"
+        />
+        <app-stat-card
+          [icon]="availableIcon"
+          iconBg="#DCFCE7"
+          [value]="availableAssets()"
+          label="Available"
+          change="5 ready to assign"
+          changeType="positive"
+        />
+        <app-stat-card
+          [icon]="assignedIcon"
+          iconBg="#F3E8FF"
+          [value]="assignedAssets()"
+          label="Assigned"
+          change="+8 this month"
+          changeType="positive"
+        />
+        <app-stat-card
+          [icon]="maintenanceIcon"
+          iconBg="#FEF3C7"
+          [value]="maintenanceAssets()"
+          label="Maintenance"
+          change="2 in service"
+          changeType="negative"
+        />
+        <app-stat-card
+          [icon]="valueIcon"
+          iconBg="#CFFAFE"
+          [value]="totalValueFormatted()"
+          label="Total Value"
+          change="+15% from last year"
+          changeType="positive"
+        />
       </div>
 
       <!-- Main Content -->
-      <div class="content-layout">
-        <!-- Filters Panel -->
-        <div class="filters-panel">
-          <knod-card title="Filters" subtitle="Refine your search">
-            <div class="filter-section">
-              <label class="filter-label">Search</label>
-              <knod-search 
-                placeholder="Tag, name, serial..."
-                [value]="searchQuery()"
-                (valueChange)="searchQuery.set($event)">
-              </knod-search>
+      <div class="main-content">
+        <!-- Asset List Card -->
+        <app-card title="All Assets" [subtitle]="filteredAssets().length + ' assets found'" [noPadding]="true">
+          <!-- Search and Filters -->
+          <div class="card-toolbar">
+            <div class="search-box">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Search by tag, name, serial..."
+                [ngModel]="searchQuery()"
+                (ngModelChange)="searchQuery.set($event)"
+              />
             </div>
-
-            <div class="filter-section">
-              <label class="filter-label">Status</label>
+            <div class="filter-controls">
               <select class="filter-select" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
-                <option value="">All Statuses</option>
+                <option value="">All Status</option>
                 <option value="available">Available</option>
                 <option value="assigned">Assigned</option>
                 <option value="maintenance">Maintenance</option>
                 <option value="retired">Retired</option>
-                <option value="lost">Lost</option>
               </select>
-            </div>
-
-            <div class="filter-section">
-              <label class="filter-label">Category</label>
               <select class="filter-select" [ngModel]="categoryFilter()" (ngModelChange)="categoryFilter.set($event)">
                 <option value="">All Categories</option>
                 <option value="Laptop">Laptops</option>
@@ -132,688 +162,621 @@ interface Asset {
                 <option value="Desktop">Desktops</option>
               </select>
             </div>
+          </div>
 
-            <div class="filter-section">
-              <label class="filter-label">Location</label>
-              <select class="filter-select" [ngModel]="locationFilter()" (ngModelChange)="locationFilter.set($event)">
-                <option value="">All Locations</option>
-                <option value="Bangalore">Bangalore</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Chennai">Chennai</option>
-                <option value="Pune">Pune</option>
-                <option value="Hyderabad">Hyderabad</option>
-              </select>
-            </div>
+          <!-- Assets Table -->
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Tag</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Assigned To</th>
+                  <th>Location</th>
+                  <th>Value</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (asset of filteredAssets(); track asset.id) {
+                  <tr>
+                    <td>
+                      <div class="asset-cell">
+                        <div class="asset-icon" [ngClass]="'cat-' + asset.category.toLowerCase()">
+                          <span [innerHTML]="getCategoryIcon(asset.category)"></span>
+                        </div>
+                        <div class="asset-info">
+                          <span class="asset-name">{{ asset.name }}</span>
+                          <span class="asset-model">{{ asset.brand }} {{ asset.model }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="tag-badge">{{ asset.tag }}</span></td>
+                    <td>{{ asset.category }}</td>
+                    <td>
+                      <app-badge [variant]="getStatusVariant(asset.status)">{{ asset.status | titlecase }}</app-badge>
+                    </td>
+                    <td>
+                      @if (asset.assignedToName) {
+                        <div class="assignee-cell">
+                          <div class="assignee-avatar">{{ asset.assignedToName.charAt(0) }}</div>
+                          <span>{{ asset.assignedToName }}</span>
+                        </div>
+                      } @else {
+                        <span class="unassigned">Unassigned</span>
+                      }
+                    </td>
+                    <td>{{ asset.location }}</td>
+                    <td>{{ asset.purchaseCost | currency:'USD':'symbol':'1.0-0' }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="action-btn view" title="View Details" (click)="viewAsset(asset.id)">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                        </button>
+                        <button class="action-btn edit" title="Edit">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                        <button class="action-btn delete" title="Delete">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+      </div>
 
-            <div class="filter-section">
-              <label class="filter-label">Warranty</label>
-              <select class="filter-select" [ngModel]="warrantyFilter()" (ngModelChange)="warrantyFilter.set($event)">
-                <option value="">All</option>
-                <option value="active">Active</option>
-                <option value="expiring">Expiring Soon</option>
-                <option value="expired">Expired</option>
-              </select>
-            </div>
+      <!-- Add Asset Modal -->
+      <app-modal
+        [isOpen]="showAddAssetModal()"
+        [title]="'Add New Asset'"
+        size="lg"
+        (closed)="closeAddAssetModal()"
+      >
+        <div class="add-asset-form">
+          <div class="form-row">
+            <app-input
+              label="Asset Tag"
+              placeholder="Auto-generated if empty"
+              [(ngModel)]="newAsset.tag"
+            />
+            <app-input
+              label="Serial Number"
+              placeholder="Enter serial number"
+              [(ngModel)]="newAsset.serialNumber"
+            />
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Asset Name"
+              placeholder="E.g., MacBook Pro 14-inch M3"
+              [(ngModel)]="newAsset.name"
+            />
+          </div>
 
-            <knod-button variant="outline" class="reset-btn" (click)="resetFilters()">Reset Filters</knod-button>
-          </knod-card>
-
-          <!-- Quick Filters -->
-          <knod-card title="Quick Filters">
-            <div class="quick-filters">
-              <button class="quick-filter-btn" (click)="applyQuickFilter('expiring_warranty')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-                Expiring Warranty
-              </button>
-              <button class="quick-filter-btn" (click)="applyQuickFilter('recently_added')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                Recently Added
-              </button>
-              <button class="quick-filter-btn" (click)="applyQuickFilter('high_value')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="1" x2="12" y2="23"/>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-                High Value (>$100K)
-              </button>
-              <button class="quick-filter-btn" (click)="applyQuickFilter('unassigned')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                  <line x1="8" y1="21" x2="16" y2="21"/>
-                  <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
-                Unassigned
-              </button>
-            </div>
-          </knod-card>
-        </div>
-
-        <!-- Asset List -->
-        <div class="asset-list-panel">
-          <div class="list-header">
-            <div class="list-info">
-              <span class="result-count">{{ filteredAssets().length }} assets found</span>
-            </div>
-            <div class="list-actions">
-              <div class="view-toggle">
-                <button class="view-btn" [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                  </svg>
-                </button>
-                <button class="view-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="8" y1="6" x2="21" y2="6"/>
-                    <line x1="8" y1="12" x2="21" y2="12"/>
-                    <line x1="8" y1="18" x2="21" y2="18"/>
-                    <line x1="3" y1="6" x2="3.01" y2="6"/>
-                    <line x1="3" y1="12" x2="3.01" y2="12"/>
-                    <line x1="3" y1="18" x2="3.01" y2="18"/>
-                  </svg>
-                </button>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <div class="category-options">
+                @for (cat of categories; track cat.value) {
+                  <label class="category-option" [class.selected]="newAsset.category === cat.value">
+                    <input 
+                      type="radio" 
+                      name="category" 
+                      [value]="cat.value"
+                      [(ngModel)]="newAsset.category">
+                    <div class="category-icon" [innerHTML]="cat.icon"></div>
+                    <span class="category-label">{{ cat.label }}</span>
+                  </label>
+                }
               </div>
             </div>
           </div>
 
-          @if (viewMode() === 'grid') {
-            <div class="asset-grid">
-              @for (asset of filteredAssets(); track asset.id) {
-                <div class="asset-card" (click)="viewAsset(asset.id)">
-                  <div class="asset-card-header">
-                    <div class="asset-icon" [ngClass]="'cat-' + asset.category.toLowerCase()">
-                      <span [innerHTML]="getCategoryIcon(asset.category)"></span>
-                    </div>
-                    <knod-badge [color]="getStatusColor(asset.status)">{{ asset.status | titlecase }}</knod-badge>
-                  </div>
-                  
-                  <h3 class="asset-name">{{ asset.name }}</h3>
-                  <p class="asset-tag">{{ asset.tag }}</p>
-                  
-                  <div class="asset-details">
-                    <div class="detail-row">
-                      <span class="detail-label">Brand/Model</span>
-                      <span class="detail-value">{{ asset.brand }} {{ asset.model }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Location</span>
-                      <span class="detail-value">{{ asset.location }}</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Warranty</span>
-                      <span class="detail-value" [class.warning]="asset.warrantyStatus === 'expiring'">
-                        {{ asset.warrantyEnd | date:'mediumDate' }}
-                        <knod-badge [color]="getWarrantyColor(asset.warrantyStatus)" size="sm">{{ asset.warrantyStatus }}</knod-badge>
-                      </span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Value</span>
-                      <span class="detail-value">{{ asset.purchaseCost | currency:'USD':'symbol':'1.0-0' }}</span>
-                    </div>
-                  </div>
+          <div class="form-row two-col">
+            <app-input
+              label="Brand"
+              placeholder="E.g., Apple, Dell, HP"
+              [(ngModel)]="newAsset.brand"
+            />
+            <app-input
+              label="Model"
+              placeholder="E.g., MacBook Pro 14-inch"
+              [(ngModel)]="newAsset.model"
+            />
+          </div>
 
-                  @if (asset.assignedToName) {
-                    <div class="asset-assignee">
-                      <knod-avatar [name]="asset.assignedToName" size="sm"></knod-avatar>
-                      <span class="assignee-name">{{ asset.assignedToName }}</span>
-                    </div>
-                  } @else {
-                    <div class="asset-unassigned">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="16"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                      </svg>
-                      <span>Unassigned</span>
-                    </div>
-                  }
+          <div class="form-row two-col">
+            <app-input
+              label="Purchase Date"
+              type="date"
+              [(ngModel)]="newAsset.purchaseDate"
+            />
+            <app-input
+              label="Purchase Cost"
+              type="number"
+              placeholder="0.00"
+              [(ngModel)]="newAsset.purchaseCost"
+            />
+          </div>
 
-                  <div class="asset-actions">
-                    <knod-button variant="ghost" size="sm" [icon]="assignIcon" (click)="assignAsset($event, asset)">Assign</knod-button>
-                    <knod-button variant="ghost" size="sm" (click)="viewAsset(asset.id)">Details</knod-button>
-                  </div>
-                </div>
-              }
-            </div>
-          } @else {
-            <div class="asset-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Asset</th>
-                    <th>Tag</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th>Assigned To</th>
-                    <th>Location</th>
-                    <th>Warranty</th>
-                    <th>Value</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (asset of filteredAssets(); track asset.id) {
-                    <tr (click)="viewAsset(asset.id)">
-                      <td>
-                        <div class="asset-cell">
-                          <div class="asset-icon-sm" [ngClass]="'cat-' + asset.category.toLowerCase()">
-                            <span [innerHTML]="getCategoryIcon(asset.category)"></span>
-                          </div>
-                          <div class="asset-cell-info">
-                            <span class="asset-cell-name">{{ asset.name }}</span>
-                            <span class="asset-cell-model">{{ asset.brand }} {{ asset.model }}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="asset-tag">{{ asset.tag }}</span></td>
-                      <td>{{ asset.category }}</td>
-                      <td>
-                        <knod-badge [color]="getStatusColor(asset.status)">{{ asset.status | titlecase }}</knod-badge>
-                      </td>
-                      <td>
-                        @if (asset.assignedToName) {
-                          <div class="assignee-cell">
-                            <knod-avatar [name]="asset.assignedToName" size="sm"></knod-avatar>
-                            <span>{{ asset.assignedToName }}</span>
-                          </div>
-                        } @else {
-                          <span class="unassigned">—</span>
-                        }
-                      </td>
-                      <td>{{ asset.location }}</td>
-                      <td>
-                        <span [class.warning]="asset.warrantyStatus === 'expiring'">
-                          {{ asset.warrantyEnd | date:'short' }}
-                        </span>
-                      </td>
-                      <td>{{ asset.purchaseCost | currency:'USD':'symbol':'1.0-0' }}</td>
-                      <td>
-                        <div class="action-cell">
-                          <knod-button variant="ghost" size="sm" (click)="assignAsset($event, asset)">Assign</knod-button>
-                          <knod-button variant="ghost" size="sm">Edit</knod-button>
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
+          <div class="form-row">
+            <app-input
+              label="Location"
+              placeholder="E.g., Bangalore, Mumbai"
+              [(ngModel)]="newAsset.location"
+            />
+          </div>
         </div>
-      </div>
+
+        <div slot="footer" class="modal-actions">
+          <button class="btn-secondary" (click)="closeAddAssetModal()">Cancel</button>
+          <button class="btn-primary" (click)="saveAsset()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Save Asset
+          </button>
+        </div>
+      </app-modal>
     </div>
   `,
   styles: [`
     .assets-page {
-      max-width: 1440px;
-      margin: 0 auto;
+      animation: fadeIn 200ms ease;
     }
 
-    /* Page Header */
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 24px;
-    }
-
-    .page-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--color-slate-900);
-      margin: 0 0 4px 0;
-    }
-
-    .page-subtitle {
-      font-size: 14px;
-      color: var(--color-slate-500);
-      margin: 0;
-    }
-
-    /* Stats Row */
-    .stats-row {
+    .stats-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: var(--spacing-6);
+      margin-bottom: var(--spacing-8);
     }
 
-    @media (max-width: 1024px) {
-      .stats-row {
-        grid-template-columns: repeat(3, 1fr);
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-6);
+    }
+
+    .card-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-5) var(--spacing-6);
+      border-bottom: 1px solid var(--bg-border);
+      gap: var(--spacing-4);
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: 0 var(--spacing-4);
+      height: 44px;
+      background: var(--bg-main);
+      border: 1px solid var(--bg-border);
+      border-radius: var(--radius-md);
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .search-icon {
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: var(--font-size-sm);
+      color: var(--text-primary);
+      background: transparent;
+
+      &::placeholder {
+        color: var(--text-secondary);
       }
     }
 
-    @media (max-width: 640px) {
-      .stats-row {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .stat-card {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
+    .filter-controls {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--color-slate-900);
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--color-slate-500);
-    }
-
-    .stat-indicator {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-    }
-
-    .stat-indicator.blue { background: var(--color-primary-500); }
-    .stat-indicator.green { background: var(--color-success-500); }
-    .stat-indicator.indigo { background: var(--color-indigo-500); }
-    .stat-indicator.amber { background: var(--color-warning-500); }
-    .stat-indicator.violet { background: var(--color-violet-500); }
-
-    /* Content Layout */
-    .content-layout {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 24px;
-    }
-
-    @media (max-width: 1024px) {
-      .content-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Filters Panel */
-    .filters-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .filter-section {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-
-    .filter-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--color-slate-600);
+      gap: var(--spacing-3);
     }
 
     .filter-select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--color-slate-200);
-      border-radius: 8px;
-      font-size: 13px;
-      background: white;
-      cursor: pointer;
-    }
-
-    .filter-select:focus {
-      outline: none;
-      border-color: var(--color-primary-500);
-    }
-
-    .reset-btn {
-      width: 100%;
-    }
-
-    /* Quick Filters */
-    .quick-filters {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .quick-filter-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-slate-600);
-      transition: all var(--transition-fast);
-      text-align: left;
-    }
-
-    .quick-filter-btn:hover {
-      background: var(--color-slate-50);
-      color: var(--color-slate-900);
-    }
-
-    .quick-filter-btn svg {
-      color: var(--color-slate-400);
-    }
-
-    /* Asset List Panel */
-    .asset-list-panel {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      overflow: hidden;
-    }
-
-    .list-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--color-slate-100);
-    }
-
-    .result-count {
-      font-size: 13px;
-      color: var(--color-slate-500);
-    }
-
-    .view-toggle {
-      display: flex;
-      background: var(--color-slate-100);
-      border-radius: 6px;
-      padding: 2px;
-    }
-
-    .view-btn {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      color: var(--color-slate-500);
-      transition: all var(--transition-fast);
-    }
-
-    .view-btn:hover {
-      color: var(--color-slate-700);
-    }
-
-    .view-btn.active {
-      background: white;
-      color: var(--color-slate-900);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Asset Grid */
-    .asset-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-      padding: 20px;
-    }
-
-    .asset-card {
-      background: white;
-      border: 1px solid var(--color-slate-200);
-      border-radius: 12px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .asset-card:hover {
-      border-color: var(--color-primary-300);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
-    }
-
-    .asset-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .asset-icon {
-      width: 44px;
       height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 10px;
+      padding: 0 var(--spacing-4);
+      background: var(--bg-card);
+      border: 1px solid var(--bg-border);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--text-primary);
+      cursor: pointer;
+      min-width: 150px;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+      }
     }
 
-    .asset-icon.cat-laptop { background: var(--color-primary-100); color: var(--color-primary-600); }
-    .asset-icon.cat-monitor { background: var(--color-indigo-100); color: var(--color-indigo-600); }
-    .asset-icon.cat-phone { background: var(--color-violet-100); color: var(--color-violet-600); }
-    .asset-icon.cat-accessory { background: var(--color-cyan-100); color: var(--color-cyan-600); }
-    .asset-icon.cat-printer { background: var(--color-success-100); color: var(--color-success-600); }
-    .asset-icon.cat-desktop { background: var(--color-amber-100); color: var(--color-amber-600); }
-
-    .asset-icon :deep(svg) {
-      width: 20px;
-      height: 20px;
-    }
-
-    .asset-name {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--color-slate-900);
-      margin: 0;
-    }
-
-    .asset-tag {
-      font-size: 12px;
-      color: var(--color-slate-500);
-      margin: 0;
-      font-family: monospace;
-    }
-
-    .asset-details {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 12px;
-      background: var(--color-slate-50);
-      border-radius: 8px;
-    }
-
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .detail-label {
-      font-size: 11px;
-      color: var(--color-slate-500);
-    }
-
-    .detail-value {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--color-slate-700);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .detail-value.warning {
-      color: var(--color-amber-600);
-    }
-
-    .asset-assignee {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 0;
-    }
-
-    .assignee-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-slate-700);
-    }
-
-    .asset-unassigned {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--color-slate-400);
-      padding: 8px 0;
-    }
-
-    .asset-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: auto;
-      padding-top: 8px;
-      border-top: 1px solid var(--color-slate-100);
-    }
-
-    /* Asset Table */
-    .asset-table {
+    .table-wrapper {
       overflow-x: auto;
     }
 
-    .asset-table table {
+    .data-table {
       width: 100%;
       border-collapse: collapse;
-    }
 
-    .asset-table th {
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--color-slate-500);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: var(--color-slate-50);
-      border-bottom: 1px solid var(--color-slate-200);
-    }
+      th, td {
+        padding: var(--spacing-4) var(--spacing-5);
+        text-align: left;
+        border-bottom: 1px solid var(--bg-border);
+      }
 
-    .asset-table td {
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--color-slate-700);
-      border-bottom: 1px solid var(--color-slate-100);
-    }
+      th {
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: var(--bg-main);
+      }
 
-    .asset-table tr {
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
+      td {
+        font-size: var(--font-size-sm);
+        color: var(--text-primary);
+      }
 
-    .asset-table tr:hover {
-      background: var(--color-slate-50);
+      tbody tr {
+        transition: background var(--transition-fast);
+
+        &:hover {
+          background: rgba(59, 130, 246, 0.03);
+        }
+      }
     }
 
     .asset-cell {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: var(--spacing-3);
     }
 
-    .asset-icon-sm {
-      width: 32px;
-      height: 32px;
+    .asset-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
       flex-shrink: 0;
+
+      :deep(svg) {
+        width: 22px;
+        height: 22px;
+      }
+
+      &.cat-laptop { background: #EFF6FF; color: #3B82F6; }
+      &.cat-desktop { background: #F3E8FF; color: #8B5CF6; }
+      &.cat-monitor { background: #DCFCE7; color: #22C55E; }
+      &.cat-phone { background: #FEF3C7; color: #F59E0B; }
+      &.cat-accessory { background: #CFFAFE; color: #06B6D4; }
+      &.cat-printer { background: #FEE2E2; color: #EF4444; }
     }
 
-    .asset-icon-sm.cat-laptop { background: var(--color-primary-100); color: var(--color-primary-600); }
-    .asset-icon-sm.cat-monitor { background: var(--color-indigo-100); color: var(--color-indigo-600); }
-    .asset-icon-sm.cat-phone { background: var(--color-violet-100); color: var(--color-violet-600); }
-    .asset-icon-sm.cat-accessory { background: var(--color-cyan-100); color: var(--color-cyan-600); }
-    .asset-icon-sm.cat-printer { background: var(--color-success-100); color: var(--color-success-600); }
-
-    .asset-icon-sm :deep(svg) {
-      width: 16px;
-      height: 16px;
-    }
-
-    .asset-cell-info {
+    .asset-info {
       display: flex;
       flex-direction: column;
     }
 
-    .asset-cell-name {
-      font-weight: 500;
-      color: var(--color-slate-800);
+    .asset-name {
+      font-weight: var(--font-weight-semibold);
+      color: var(--text-primary);
     }
 
-    .asset-cell-model {
-      font-size: 11px;
-      color: var(--color-slate-500);
+    .asset-model {
+      font-size: var(--font-size-xs);
+      color: var(--text-secondary);
+    }
+
+    .tag-badge {
+      display: inline-block;
+      padding: var(--spacing-1) var(--spacing-3);
+      background: var(--bg-main);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--text-secondary);
     }
 
     .assignee-cell {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--spacing-2);
+    }
+
+    .assignee-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-hover) 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
     }
 
     .unassigned {
-      color: var(--color-slate-400);
+      color: var(--text-secondary);
+      font-style: italic;
     }
 
-    .warning {
-      color: var(--color-amber-600);
-    }
-
-    .action-cell {
+    .action-buttons {
       display: flex;
-      gap: 4px;
+      gap: var(--spacing-1);
     }
 
-    /* Icons */
-    .exportIcon, .plusIcon, .assignIcon {
+    .action-btn {
+      width: 32px;
+      height: 32px;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+
+      &.view {
+        color: var(--info);
+        &:hover { background: var(--info-light); }
+      }
+
+      &.edit {
+        color: var(--primary-blue);
+        &:hover { background: rgba(59, 130, 246, 0.1); }
+      }
+
+      &.delete {
+        color: var(--danger);
+        &:hover { background: var(--danger-light); }
+      }
+    }
+
+    /* Modal Form Styles */
+    .add-asset-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-5);
+    }
+
+    .form-row {
+      display: grid;
+      gap: var(--spacing-5);
+
+      &.two-col {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-2);
+    }
+
+    .form-label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--text-primary);
+    }
+
+    .category-options {
+      display: flex;
+      gap: var(--spacing-3);
+      flex-wrap: wrap;
+    }
+
+    .category-option {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
+      padding: var(--spacing-3) var(--spacing-4);
+      background: var(--bg-main);
+      border: 1px solid var(--bg-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+
+      input {
+        display: none;
+      }
+
+      &:hover {
+        border-color: var(--primary-blue);
+      }
+
+      &.selected {
+        background: rgba(59, 130, 246, 0.1);
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+      }
+    }
+
+    .category-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      :deep(svg) {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .category-label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-3);
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-2);
+      height: 48px;
+      padding: 0 var(--spacing-6);
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-hover) 100%);
+      color: white;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      }
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-2);
+      height: 48px;
+      padding: 0 var(--spacing-6);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      border: 1px solid var(--bg-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+
+      &:hover {
+        background: var(--bg-main);
+        border-color: var(--text-secondary);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1280px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .filter-controls {
+        width: 100%;
+      }
+
+      .filter-select {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        max-width: none;
+      }
     }
   `]
 })
 export class AssetsComponent {
   private router: Router;
 
-  readonly exportIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
-  readonly plusIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-  readonly assignIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  breadcrumbs = [
+    { label: 'Home', route: '/' },
+    { label: 'Assets' }
+  ];
+
+  pageIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>';
+
+  totalIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>';
+  availableIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+  assignedIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+  maintenanceIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
+  valueIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
+
+  showAddAssetModal = signal(false);
+
+  newAsset: NewAsset = {
+    tag: '',
+    name: '',
+    category: 'Laptop',
+    brand: '',
+    model: '',
+    serialNumber: '',
+    purchaseDate: '',
+    purchaseCost: 0,
+    location: '',
+    status: 'available'
+  };
+
+  readonly categories = [
+    { value: 'Laptop', label: 'Laptop', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
+    { value: 'Desktop', label: 'Desktop', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
+    { value: 'Monitor', label: 'Monitor', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
+    { value: 'Phone', label: 'Phone', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>' },
+    { value: 'Accessory', label: 'Accessory', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>' },
+    { value: 'Printer', label: 'Printer', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' }
+  ];
 
   readonly searchQuery = signal('');
   readonly statusFilter = signal('');
   readonly categoryFilter = signal('');
-  readonly locationFilter = signal('');
-  readonly warrantyFilter = signal('');
-  readonly viewMode = signal<'grid' | 'table'>('grid');
 
   readonly assets = signal<Asset[]>([
     { id: 'AST-1045', tag: 'AST-1045', name: 'MacBook Pro 14" M3', category: 'Laptop', brand: 'Apple', model: 'MacBook Pro 14"', serialNumber: 'C02X1234ABCD', status: 'assigned', assignedTo: 'EMP-2007', assignedToName: 'Nisha Sharma', location: 'Bangalore', purchaseDate: '2025-03-15', purchaseCost: 195000, warrantyEnd: '2028-03-14', warrantyStatus: 'active' },
@@ -831,8 +794,6 @@ export class AssetsComponent {
     const query = this.searchQuery().toLowerCase();
     const status = this.statusFilter();
     const category = this.categoryFilter();
-    const location = this.locationFilter();
-    const warranty = this.warrantyFilter();
 
     if (query) {
       result = result.filter(a => 
@@ -851,14 +812,6 @@ export class AssetsComponent {
       result = result.filter(a => a.category === category);
     }
 
-    if (location) {
-      result = result.filter(a => a.location === location);
-    }
-
-    if (warranty) {
-      result = result.filter(a => a.warrantyStatus === warranty);
-    }
-
     return result;
   });
 
@@ -867,25 +820,10 @@ export class AssetsComponent {
   readonly assignedAssets = computed(() => this.assets().filter(a => a.status === 'assigned').length);
   readonly maintenanceAssets = computed(() => this.assets().filter(a => a.status === 'maintenance').length);
   readonly totalValue = computed(() => this.assets().reduce((sum, a) => sum + a.purchaseCost, 0));
+  readonly totalValueFormatted = computed(() => '$' + this.totalValue().toLocaleString());
 
   constructor(router: Router) {
     this.router = router;
-  }
-
-  resetFilters(): void {
-    this.searchQuery.set('');
-    this.statusFilter.set('');
-    this.categoryFilter.set('');
-    this.locationFilter.set('');
-    this.warrantyFilter.set('');
-  }
-
-  applyQuickFilter(filter: string): void {
-    if (filter === 'expiring_warranty') {
-      this.warrantyFilter.set('expiring');
-    } else if (filter === 'unassigned') {
-      this.statusFilter.set('available');
-    }
   }
 
   getCategoryIcon(category: string): string {
@@ -900,36 +838,64 @@ export class AssetsComponent {
     return icons[category] || icons['Laptop'];
   }
 
-  getStatusColor(status: string): 'green' | 'blue' | 'amber' | 'red' | 'slate' {
-    const colors: Record<string, 'green' | 'blue' | 'amber' | 'red' | 'slate'> = {
-      'available': 'green',
-      'assigned': 'blue',
-      'maintenance': 'amber',
-      'retired': 'slate',
-      'lost': 'red'
+  getStatusVariant(status: string): 'success' | 'warning' | 'danger' | 'info' | 'gray' {
+    const variants: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'gray'> = {
+      'available': 'success',
+      'assigned': 'info',
+      'maintenance': 'warning',
+      'retired': 'gray',
+      'lost': 'danger'
     };
-    return colors[status] || 'slate';
-  }
-
-  getWarrantyColor(status: string): 'green' | 'amber' | 'red' {
-    const colors: Record<string, 'green' | 'amber' | 'red'> = {
-      'active': 'green',
-      'expiring': 'amber',
-      'expired': 'red'
-    };
-    return colors[status] || 'green';
+    return variants[status] || 'gray';
   }
 
   viewAsset(assetId: string): void {
     this.router.navigate(['/assets', assetId]);
   }
 
-  assignAsset(event: Event, asset: Asset): void {
-    event.stopPropagation();
-    // Open assign dialog
+  openAddAssetModal(): void {
+    this.showAddAssetModal.set(true);
   }
 
-  navigateToAddAsset(): void {
-    this.router.navigate(['/assets/new']);
+  closeAddAssetModal(): void {
+    this.showAddAssetModal.set(false);
+    this.newAsset = {
+      tag: '',
+      name: '',
+      category: 'Laptop',
+      brand: '',
+      model: '',
+      serialNumber: '',
+      purchaseDate: '',
+      purchaseCost: 0,
+      location: '',
+      status: 'available'
+    };
+  }
+
+  saveAsset(): void {
+    if (!this.newAsset.name || !this.newAsset.brand || !this.newAsset.serialNumber) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const newAssetEntry: Asset = {
+      id: `AST-${Math.floor(Math.random() * 9999)}`,
+      tag: this.newAsset.tag || `AST-${Math.floor(Math.random() * 9999)}`,
+      name: this.newAsset.name,
+      category: this.newAsset.category,
+      brand: this.newAsset.brand,
+      model: this.newAsset.model,
+      serialNumber: this.newAsset.serialNumber,
+      status: this.newAsset.status,
+      location: this.newAsset.location,
+      purchaseDate: this.newAsset.purchaseDate,
+      purchaseCost: this.newAsset.purchaseCost,
+      warrantyEnd: '',
+      warrantyStatus: 'active'
+    };
+
+    this.assets.update(current => [newAssetEntry, ...current]);
+    this.closeAddAssetModal();
   }
 }
