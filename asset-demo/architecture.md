@@ -1,159 +1,247 @@
-# Asset Management Architecture
+# HRMS Admin Dashboard - Architecture Documentation
 
-## Purpose
+## Overview
 
-This Angular feature is a frontend prototype for an HRMS Asset Management area. It now covers asset inventory, employee assets, asset support and request workflows, reporting, and an HR-owned Offboarding module with linked Exit Clearance.
+This is a modern enterprise HRMS (Human Resource Management System) Admin Dashboard built with Angular 21, standalone components, Tailwind CSS, and SCSS for theming.
 
-The implementation is still mock-data driven. State lives in Angular signals inside `src/app/asset-management/asset-management.component.ts`, with seed data in `src/app/asset-management/asset-management.mock-data.ts`. There is no backend persistence, authentication, notification service, or real approval engine yet.
+## Tech Stack
 
-## Module Structure
+- **Framework**: Angular 21
+- **Styling**: 
+  - Tailwind CSS for utility classes
+  - SCSS for component styling
+  - CSS Custom Properties (CSS Variables) for theming
+- **Architecture**: Standalone Components only
+- **State Management**: Angular Signals
+- **No External UI Libraries**: No Angular Material, Bootstrap, PrimeNG, or other UI component libraries
 
-### Asset Inventory
+## Project Structure
 
-Asset Inventory is the IT/Admin master list for company-owned assets.
+```
+asset-demo/
+├── src/
+│   ├── app/
+│   │   ├── core/
+│   │   │   └── layouts/
+│   │   │       ├── sidebar.component.ts      # Sidebar navigation component
+│   │   │       ├── header.component.ts       # Top header with search, notifications
+│   │   │       └── main-layout.component.ts # Main layout wrapper
+│   │   │
+│   │   ├── shared/
+│   │   │   └── components/
+│   │   │       ├── button.component.ts       # Reusable button component
+│   │   │       ├── card.component.ts          # Card container component
+│   │   │       ├── badge.component.ts        # Status badge component
+│   │   │       ├── input.component.ts        # Form input component
+│   │   │       ├── modal.component.ts         # Modal/dialog component
+│   │   │       ├── stat-card.component.ts    # Statistics card
+│   │   │       ├── page-header.component.ts  # Page header with icon
+│   │   │       ├── breadcrumb.component.ts   # Breadcrumb navigation
+│   │   │       ├── data-table.component.ts  # Data table with pagination
+│   │   │       └── index.ts                 # Component exports
+│   │   │
+│   │   ├── features/
+│   │   │   ├── dashboard/
+│   │   │   │   └── dashboard.component.ts   # Dashboard page
+│   │   │   ├── administration/
+│   │   │   │   └── administration.component.ts # Admin management page
+│   │   │   ├── leaves/
+│   │   │   │   └── leaves.component.ts      # Leave management page
+│   │   │   ├── onboarding/
+│   │   │   │   └── onboarding.component.ts  # Onboarding page
+│   │   │   └── profile/
+│   │   │       └── profile.component.ts    # User profile page
+│   │   │
+│   │   ├── theme/
+│   │   │   ├── _variables.scss              # SCSS variables (deprecated)
+│   │   │   ├── _mixins.scss                 # SCSS mixins (deprecated)
+│   │   │   └── index.scss                   # Theme exports
+│   │   │
+│   │   ├── app.ts                          # Root app component
+│   │   ├── app.routes.ts                  # Application routes
+│   │   └── app.config.ts                  # App configuration
+│   │
+│   ├── styles.scss                         # Global styles with CSS variables
+│   ├── index.html                          # HTML entry point
+│   └── main.ts                             # Bootstrap file
+│
+├── angular.json                             # Angular CLI configuration
+├── package.json                             # Dependencies
+└── tsconfig.json                           # TypeScript configuration
+```
 
-It includes available stock, assigned devices, maintenance items, retired items, lost assets, procurement data, warranty data, location data, documents, and audit history.
+## Design System
 
-### My Employee Assets
+### Color System (CSS Variables)
 
-My Employee Assets is the employee self-service view. It shows the active employee's assigned assets and routes the employee into Asset Support & Requests for new assets, issue reports, damaged assets, repairs, replacements, and IT support.
+```scss
+--primary-blue: #3B82F6
+--primary-hover: #2563EB
+--bg-main: #F3F6FB
+--bg-card: #FFFFFF
+--bg-border: #E5EAF3
+--text-primary: #0F172A
+--text-secondary: #64748B
+--success: #22C55E
+--warning: #F59E0B
+--danger: #EF4444
+--purple: #8B5CF6
+--orange: #F97316
+--info: #06B6D4
+```
 
-### Asset Support & Requests
+### Typography
 
-Asset Support & Requests replaces the older, narrower Asset Requests module.
+- **Font Family**: Inter (Google Fonts)
+- **Font Sizes**: xs (12px), sm (14px), base (16px), lg (18px), xl (20px), 2xl (24px), 3xl (28px), 4xl (36px)
+- **Font Weights**: 400 (normal), 500 (medium), 600 (semibold), 700 (bold)
 
-It supports:
+### Spacing System
 
-- New asset requests.
-- Damaged or malfunctioning asset reports.
-- IT support tickets linked to assigned assets.
-- Repairs and maintenance.
-- Replacements.
-- Request approvals and rejections.
-- IT assignment, review, repair, replacement, and closure actions.
-- Communication history and SLA visibility.
-- Asset linkage so a request can be reflected against an employee's assigned asset.
+4px base unit: 4, 8, 12, 16, 20, 24, 32, 40, 48px
 
-Expected workflow:
+### Border Radius
 
-1. Employee submits a service ticket from self-service or the support queue.
-2. The system notifies IT automatically and, where required, sends business approval to Manager/HR.
-3. Manager/HR approves or rejects business need.
-4. IT triages the ticket, assigns an owner, and decides whether to assign, repair, replace, reject, or close.
-5. Repair tickets can create maintenance records and vendor follow-up.
-6. Replacement tickets link the old and replacement asset.
-7. Closure records communication and updates the asset history.
+- sm: 8px
+- md: 14px
+- lg: 16px
+- xl: 20px
+- 2xl: 24px
+- 3xl: 28px
+- full: 9999px
 
-### Offboarding
+### Shadows
 
-Offboarding is a dedicated tab under Asset Management for now. It represents the HR-owned employee separation workflow and links Exit Clearance as the asset-recovery stage.
+- **Card**: `0 8px 30px rgba(15, 23, 42, 0.06)`
+- **Card Hover**: `0 15px 40px rgba(15, 23, 42, 0.12)`
+- **Dropdown**: `0 20px 50px rgba(15, 23, 42, 0.15)`
 
-HR responsibilities covered in the process flow:
+## Pages
 
-- Separation initiation for resignation, termination, or contract end.
-- Last working day and notice-period tracking.
-- Manager handover approval.
-- Knowledge transfer and pending work handoff.
-- Linked Exit Clearance for assigned assets.
-- Access revocation coordination with IT/Security.
-- Payroll and finance settlement, including deductions and recoveries.
-- Experience letter, relieving letter, statutory documents, exit interview notes, and final HR closure.
+### 1. Dashboard
+- Statistics cards (Departments, Employees, Active Projects, Hierarchy Levels)
+- Recent employees table
+- Quick actions widget
+- Organization hierarchy timeline
+- Department distribution chart
 
-### Exit Clearance
+### 2. Administration
+- Department management with CRUD operations
+- Statistics overview
+- Search and filter functionality
+- Detail panel for selected item
 
-Exit Clearance is no longer treated as an isolated HR clearance button. It is linked inside Offboarding.
+### 3. Leaves
+- Leave statistics
+- Leave type cards with progress bars
+- Leave requests table with status
+- Upcoming leaves widget
+- Team availability chart
 
-Expected asset-clearance flow:
+### 4. Onboarding
+- New hires list with progress tracking
+- Onboarding checklist
+- Required documents checklist
+- Quick actions
 
-1. HR opens the offboarding case.
-2. The system maps all assets assigned to the exiting employee.
-3. IT reviews each asset row.
-4. IT marks the asset as pending return, returned and verified, damaged and moved to maintenance, lost and sent for recovery, or waived by exception.
-5. Damaged and lost assets remain blockers until IT/Finance resolve the required action.
-6. When every asset row is resolved, IT sends asset clearance back to HR.
-7. HR completes final offboarding only after all stages are complete.
+### 5. Profile
+- Profile header with cover photo
+- Personal information card
+- Work information card
+- Skills & expertise tags
+- Recent activity timeline
 
-The former button label `Complete HR Clearance` was incorrect because IT is only completing asset clearance. It is now represented as `Send Asset Clearance to HR`.
+## Components
 
-### Asset Reports
+### Core Layout Components
 
-Reports now cover broader operational visibility:
+| Component | Description |
+|-----------|-------------|
+| `SidebarComponent` | Fixed sidebar with gradient background, navigation items, collapsible behavior |
+| `HeaderComponent` | Top header with search, notifications, user profile dropdown |
+| `MainLayoutComponent` | Layout wrapper combining sidebar, header, and content area |
 
-- Asset inventory summary.
-- Asset allocation status.
-- Employee-wise asset assignments.
-- Asset lifecycle tracking.
-- Pending requests and tickets.
-- Repair and maintenance history.
-- Lost and damaged asset reports.
-- Asset utilization and aging reports.
-- Offboarding asset recovery reports.
+### Shared UI Components
 
-The reports page combines summary cards with an insight table that names the report purpose, current metric, owner, and recommended next action.
+| Component | Props | Description |
+|----------|-------|-------------|
+| `ButtonComponent` | variant, size, type, disabled, icon, iconOnly | Reusable button with variants (primary, secondary, outline, ghost) |
+| `CardComponent` | title, subtitle, hoverable, noPadding | Container card with header and body |
+| `BadgeComponent` | variant | Status badge (success, warning, danger, info, purple, orange, gray) |
+| `InputComponent` | label, type, placeholder, disabled, error, hint | Form input with label and validation |
+| `ModalComponent` | isOpen, title, size, showFooter | Dialog modal with header, body, footer |
+| `StatCardComponent` | icon, iconBg, value, label, change, changeType | Statistics display card |
+| `PageHeaderComponent` | title, description, icon, iconBg | Page header with icon and actions slot |
+| `BreadcrumbComponent` | items | Breadcrumb navigation |
+| `DataTableComponent` | columns, data, showActions, pageSize | Data table with search, sort, pagination |
 
-## Data Model
+## Routes
 
-Core models live in `src/app/asset-management/asset-management.models.ts`.
+```typescript
+{
+  path: '',
+  component: MainLayoutComponent,
+  children: [
+    { path: 'dashboard', loadComponent: () => DashboardComponent },
+    { path: 'profile', loadComponent: () => ProfileComponent },
+    { path: 'administration', loadComponent: () => AdministrationComponent },
+    { path: 'leaves', loadComponent: () => LeavesComponent },
+    { path: 'onboarding', loadComponent: () => OnboardingComponent }
+  ]
+}
+```
 
-- `Employee`: employee identity, department, designation, location, and avatar.
-- `Asset`: master inventory record with status, assignment, location, procurement, and warranty data.
-- `AssetHistoryEvent`: audit timeline for create, assign, return, transfer, maintenance, document, retire, and delete events.
-- `MaintenanceRecord`: repair or vendor follow-up record.
-- `AssetDocument`: invoice, warranty, image, or repair attachment.
-- `AssetRequest`: asset service ticket with request type, linked asset, priority, owner, SLA, communication, and workflow status.
-- `ExitClearanceCase`: HR offboarding case with HR stages and linked asset-clearance rows.
-- `ExitClearanceAssetItem`: one asset outcome inside an exit-clearance case.
-- `AssignmentDraft`, `ReturnDraft`, and `ExitOutcomeDraft`: temporary UI form states.
+## Responsive Breakpoints
 
-## Current Frontend State
+- **1920px+**: Full enterprise layout
+- **1440px**: Optimized laptop layout
+- **1366px**: Standard laptop
+- **1024px**: Tablet (sidebar collapses)
+- **768px**: Mobile (single column layout)
+- **480px**: Small mobile
 
-Signals in `AssetManagementComponent` hold:
+## Key Features
 
-- `assets`
-- `employees`
-- `history`
-- `maintenance`
-- `documents`
-- `requests`
-- `exitClearances`
-- `page`
-- `detailTab`
-- form draft signals
+1. **Gradient Sidebar**: Dark blue gradient with decorative shapes
+2. **Glassmorphism Cards**: Soft shadows and rounded corners
+3. **Signal-based State**: Using Angular signals for reactive state
+4. **Lazy Loading**: All feature modules are lazy-loaded
+5. **Fully Responsive**: Mobile-first responsive design
+6. **Enterprise Design**: Professional HRMS aesthetics with clean spacing
 
-Computed values derive filtered inventory, KPIs, support-ticket metrics, report cards, report insight rows, employee assets, offboarding cases, exit blockers, and selected clearance views.
+## Development
 
-## Current Workflow Behavior
+### Commands
 
-### Assign Asset
+```bash
+# Install dependencies
+npm install
 
-`assignSelectedAsset()` updates the selected asset to assigned, sets the employee location, and adds either an `assigned` or `transferred` history event.
+# Start development server
+npm start
 
-### Return Asset
+# Build for production
+npm run build
 
-`returnSelectedAsset()` clears the employee assignment and changes the asset status based on condition:
+# Run tests
+npm test
+```
 
-- Good return becomes `available`.
-- Damaged return becomes `maintenance`.
-- Lost return becomes `lost`.
+### Adding New Components
 
-It also writes a `returned` history event. Damaged returns create a maintenance history event.
+1. Create component in appropriate directory under `src/app/`
+2. Use standalone component architecture
+3. Use CSS variables for styling (defined in `styles.scss`)
+4. Export from appropriate index.ts file
 
-### Exit Asset Outcome
+### Adding New Pages
 
-`saveExitAssetOutcome()` updates the selected offboarding asset row, recalculates blockers, changes asset assignment/status where appropriate, and writes an asset history event.
+1. Create component in `src/app/features/<feature>/`
+2. Add route in `app.routes.ts`
+3. Add navigation item in `SidebarComponent`
 
-### Reports
+## Notes
 
-Report cards and insight rows are computed from mock inventory, request, maintenance, warranty, and offboarding data.
-
-## Remaining Implementation Gaps
-
-- Replace local `page` signal navigation with route-level screens.
-- Persist create-asset form data into `assets`.
-- Add real create/update actions for asset service tickets.
-- Make request actions mutate workflow status and append communication events.
-- Create maintenance rows from repair tickets, not only history events.
-- Add role-based views for Employee, Manager/HR, IT Admin, IT Support, Finance, and Security.
-- Connect Offboarding to a real HR employee separation module.
-- Add backend APIs, notifications, file storage, and audit persistence.
-- Add tests for service-ticket transitions, assignment, return, exit-clearance blocker resolution, and report metrics.
+- The project uses CSS Custom Properties (CSS Variables) instead of SCSS variables for better compatibility with Angular's component-scoped styles
+- SCSS variables are defined in theme files but not actively used in components
+- All styling is done using inline `styles` in components or global `styles.scss`
