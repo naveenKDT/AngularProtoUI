@@ -386,12 +386,8 @@ export class SidebarComponent {
       label: 'Asset Management',
       children: [
         { icon: '', label: 'All Assets', route: '/assets' },
-        { icon: '', label: 'Add New Asset', route: '/assets/new' },
         { icon: '', label: 'Requests', route: '/requests' },
-        { icon: '', label: 'Raise Request', route: '/raise-request' },
         { icon: '', label: 'Tickets', route: '/tickets' },
-        { icon: '', label: 'Raise Ticket', route: '/raise-ticket' },
-        { icon: '', label: 'IT Clearance', route: '/it-clearance' },
         { icon: '', label: 'Reports', route: '/reports' }
       ]
     },
