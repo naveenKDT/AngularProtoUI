@@ -8,7 +8,6 @@ import {
   StatCardComponent,
   BadgeComponent,
   CardComponent,
-  ModalComponent,
   InputComponent
 } from '../../../shared/components';
 
@@ -30,19 +29,6 @@ interface Asset {
   warrantyStatus: string;
 }
 
-interface NewAsset {
-  tag: string;
-  name: string;
-  category: string;
-  brand: string;
-  model: string;
-  serialNumber: string;
-  purchaseDate: string;
-  purchaseCost: number;
-  location: string;
-  status: string;
-}
-
 @Component({
   selector: 'knodtec-assets',
   standalone: true,
@@ -57,7 +43,6 @@ interface NewAsset {
     StatCardComponent,
     BadgeComponent,
     CardComponent,
-    ModalComponent,
     InputComponent
   ],
   template: `
@@ -71,7 +56,7 @@ interface NewAsset {
         iconBg="#EFF6FF"
       >
         <div slot="actions">
-          <button class="btn-primary" (click)="openAddAssetModal()">
+          <button class="btn-primary" (click)="goToAddAsset()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -239,103 +224,6 @@ interface NewAsset {
           </div>
         </app-card>
       </div>
-
-      <!-- Add Asset Modal -->
-      <app-modal
-        [isOpen]="showAddAssetModal()"
-        [title]="'Add New Asset'"
-        size="lg"
-        (closed)="closeAddAssetModal()"
-      >
-        <div class="add-asset-form">
-          <div class="form-row">
-            <app-input
-              label="Asset Tag"
-              placeholder="Auto-generated if empty"
-              [(ngModel)]="newAsset.tag"
-            />
-            <app-input
-              label="Serial Number"
-              placeholder="Enter serial number"
-              [(ngModel)]="newAsset.serialNumber"
-            />
-          </div>
-          
-          <div class="form-row">
-            <app-input
-              label="Asset Name"
-              placeholder="E.g., MacBook Pro 14-inch M3"
-              [(ngModel)]="newAsset.name"
-            />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Category</label>
-              <div class="category-options">
-                @for (cat of categories; track cat.value) {
-                  <label class="category-option" [class.selected]="newAsset.category === cat.value">
-                    <input 
-                      type="radio" 
-                      name="category" 
-                      [value]="cat.value"
-                      [(ngModel)]="newAsset.category">
-                    <div class="category-icon" [innerHTML]="cat.icon"></div>
-                    <span class="category-label">{{ cat.label }}</span>
-                  </label>
-                }
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row two-col">
-            <app-input
-              label="Brand"
-              placeholder="E.g., Apple, Dell, HP"
-              [(ngModel)]="newAsset.brand"
-            />
-            <app-input
-              label="Model"
-              placeholder="E.g., MacBook Pro 14-inch"
-              [(ngModel)]="newAsset.model"
-            />
-          </div>
-
-          <div class="form-row two-col">
-            <app-input
-              label="Purchase Date"
-              type="date"
-              [(ngModel)]="newAsset.purchaseDate"
-            />
-            <app-input
-              label="Purchase Cost"
-              type="number"
-              placeholder="0.00"
-              [(ngModel)]="newAsset.purchaseCost"
-            />
-          </div>
-
-          <div class="form-row">
-            <app-input
-              label="Location"
-              placeholder="E.g., Bangalore, Mumbai"
-              [(ngModel)]="newAsset.location"
-            />
-          </div>
-        </div>
-
-        <div slot="footer" class="modal-actions">
-          <button class="btn-secondary" (click)="closeAddAssetModal()">Cancel</button>
-          <button class="btn-primary" (click)="saveAsset()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-              <polyline points="17 21 17 13 7 13 7 21"/>
-              <polyline points="7 3 7 8 15 8"/>
-            </svg>
-            Save Asset
-          </button>
-        </div>
-      </app-modal>
     </div>
   `,
   styles: [`
@@ -750,21 +638,6 @@ export class AssetsComponent {
   maintenanceIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
   valueIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
 
-  showAddAssetModal = signal(false);
-
-  newAsset: NewAsset = {
-    tag: '',
-    name: '',
-    category: 'Laptop',
-    brand: '',
-    model: '',
-    serialNumber: '',
-    purchaseDate: '',
-    purchaseCost: 0,
-    location: '',
-    status: 'available'
-  };
-
   readonly categories = [
     { value: 'Laptop', label: 'Laptop', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
     { value: 'Desktop', label: 'Desktop', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
@@ -853,49 +726,7 @@ export class AssetsComponent {
     this.router.navigate(['/assets', assetId]);
   }
 
-  openAddAssetModal(): void {
-    this.showAddAssetModal.set(true);
-  }
-
-  closeAddAssetModal(): void {
-    this.showAddAssetModal.set(false);
-    this.newAsset = {
-      tag: '',
-      name: '',
-      category: 'Laptop',
-      brand: '',
-      model: '',
-      serialNumber: '',
-      purchaseDate: '',
-      purchaseCost: 0,
-      location: '',
-      status: 'available'
-    };
-  }
-
-  saveAsset(): void {
-    if (!this.newAsset.name || !this.newAsset.brand || !this.newAsset.serialNumber) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    const newAssetEntry: Asset = {
-      id: `AST-${Math.floor(Math.random() * 9999)}`,
-      tag: this.newAsset.tag || `AST-${Math.floor(Math.random() * 9999)}`,
-      name: this.newAsset.name,
-      category: this.newAsset.category,
-      brand: this.newAsset.brand,
-      model: this.newAsset.model,
-      serialNumber: this.newAsset.serialNumber,
-      status: this.newAsset.status,
-      location: this.newAsset.location,
-      purchaseDate: this.newAsset.purchaseDate,
-      purchaseCost: this.newAsset.purchaseCost,
-      warrantyEnd: '',
-      warrantyStatus: 'active'
-    };
-
-    this.assets.update(current => [newAssetEntry, ...current]);
-    this.closeAddAssetModal();
+  goToAddAsset(): void {
+    this.router.navigate(['/assets/new']);
   }
 }
