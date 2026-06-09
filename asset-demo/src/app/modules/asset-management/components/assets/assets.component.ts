@@ -66,6 +66,59 @@ interface Asset {
         </div>
       </app-page-header>
 
+      <!-- Sub-navigation tabs -->
+      <nav class="am-tabs">
+        <a class="am-tab" [class.active]="activeTab() === 'inventory'" (click)="setTab('inventory')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          <span>Inventory</span>
+          <span class="am-tab-count">{{ filteredAssets().length }}</span>
+        </a>
+        <a class="am-tab" [class.active]="activeTab() === 'add'" (click)="setTab('add')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>Add Asset</span>
+        </a>
+        <a class="am-tab" [class.active]="activeTab() === 'requests'" (click)="setTab('requests')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          <span>Requests</span>
+        </a>
+        <a class="am-tab" [class.active]="activeTab() === 'tickets'" (click)="setTab('tickets')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          <span>Tickets</span>
+        </a>
+        <a class="am-tab" [class.active]="activeTab() === 'reports'" (click)="setTab('reports')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span>Reports</span>
+        </a>
+        <a class="am-tab" [class.active]="activeTab() === 'clearance'" (click)="setTab('clearance')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span>IT Clearance</span>
+          <span class="am-tab-badge">3</span>
+        </a>
+      </nav>
+
       <!-- Statistics Cards -->
       <div class="stats-grid">
         <app-stat-card
@@ -239,6 +292,98 @@ interface Asset {
       grid-template-columns: repeat(5, 1fr);
       gap: 20px;
       margin-bottom: 32px;
+    }
+
+    /* Sub-navigation tabs (Asset Management dashboard) */
+    .am-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px;
+      background: var(--bg-card);
+      border: 1px solid #E5EAF3;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .am-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 200ms ease;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .am-tab:hover {
+      background: var(--bg-page);
+      color: var(--text-primary);
+    }
+
+    .am-tab.active {
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .am-tab svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .am-tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 8px;
+      background: var(--bg-page);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .am-tab.active .am-tab-count {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+    }
+
+    .am-tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 8px;
+      background: var(--danger);
+      color: white;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .am-tabs {
+        padding: 6px;
+      }
+
+      .am-tab {
+        padding: 10px 14px;
+        font-size: 13px;
+      }
     }
 
     .main-content {
@@ -612,15 +757,52 @@ interface Asset {
       to { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 1280px) {
+    /* ─── Laptop & Smaller Desktop (≤ 1440px) ───────────────────── */
+    @media (max-width: 1440px) {
+      .assets-page {
+        max-width: 100%;
+        padding: 28px 24px;
+      }
+
       .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(5, 1fr);
+        gap: 14px;
       }
     }
 
+    /* ─── Tablet landscape / small laptop (≤ 1280px) ─────────── */
+    @media (max-width: 1280px) {
+      .assets-page {
+        padding: 24px 20px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      .data-table {
+        th, td {
+          padding: 14px 14px;
+          font-size: 13px;
+        }
+        th { font-size: 14px; }
+      }
+
+      .asset-cell { gap: 12px; }
+      .asset-icon { width: 40px; height: 40px; }
+
+      .am-tab {
+        padding: 10px 14px;
+        font-size: 13px;
+      }
+    }
+
+    /* ─── Tablet portrait (≤ 1024px) ─────────────────────────── */
     @media (max-width: 1024px) {
       .stats-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
       }
 
       .filter-controls {
@@ -629,25 +811,76 @@ interface Asset {
 
       .filter-select {
         flex: 1;
+        min-width: 0;
+      }
+
+      .search-box {
+        max-width: 100%;
+      }
+
+      .card-toolbar {
+        gap: 12px;
+        padding: 16px 20px;
+      }
+
+      /* Compact table columns on tablet */
+      .data-table {
+        th:nth-child(6),
+        td:nth-child(6),
+        th:nth-child(7),
+        td:nth-child(7) { display: none; }
       }
     }
 
+    /* ─── Mobile (≤ 768px) ───────────────────────────────────── */
     @media (max-width: 768px) {
       .assets-page {
-        padding: 16px;
+        padding: 16px 14px;
       }
 
       .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
       }
 
       .card-toolbar {
         flex-direction: column;
         align-items: stretch;
+        padding: 16px;
       }
 
       .search-box {
         max-width: none;
+      }
+
+      .data-table {
+        th, td { padding: 12px 10px; font-size: 12px; }
+        th { font-size: 12px; }
+        th:nth-child(3),
+        td:nth-child(3),
+        th:nth-child(5),
+        td:nth-child(5) { display: none; }
+      }
+
+      .am-tabs {
+        padding: 6px;
+        gap: 4px;
+      }
+
+      .am-tab {
+        padding: 8px 10px;
+        font-size: 12px;
+        gap: 6px;
+      }
+
+      .am-tab span { display: none; }
+      .am-tab.active span { display: inline; }
+    }
+
+    /* ─── Very small mobile (≤ 480px) ────────────────────────── */
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
       }
     }
   `]
@@ -680,6 +913,7 @@ export class AssetsComponent {
   readonly searchQuery = signal('');
   readonly statusFilter = signal('');
   readonly categoryFilter = signal('');
+  readonly activeTab = signal<'inventory' | 'add' | 'requests' | 'tickets' | 'reports' | 'clearance'>('inventory');
 
   readonly assets = signal<Asset[]>([
     { id: 'AST-1045', tag: 'AST-1045', name: 'MacBook Pro 14" M3', category: 'Laptop', brand: 'Apple', model: 'MacBook Pro 14"', serialNumber: 'C02X1234ABCD', status: 'assigned', assignedTo: 'EMP-2007', assignedToName: 'Nisha Sharma', location: 'Bangalore', purchaseDate: '2025-03-15', purchaseCost: 195000, warrantyEnd: '2028-03-14', warrantyStatus: 'active' },
@@ -758,5 +992,17 @@ export class AssetsComponent {
 
   goToAddAsset(): void {
     this.router.navigate(['/assets/new']);
+  }
+
+  setTab(tab: 'inventory' | 'add' | 'requests' | 'tickets' | 'reports' | 'clearance'): void {
+    // Navigate to dedicated route if it's a full page
+    switch (tab) {
+      case 'add':       this.router.navigate(['/assets/new']);    break;
+      case 'requests':  this.router.navigate(['/requests']);     break;
+      case 'tickets':   this.router.navigate(['/tickets']);      break;
+      case 'reports':   this.router.navigate(['/reports']);      break;
+      case 'clearance': this.router.navigate(['/it-clearance']); break;
+      default:          this.activeTab.set('inventory');          break;
+    }
   }
 }

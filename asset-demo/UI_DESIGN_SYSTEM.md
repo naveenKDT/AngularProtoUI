@@ -382,10 +382,17 @@ transform: scale(1.05);
 
 ```scss
 height: 52px;
-border: 2px solid #E2E8F0;
+border: 2px solid #CBD5E1;     // Use #CBD5E1 for clearly visible borders
 border-radius: 14px;
 padding: 0 20px;
 font-size: 14px;
+background: white;
+```
+
+### Hover
+
+```scss
+border-color: #94A3B8;
 ```
 
 ### Focus
@@ -441,6 +448,233 @@ font-size: 12px;
 color: #EF4444;
 margin-top: 6px;
 ```
+
+---
+
+# Info Banner
+
+A contextual banner used at the top of forms to explain the purpose or provide guidance.
+
+## Container
+
+```scss
+display: flex;
+align-items: flex-start;
+gap: 16px;
+padding: 20px 24px;
+background: var(--primary-light);   // #EFF6FF
+border: 1px solid #BFDBFE;
+border-radius: var(--radius-lg);    // 24px
+```
+
+## Icon Container
+
+* 44px × 44px
+* Border-radius: 14px
+* Background: #DBEAFE
+* Color: var(--primary)
+
+## Content
+
+* Strong label: 15px / 600 / text-primary
+* Body: 14px / 400 / text-secondary
+* Inline links: text-primary color, hover underline
+
+---
+
+# Workflow Banner
+
+A horizontal status strip shown above forms to communicate ticket/request state, SLA, and assignment.
+
+## Container
+
+```scss
+display: flex;
+align-items: center;
+padding: 20px 28px;
+background: var(--bg-card);
+border-radius: var(--radius-lg);     // 24px
+box-shadow: var(--shadow-card);
+```
+
+## Item
+
+* Flex: 1
+* Padding: 0 20px
+
+## Label
+
+* Font-size: 11px
+* Font-weight: 600
+* Text-transform: uppercase
+* Letter-spacing: 0.6px
+* Color: text-secondary
+
+## Divider
+
+* Width: 1px
+* Height: 40px
+* Background: var(--border-color)
+
+## Value
+
+* Font-size: 14px
+* Font-weight: 600
+* Color: text-primary
+
+---
+
+# Form Card
+
+A standardized card container used to wrap form content with a title bar at the top.
+
+## Container
+
+```scss
+background: var(--bg-card);
+border-radius: var(--radius-lg);     // 24px
+box-shadow: var(--shadow-card);
+overflow: hidden;
+```
+
+## Title Bar
+
+* Padding: 28px 32px 20px
+* Border-bottom: 1px solid var(--border-color)
+* Title: 18px / 600 / text-primary
+* Subtitle: 14px / 400 / text-secondary
+
+## Body
+
+* Padding: 28px 32px
+* Display: grid (2 columns by default, 20px gap)
+
+## Footer
+
+* Padding: 20px 32px
+* Border-top: 1px solid var(--border-color)
+* Background: var(--bg-page)
+* Border-radius: 0 0 var(--radius-lg) var(--radius-lg)
+
+---
+
+# File Upload
+
+A dropzone area for uploading attachments.
+
+## Dropzone
+
+* Padding: 32px 24px
+* Border: 2px dashed var(--border-color)
+* Border-radius: var(--radius-lg)
+* Background: var(--bg-card)
+* Hover: border-color primary, background primary-light
+
+## Upload Icon Container
+
+* 48px × 48px
+* Border-radius: 14px
+* Background: var(--bg-page)
+* Hover: background #DBEAFE, color primary
+
+## Text
+
+* Primary: 14px / 500 / text-primary
+* Hint: 12px / 400 / text-secondary
+
+## Attachment List
+
+Each attachment item:
+* Padding: 12px 16px
+* Background: var(--bg-page)
+* Border: 1px solid var(--border-color)
+* Border-radius: 14px
+* Icon container: 32px × 32px, primary-light background
+* Remove button: 28px × 28px, hover danger-light
+
+---
+
+# Contact / Radio Options
+
+A row of selectable cards for radio-style choices.
+
+## Container
+
+* Display: flex
+* Gap: 12px
+
+## Option
+
+* Padding: 14px 20px
+* Border: 2px solid var(--border-color)
+* Border-radius: 14px
+* Font-size: 14px / 500
+* Color: text-secondary
+
+### Hover
+
+* Border-color: #CBD5E1
+* Color: text-primary
+
+### Selected
+
+* Border-color: primary
+* Background: primary-light
+* Color: primary
+
+---
+
+# SLA / Helper Info
+
+Small inline informational text shown at the bottom of forms.
+
+## Container
+
+* Display: flex
+* Align-items: center
+* Gap: 8px
+* Font-size: 12px
+* Color: text-secondary
+
+## Strong text
+
+* Font-weight: 600
+* Color: text-primary
+
+---
+
+# Priority Selector
+
+A grid of selectable cards for priority levels.
+
+## Grid
+
+* Display: grid
+* 4 columns on desktop, 2 on tablet, 1 on mobile
+* Gap: 12px
+
+## Option Card
+
+* Padding: 16px
+* Border: 2px solid var(--border-color)
+* Border-radius: 14px
+* Hover: translateY(-2px), border-color #CBD5E1
+
+## Color Coding
+
+| Level     | Color     | Light BG     |
+| --------- | --------- | ------------ |
+| Critical  | danger    | danger-light |
+| High      | warning   | warning-light|
+| Medium    | primary   | primary-light|
+| Low       | success   | success-light|
+
+## Dot Indicator
+
+* 10px circle
+* Border: 2px (3px when selected)
+* Color matches the priority level
+* Background fills when selected
 
 ---
 

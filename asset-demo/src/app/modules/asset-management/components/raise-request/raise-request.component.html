@@ -1,0 +1,321 @@
+<div class="raise-request-page">
+
+  <!-- Breadcrumb (shared component) -->
+  <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+
+  <!-- Page Header (shared component) -->
+  <app-page-header
+    title="Raise Asset Request"
+    description="Request a new asset, replacement, or additional equipment"
+    [icon]="pageIcon"
+    iconBg="#EFF6FF">
+    <button slot="actions" class="back-btn" (click)="goBack()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      <span>Back to Requests</span>
+    </button>
+  </app-page-header>
+
+  <!-- Info Banner -->
+  <div class="info-banner">
+    <div class="banner-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    </div>
+    <div class="banner-content">
+      <strong>What is a Request?</strong>
+      <span>Use this form to <em>request new assets, replacements, upgrades, accessories, or software</em>. For reporting issues with existing assets, use the <a href="/raise-ticket">Raise Ticket</a> form instead.</span>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-container">
+    <knod-card title="Request Information">
+      <div class="form-grid">
+
+        <!-- Request Type -->
+        <div class="form-group">
+          <label class="form-label">
+            Request Type <span class="required">*</span>
+          </label>
+          <div class="request-type-options">
+            @for (type of requestTypes; track type.value) {
+              <label class="type-option"
+                [class.selected]="requestType() === type.value"
+                [ngClass]="'type-' + type.value">
+                <input
+                  type="radio"
+                  name="requestType"
+                  [value]="type.value"
+                  [ngModel]="requestType()"
+                  (ngModelChange)="requestType.set($event)">
+                <div class="type-icon" [innerHTML]="type.icon"></div>
+                <div class="type-content">
+                  <span class="type-label">{{ type.label }}</span>
+                  <span class="type-desc">{{ type.description }}</span>
+                </div>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Asset Category -->
+        <div class="form-group">
+          <label class="form-label">
+            Asset Category <span class="required">*</span>
+          </label>
+          <select class="form-select" [ngModel]="category()" (ngModelChange)="category.set($event)">
+            <option value="">Select category</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Desktop">Desktop</option>
+            <option value="Monitor">Monitor</option>
+            <option value="Phone">Phone/Tablet</option>
+            <option value="Accessory">Accessories</option>
+            <option value="Software">Software License</option>
+            <option value="Networking">Networking Equipment</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <!-- Specific Asset (optional) -->
+        <div class="form-group">
+          <label class="form-label">
+            Specific Asset <span class="optional">(optional)</span>
+          </label>
+          <input
+            type="text"
+            class="form-input"
+            placeholder="E.g., MacBook Pro 14-inch M3"
+            [ngModel]="specificAsset()"
+            (ngModelChange)="specificAsset.set($event)">
+        </div>
+
+        <!-- Quantity -->
+        <div class="form-group">
+          <label class="form-label">
+            Quantity <span class="required">*</span>
+          </label>
+          <input
+            type="number"
+            class="form-input"
+            min="1"
+            [ngModel]="quantity()"
+            (ngModelChange)="quantity.set($event)">
+        </div>
+
+        <!-- Priority Level -->
+        <div class="form-group full-width">
+          <label class="form-label">
+            Priority Level <span class="required">*</span>
+          </label>
+          <div class="priority-options">
+            @for (option of priorityOptions; track option.value) {
+              <label class="priority-option"
+                [class.selected]="priority() === option.value"
+                [ngClass]="'pri-' + option.value">
+                <input
+                  type="radio"
+                  name="priority"
+                  [value]="option.value"
+                  [ngModel]="priority()"
+                  (ngModelChange)="priority.set($event)">
+                <div class="priority-dot"></div>
+                <div class="priority-content">
+                  <span class="priority-label">{{ option.label }}</span>
+                  <span class="priority-desc">{{ option.description }}</span>
+                </div>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Justification -->
+        <div class="form-group full-width">
+          <label class="form-label">
+            Business Justification <span class="required">*</span>
+          </label>
+          <textarea
+            class="form-textarea"
+            rows="4"
+            placeholder="Explain why this asset is needed. Include details about the work it will be used for, team size, specific requirements, etc."
+            [ngModel]="justification()"
+            (ngModelChange)="justification.set($event)">
+          </textarea>
+        </div>
+
+        <!-- Replacement Reason -->
+        @if (requestType() === 'replacement') {
+          <div class="form-group full-width">
+            <label class="form-label">
+              Reason for Replacement <span class="required">*</span>
+            </label>
+            <select class="form-select" [ngModel]="replacementReason()" (ngModelChange)="replacementReason.set($event)">
+              <option value="">Select reason</option>
+              <option value="damaged">Asset is damaged</option>
+              <option value="lost">Asset is lost/stolen</option>
+              <option value="outdated">Asset is outdated/slow</option>
+              <option value="upgrade">Required upgrade for new role</option>
+              <option value="upgrade_team">Team expansion</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              Current Asset Details <span class="optional">(if applicable)</span>
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Asset tag or name of asset being replaced"
+              [ngModel]="currentAsset()"
+              (ngModelChange)="currentAsset.set($event)">
+          </div>
+        }
+
+        <!-- Preferred Specifications -->
+        <div class="form-group full-width">
+          <label class="form-label">
+            Preferred Specifications <span class="optional">(optional)</span>
+          </label>
+          <textarea
+            class="form-textarea"
+            rows="3"
+            placeholder="List any specific requirements: RAM, storage, processor, OS version, screen size, etc."
+            [ngModel]="specifications()"
+            (ngModelChange)="specifications.set($event)">
+          </textarea>
+        </div>
+
+        <!-- Budget -->
+        <div class="form-group">
+          <label class="form-label">
+            Estimated Budget <span class="optional">(optional)</span>
+          </label>
+          <div class="budget-input">
+            <span class="currency">₹</span>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="0.00"
+              [ngModel]="budget()"
+              (ngModelChange)="budget.set($event)">
+          </div>
+        </div>
+
+        <!-- Needed By Date -->
+        <div class="form-group">
+          <label class="form-label">
+            Needed By Date <span class="optional">(optional)</span>
+          </label>
+          <input
+            type="date"
+            class="form-input"
+            [ngModel]="neededByDate()"
+            (ngModelChange)="neededByDate.set($event)">
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label class="form-label">
+            Delivery Location <span class="required">*</span>
+          </label>
+          <select class="form-select" [ngModel]="location()" (ngModelChange)="location.set($event)">
+            <option value="">Select location</option>
+            <option value="Bangalore HQ">Knodtec HQ - Bangalore</option>
+            <option value="Mumbai">Mumbai Office</option>
+            <option value="Delhi">Delhi Office</option>
+            <option value="Chennai">Chennai Office</option>
+            <option value="Pune">Pune Office</option>
+            <option value="Remote">Remote Employee</option>
+          </select>
+        </div>
+
+        <!-- Additional Notes -->
+        <div class="form-group full-width">
+          <label class="form-label">
+            Additional Notes <span class="optional">(optional)</span>
+          </label>
+          <textarea
+            class="form-textarea"
+            rows="3"
+            placeholder="Any other information that would help process this request..."
+            [ngModel]="additionalNotes()"
+            (ngModelChange)="additionalNotes.set($event)">
+          </textarea>
+        </div>
+
+        <!-- Attachments -->
+        <div class="form-group full-width">
+          <label class="form-label">Attachments</label>
+          <div class="file-upload">
+            <input type="file" id="file-upload" multiple (change)="handleFileUpload($event)">
+            <label for="file-upload" class="upload-label">
+              <div class="upload-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <span class="upload-text">Drop files here or click to upload</span>
+              <span class="upload-hint">Approval documents, screenshots, or other relevant files</span>
+            </label>
+          </div>
+          @if (attachments().length > 0) {
+            <div class="attachment-list">
+              @for (file of attachments(); track file.name) {
+                <div class="attachment-item">
+                  <div class="attach-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                  </div>
+                  <span class="file-name">{{ file.name }}</span>
+                  <span class="file-size">{{ file.size }}</span>
+                  <button type="button" class="remove-btn" (click)="removeAttachment(file.name)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Approval Info -->
+        <div class="form-group full-width">
+          <div class="approval-info">
+            <div class="info-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <div class="info-content">
+              <strong>Approval Workflow</strong>
+              <p>This request will be sent to your manager for approval. Once approved, it will be forwarded to IT Asset Management for processing.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <div class="summary-info">
+          <span class="summary-label">Request Summary:</span>
+          <span class="summary-value">{{ getRequestSummary() }}</span>
+        </div>
+        <div class="form-actions">
+          <knod-button variant="outline" (click)="goBack()">Cancel</knod-button>
+          <knod-button variant="primary" (click)="submitRequest()">Submit Request</knod-button>
+        </div>
+      </div>
+    </knod-card>
+  </div>
+</div>

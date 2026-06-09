@@ -1,0 +1,450 @@
+<div class="reports-page">
+
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+
+  <!-- Page Header -->
+  <app-page-header
+    title="Asset Reports & Analytics"
+    description="Comprehensive insights into your asset management"
+    [icon]="pageIcon"
+    iconBg="#EFF6FF">
+    <div slot="actions" class="header-actions">
+      <div class="period-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>Last 12 months</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+      <knod-button variant="outline">Export PDF</knod-button>
+      <knod-button variant="primary">Share Report</knod-button>
+    </div>
+  </app-page-header>
+
+  <!-- KPI Stats Row -->
+  <div class="kpi-row">
+    @for (kpi of kpiStats(); track kpi.label) {
+      <div class="kpi-card" [ngClass]="'kpi-' + kpi.tone">
+        <div class="kpi-top">
+          <div class="kpi-icon" [innerHTML]="kpi.icon"></div>
+          <div class="kpi-trend" [ngClass]="kpi.trendDirection">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              @if (kpi.trendDirection === 'up') {
+                <polyline points="6 15 12 9 18 15"/>
+              } @else if (kpi.trendDirection === 'down') {
+                <polyline points="6 9 12 15 18 9"/>
+              } @else {
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              }
+            </svg>
+            <span>{{ kpi.trend }}</span>
+          </div>
+        </div>
+        <div class="kpi-value">{{ kpi.value }}</div>
+        <div class="kpi-label">{{ kpi.label }}</div>
+        <svg class="kpi-spark" viewBox="0 0 100 30" preserveAspectRatio="none">
+          <defs>
+            <linearGradient [attr.id]="'sparkGrad-' + kpi.label.replace(' ', '')" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   [attr.stop-color]="kpi.sparkColor" stop-opacity="0.35"/>
+              <stop offset="100%" [attr.stop-color]="kpi.sparkColor" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path [attr.d]="kpi.sparkArea" [attr.fill]="'url(#sparkGrad-' + kpi.label.replace(' ', '') + ')'"/>
+          <path [attr.d]="kpi.sparkLine" fill="none" [attr.stroke]="kpi.sparkColor" stroke-width="1.6"/>
+        </svg>
+      </div>
+    }
+  </div>
+
+  <!-- Charts Row 1: Trend + Donut -->
+  <div class="charts-row charts-row-2">
+    <!-- Asset Trend Area Chart -->
+    <div class="chart-card chart-card-large">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Asset Lifecycle Trend</h3>
+          <p class="chart-subtitle">Acquisition vs. Retirement over 12 months</p>
+        </div>
+        <div class="chart-legend-inline">
+          <span class="legend-pill"><i style="background: #3B82F6"></i> Acquired</span>
+          <span class="legend-pill"><i style="background: #EF4444"></i> Retired</span>
+        </div>
+      </div>
+      <div class="chart-body">
+        <svg class="trend-chart" viewBox="0 0 600 220" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="acqGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#3B82F6" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="retGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#EF4444" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#EF4444" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          @for (g of [0, 1, 2, 3, 4]; track g) {
+            <line [attr.x1]="40" [attr.x2]="580" [attr.y1]="20 + g * 40" [attr.y2]="20 + g * 40"
+              stroke="#E5EAF3" stroke-dasharray="3 3"/>
+            <text [attr.x]="6" [attr.y]="24 + g * 40" font-size="10" fill="#94A3B8">
+              {{ 40 - g * 8 }}
+            </text>
+          }
+          <!-- Acquired area -->
+          <path [attr.d]="trendAreaAcq" fill="url(#acqGrad)"/>
+          <path [attr.d]="trendLineAcq" fill="none" stroke="#3B82F6" stroke-width="2.5"/>
+          <!-- Retired area -->
+          <path [attr.d]="trendAreaRet" fill="url(#retGrad)"/>
+          <path [attr.d]="trendLineRet" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-dasharray="4 3"/>
+          <!-- Dots -->
+          @for (p of trendPointsAcq(); track p.x) {
+            <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3.5" fill="white" stroke="#3B82F6" stroke-width="2"/>
+          }
+          @for (p of trendPointsRet(); track p.x) {
+            <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3.5" fill="white" stroke="#EF4444" stroke-width="2"/>
+          }
+          <!-- X axis labels -->
+          @for (m of monthLabels; track m; let i = $index) {
+            <text [attr.x]="60 + i * 47" [attr.y]="210" font-size="10" fill="#94A3B8" text-anchor="middle">
+              {{ m }}
+            </text>
+          }
+        </svg>
+      </div>
+    </div>
+
+    <!-- Modern Donut Chart: Asset Health -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Asset Health</h3>
+          <p class="chart-subtitle">Inventory condition</p>
+        </div>
+      </div>
+      <div class="chart-body donut-body">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" class="donut-svg">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#F1F5F9" stroke-width="14"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#22C55E" stroke-width="14"
+              stroke-dasharray="244.2 301.6" stroke-dashoffset="0" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#F59E0B" stroke-width="14"
+              stroke-dasharray="42.2 301.6" stroke-dashoffset="-244.2" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#EF4444" stroke-width="14"
+              stroke-dasharray="15.2 301.6" stroke-dashoffset="-286.4" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+          </svg>
+          <div class="donut-center">
+            <span class="donut-value">247</span>
+            <span class="donut-label">Total</span>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-legend-item">
+            <span class="dot" style="background:#22C55E"></span>
+            <span class="lbl">Good</span>
+            <span class="val">201 · 81%</span>
+          </div>
+          <div class="donut-legend-item">
+            <span class="dot" style="background:#F59E0B"></span>
+            <span class="lbl">Fair</span>
+            <span class="val">35 · 14%</span>
+          </div>
+          <div class="donut-legend-item">
+            <span class="dot" style="background:#EF4444"></span>
+            <span class="lbl">Poor</span>
+            <span class="val">11 · 5%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2: Stacked Column + Heatmap -->
+  <div class="charts-row charts-row-2">
+    <!-- Stacked Column Chart: Assets by Department -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Assets by Department</h3>
+          <p class="chart-subtitle">Composition per department</p>
+        </div>
+        <div class="chart-legend-inline">
+          <span class="legend-pill"><i style="background:#3B82F6"></i> Laptops</span>
+          <span class="legend-pill"><i style="background:#8B5CF6"></i> Monitors</span>
+          <span class="legend-pill"><i style="background:#22C55E"></i> Phones</span>
+          <span class="legend-pill"><i style="background:#F59E0B"></i> Other</span>
+        </div>
+      </div>
+      <div class="chart-body">
+        <svg class="stacked-chart" viewBox="0 0 600 240" preserveAspectRatio="none">
+          <!-- Y axis grid -->
+          @for (g of [0, 1, 2, 3, 4]; track g) {
+            <line x1="40" x2="580" [attr.y1]="20 + g * 40" [attr.y2]="20 + g * 40" stroke="#E5EAF3" stroke-dasharray="3 3"/>
+            <text [attr.x]="6" [attr.y]="24 + g * 40" font-size="10" fill="#94A3B8">{{ 60 - g * 12 }}</text>
+          }
+          <!-- Stacked bars -->
+          @for (dept of stackedBars(); track dept.label; let i = $index) {
+            <g [attr.transform]="'translate(' + (60 + i * 70) + ', 0)'">
+              <rect [attr.x]="0" [attr.y]="0" width="38" [attr.height]="20" fill="#F1F5F9" rx="6"/>
+              <rect [attr.x]="0" [attr.y]="20 - dept.laptops * 0.6"                width="38" [attr.height]="dept.laptops * 0.6"  fill="#3B82F6"/>
+              <rect [attr.x]="0" [attr.y]="20 - (dept.laptops + dept.monitors) * 0.6" width="38" [attr.height]="dept.monitors * 0.6" fill="#8B5CF6"/>
+              <rect [attr.x]="0" [attr.y]="20 - (dept.laptops + dept.monitors + dept.phones) * 0.6" width="38" [attr.height]="dept.phones * 0.6" fill="#22C55E"/>
+              <rect [attr.x]="0" [attr.y]="20 - dept.total * 0.6"                  width="38" [attr.height]="dept.other * 0.6"   fill="#F59E0B"/>
+              <text x="19" y="215" font-size="10" fill="#94A3B8" text-anchor="middle">{{ dept.label }}</text>
+            </g>
+          }
+        </svg>
+      </div>
+    </div>
+
+    <!-- Activity Heatmap -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Activity Heatmap</h3>
+          <p class="chart-subtitle">Requests & tickets (last 8 weeks)</p>
+        </div>
+        <div class="heatmap-legend">
+          <span>Less</span>
+          <span class="hm-cell" style="background:#F1F5F9"></span>
+          <span class="hm-cell" style="background:#DBEAFE"></span>
+          <span class="hm-cell" style="background:#93C5FD"></span>
+          <span class="hm-cell" style="background:#3B82F6"></span>
+          <span class="hm-cell" style="background:#1D4ED8"></span>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div class="heatmap">
+          <div class="heatmap-col-labels">
+            <span></span>
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+          </div>
+          @for (week of heatmap(); track week.week; let w = $index) {
+            <div class="heatmap-row">
+              <span class="heatmap-row-label">W{{ week.week }}</span>
+              @for (day of week.days; track $index) {
+                <span class="hm-cell-lg" [style.background]="getHeatColor(day)"
+                  [title]="'W' + week.week + ' ' + dayNames[$index] + ': ' + day"></span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 3: Utilization + Category bars -->
+  <div class="charts-row charts-row-2">
+    <!-- Utilization Horizontal Bars -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Utilization by Asset Type</h3>
+          <p class="chart-subtitle">% of assets in active use</p>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div class="util-bars">
+          @for (item of utilizationData(); track item.type) {
+            <div class="util-row">
+              <div class="util-label-row">
+                <span class="util-label">{{ item.type }}</span>
+                <span class="util-pct">{{ item.rate }}%</span>
+              </div>
+              <div class="util-track">
+                <div class="util-fill" [style.width.%]="item.rate" [ngClass]="'fill-' + item.color">
+                  <span class="util-fill-glow"></span>
+                </div>
+              </div>
+              <div class="util-meta">
+                <span>{{ item.assigned }} assigned</span>
+                <span class="util-dot">·</span>
+                <span>{{ item.available }} available</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie/Ring: Asset Distribution by Category -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Asset Distribution</h3>
+          <p class="chart-subtitle">By category</p>
+        </div>
+      </div>
+      <div class="chart-body donut-body">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" class="donut-svg">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#F1F5F9" stroke-width="14"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#3B82F6" stroke-width="14"
+              stroke-dasharray="117 301.6" stroke-dashoffset="0" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#8B5CF6" stroke-width="14"
+              stroke-dasharray="71 301.6" stroke-dashoffset="-117" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#22C55E" stroke-width="14"
+              stroke-dasharray="55 301.6" stroke-dashoffset="-188" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#F59E0B" stroke-width="14"
+              stroke-dasharray="38 301.6" stroke-dashoffset="-243" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#06B6D4" stroke-width="14"
+              stroke-dasharray="20.6 301.6" stroke-dashoffset="-281" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+          </svg>
+          <div class="donut-center">
+            <span class="donut-value">247</span>
+            <span class="donut-label">Assets</span>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-legend-item">
+            <span class="dot" style="background:#3B82F6"></span>
+            <span class="lbl">Laptops</span>
+            <span class="val">96 · 39%</span>
+          </div>
+          <div class="donut-legend-item">
+            <span class="dot" style="background:#8B5CF6"></span>
+            <span class="lbl">Monitors</span>
+            <span class="val">58 · 23%</span>
+          </div>
+          <div class="donut-legend-item">
+            <span class="dot" style="background:#22C55E"></span>
+            <span class="lbl">Phones</span>
+            <span class="val">45 · 18%</span>
+          </div>
+          <div class="donut-legend-item">
+            <span class="dot" style="background:#F59E0B"></span>
+            <span class="lbl">Accessories</span>
+            <span class="val">31 · 13%</span>
+          </div>
+          <div class="donut-legend-item">
+            <span class="dot" style="background:#06B6D4"></span>
+            <span class="lbl">Other</span>
+            <span class="val">17 · 7%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Row: Top Holders + Ticket SLA -->
+  <div class="charts-row charts-row-2">
+    <!-- Top Holders -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Top Asset Holders</h3>
+          <p class="chart-subtitle">By number of assigned assets</p>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div class="top-holders">
+          @for (holder of topHolders(); track holder.rank; let i = $index) {
+            <div class="holder-row">
+              <span class="holder-rank" [ngClass]="getRankClass(holder.rank)">
+                @if (holder.rank <= 3) {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                } @else {
+                  #{{ holder.rank }}
+                }
+              </span>
+              <knod-avatar [name]="holder.name" size="sm"></knod-avatar>
+              <div class="holder-info">
+                <span class="holder-name">{{ holder.name }}</span>
+                <span class="holder-dept">{{ holder.department }}</span>
+              </div>
+              <div class="holder-bar">
+                <div class="holder-fill" [style.width.%]="(holder.count / 5) * 100"></div>
+              </div>
+              <div class="holder-count">
+                <span class="count-value">{{ holder.count }}</span>
+                <span class="count-label">assets</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticket SLA Performance -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Ticket SLA Performance</h3>
+          <p class="chart-subtitle">Resolution within target</p>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div class="sla-grid">
+          <div class="sla-item">
+            <div class="sla-ring sla-ring-success">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#F1F5F9" stroke-width="8"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#22C55E" stroke-width="8"
+                  stroke-dasharray="191 201" stroke-dashoffset="0" transform="rotate(-90 40 40)" stroke-linecap="round"/>
+              </svg>
+              <div class="sla-ring-text">
+                <span class="sla-pct">95%</span>
+                <span class="sla-time">On-time</span>
+              </div>
+            </div>
+            <span class="sla-label">Critical</span>
+          </div>
+          <div class="sla-item">
+            <div class="sla-ring sla-ring-primary">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#F1F5F9" stroke-width="8"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#3B82F6" stroke-width="8"
+                  stroke-dasharray="179 201" stroke-dashoffset="0" transform="rotate(-90 40 40)" stroke-linecap="round"/>
+              </svg>
+              <div class="sla-ring-text">
+                <span class="sla-pct">89%</span>
+                <span class="sla-time">On-time</span>
+              </div>
+            </div>
+            <span class="sla-label">High</span>
+          </div>
+          <div class="sla-item">
+            <div class="sla-ring sla-ring-cyan">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#F1F5F9" stroke-width="8"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#06B6D4" stroke-width="8"
+                  stroke-dasharray="173 201" stroke-dashoffset="0" transform="rotate(-90 40 40)" stroke-linecap="round"/>
+              </svg>
+              <div class="sla-ring-text">
+                <span class="sla-pct">86%</span>
+                <span class="sla-time">On-time</span>
+              </div>
+            </div>
+            <span class="sla-label">Medium</span>
+          </div>
+          <div class="sla-item">
+            <div class="sla-ring sla-ring-purple">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#F1F5F9" stroke-width="8"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#8B5CF6" stroke-width="8"
+                  stroke-dasharray="165 201" stroke-dashoffset="0" transform="rotate(-90 40 40)" stroke-linecap="round"/>
+              </svg>
+              <div class="sla-ring-text">
+                <span class="sla-pct">82%</span>
+                <span class="sla-time">On-time</span>
+              </div>
+            </div>
+            <span class="sla-label">Low</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
