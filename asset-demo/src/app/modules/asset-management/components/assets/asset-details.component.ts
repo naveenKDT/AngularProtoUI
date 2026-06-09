@@ -55,6 +55,7 @@ interface HistoryEntry {
   ],
   template: `
     <div class="asset-details-page">
+
       <!-- Breadcrumb & Header -->
       <div class="page-header">
         <div class="breadcrumb-row">
@@ -65,6 +66,7 @@ interface HistoryEntry {
             Back to Assets
           </button>
         </div>
+
         <div class="asset-header">
           <div class="asset-info">
             <div class="asset-icon" [ngClass]="'cat-' + asset().category.toLowerCase()">
@@ -84,6 +86,7 @@ interface HistoryEntry {
               </div>
             </div>
           </div>
+
           <div class="header-actions">
             <knod-button variant="outline" [icon]="printIcon">Print Label</knod-button>
             <knod-button variant="outline" [icon]="editIcon">Edit Asset</knod-button>
@@ -135,8 +138,10 @@ interface HistoryEntry {
 
       <!-- Main Content -->
       <div class="content-layout">
-        <!-- Left Column: Asset Info & Tabs -->
+
+        <!-- Left Column -->
         <div class="main-content">
+
           <!-- Quick Stats -->
           <div class="quick-stats-row">
             <div class="quick-stat">
@@ -162,13 +167,16 @@ interface HistoryEntry {
           </div>
 
           <!-- Tabs -->
-          <div class="detail-tabs">
-            <knod-tabs 
-              [tabs]="detailTabs" 
-              [activeTab]="activeTab()"
-              (tabChange)="activeTab.set($event)">
-            </knod-tabs>
-          </div>
+        <div class="detail-tabs">
+  @for (tab of detailTabs; track tab.key) {
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === tab.key"
+      (click)="activeTab.set(tab.key)">
+      {{ tab.label }}
+    </button>
+  }
+</div>
 
           <!-- Tab Content -->
           <div class="tab-content">
@@ -201,8 +209,9 @@ interface HistoryEntry {
           </div>
         </div>
 
-        <!-- Right Column: Summary -->
+        <!-- Right Column: Sidebar -->
         <div class="sidebar-content">
+
           <!-- Assignment Card -->
           <knod-card title="Assignment Information">
             @if (asset().assignedToName) {
@@ -311,7 +320,9 @@ interface HistoryEntry {
       </div>
     </div>
 
-    <!-- Overview Tab Template -->
+    <!-- ─── Tab Templates ──────────────────────────────────────── -->
+
+    <!-- Overview Tab -->
     <ng-template #overviewTab>
       <div class="overview-section">
         <knod-card title="Asset Overview">
@@ -394,7 +405,7 @@ interface HistoryEntry {
       </div>
     </ng-template>
 
-    <!-- Assignment Tab Template -->
+    <!-- Assignment Tab -->
     <ng-template #assignmentTab>
       <div class="assignment-section">
         @if (asset().assignedToName) {
@@ -455,9 +466,11 @@ interface HistoryEntry {
           </knod-card>
         } @else {
           <div class="empty-assignment">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
+            <div class="empty-icon-container">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
             <h3>No Current Assignment</h3>
             <p>This asset is currently available and not assigned to anyone.</p>
             <knod-button variant="primary" [icon]="assignIcon">Assign to Employee</knod-button>
@@ -466,7 +479,7 @@ interface HistoryEntry {
       </div>
     </ng-template>
 
-    <!-- History Tab Template -->
+    <!-- History Tab -->
     <ng-template #historyTab>
       <div class="history-section">
         <knod-card title="Asset Audit Trail">
@@ -497,49 +510,47 @@ interface HistoryEntry {
       </div>
     </ng-template>
 
-    <!-- Maintenance Tab Template -->
+    <!-- Maintenance Tab -->
     <ng-template #maintenanceTab>
       <div class="maintenance-section">
-        <div class="section-header">
-          <knod-card title="Maintenance Records">
-            <div class="maintenance-list">
-              @for (record of maintenanceRecords(); track record.id) {
-                <div class="maintenance-item">
-                  <div class="maintenance-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                    </svg>
+        <knod-card title="Maintenance Records">
+          <div class="maintenance-list">
+            @for (record of maintenanceRecords(); track record.id) {
+              <div class="maintenance-item">
+                <div class="maintenance-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                  </svg>
+                </div>
+                <div class="maintenance-content">
+                  <div class="maintenance-header">
+                    <span class="maintenance-type">{{ record.type }}</span>
+                    <knod-badge [color]="getMaintenanceStatusColor(record.status)">{{ record.status }}</knod-badge>
                   </div>
-                  <div class="maintenance-content">
-                    <div class="maintenance-header">
-                      <span class="maintenance-type">{{ record.type }}</span>
-                      <knod-badge [color]="getMaintenanceStatusColor(record.status)">{{ record.status }}</knod-badge>
-                    </div>
-                    <p class="maintenance-desc">{{ record.description }}</p>
-                    <div class="maintenance-meta">
-                      <span>Scheduled: {{ record.scheduledDate | date:'mediumDate' }}</span>
-                      @if (record.vendor) {
-                        <span class="separator">•</span>
-                        <span>Vendor: {{ record.vendor }}</span>
-                      }
-                      @if (record.cost) {
-                        <span class="separator">•</span>
-                        <span>Cost: {{ record.cost | currency:'USD':'symbol':'1.0-0' }}</span>
-                      }
-                    </div>
+                  <p class="maintenance-desc">{{ record.description }}</p>
+                  <div class="maintenance-meta">
+                    <span>Scheduled: {{ record.scheduledDate | date:'mediumDate' }}</span>
+                    @if (record.vendor) {
+                      <span class="separator">•</span>
+                      <span>Vendor: {{ record.vendor }}</span>
+                    }
+                    @if (record.cost) {
+                      <span class="separator">•</span>
+                      <span>Cost: {{ record.cost | currency:'USD':'symbol':'1.0-0' }}</span>
+                    }
                   </div>
                 </div>
-              }
-            </div>
-            <div class="card-footer">
-              <knod-button variant="primary" [icon]="addIcon">Schedule Maintenance</knod-button>
-            </div>
-          </knod-card>
-        </div>
+              </div>
+            }
+          </div>
+          <div class="card-footer">
+            <knod-button variant="primary" [icon]="addIcon">Schedule Maintenance</knod-button>
+          </div>
+        </knod-card>
       </div>
     </ng-template>
 
-    <!-- Documents Tab Template -->
+    <!-- Documents Tab -->
     <ng-template #documentsTab>
       <div class="documents-section">
         <knod-card title="Asset Documents">
@@ -556,7 +567,7 @@ interface HistoryEntry {
                   <span class="doc-meta">{{ doc.type }} • {{ doc.size }} • Uploaded {{ doc.uploadedAt | date:'short' }}</span>
                 </div>
                 <div class="doc-actions">
-                  <button class="doc-action">
+                  <button class="doc-action-btn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
@@ -572,7 +583,7 @@ interface HistoryEntry {
       </div>
     </ng-template>
 
-    <!-- Procurement Tab Template -->
+    <!-- Procurement Tab -->
     <ng-template #procurementTab>
       <div class="procurement-section">
         <knod-card title="Procurement Information">
@@ -614,7 +625,7 @@ interface HistoryEntry {
       </div>
     </ng-template>
 
-    <!-- Warranty Tab Template -->
+    <!-- Warranty Tab -->
     <ng-template #warrantyTab>
       <div class="warranty-section">
         <knod-card title="Warranty Information">
@@ -665,12 +676,12 @@ interface HistoryEntry {
       </div>
     </ng-template>
 
-    <!-- Location Tab Template -->
+    <!-- Location Tab -->
     <ng-template #locationTab>
       <div class="location-section">
         <knod-card title="Location Information">
           <div class="location-visual">
-            <div class="location-building">
+            <div class="location-building-banner">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
               </svg>
@@ -708,6 +719,36 @@ interface HistoryEntry {
     </ng-template>
   `,
   styles: [`
+    /* ─── Design Tokens ─────────────────────────────────────────── */
+    :host {
+      --bg-page:            #F3F6FB;
+      --bg-card:            #FFFFFF;
+      --border-color:       #E5EAF3;
+      --text-primary:       #0F172A;
+      --text-secondary:     #64748B;
+      --primary:            #3B82F6;
+      --primary-hover:      #2563EB;
+      --success:            #22C55E;
+      --success-light:      #DCFCE7;
+      --warning:            #F59E0B;
+      --warning-light:      #FEF3C7;
+      --danger:             #EF4444;
+      --danger-light:       #FEE2E2;
+      --purple:             #8B5CF6;
+      --purple-light:       #F3E8FF;
+      --info:               #06B6D4;
+      --info-light:         #CFFAFE;
+      --radius-sm:          14px;
+      --radius-md:          16px;
+      --radius-lg:          24px;
+      --radius-xl:          28px;
+      --shadow-card:        0 8px 30px rgba(15,23,42,0.06);
+      --shadow-card-hover:  0 15px 40px rgba(15,23,42,0.12);
+      --shadow-dropdown:    0 20px 50px rgba(15,23,42,0.15);
+      --transition:         200ms ease;
+    }
+
+    /* ─── Page Shell ────────────────────────────────────────────── */
     .asset-details-page {
       max-width: 1600px;
       margin: 0 auto;
@@ -715,30 +756,38 @@ interface HistoryEntry {
       display: flex;
       flex-direction: column;
       gap: 24px;
+      background: var(--bg-page);
+      min-height: 100vh;
     }
 
-    .breadcrumb-row {
-      margin-bottom: 16px;
-    }
+    /* ─── Breadcrumb / Back Button ──────────────────────────────── */
+    .breadcrumb-row { margin-bottom: 16px; }
 
     .back-btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 16px;
-      border-radius: 14px;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
       font-size: 14px;
       font-weight: 500;
-      color: #64748B;
-      background: white;
-      border: 2px solid #E5EAF3;
-      transition: all 200ms ease;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
     .back-btn:hover {
       background: #F3F6FB;
-      border-color: #3B82F6;
-      color: #3B82F6;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* ─── Page Header ───────────────────────────────────────────── */
+    .page-header {
+      display: flex;
+      flex-direction: column;
     }
 
     .asset-header {
@@ -754,6 +803,7 @@ interface HistoryEntry {
       gap: 20px;
     }
 
+    /* Icon Container: 72×72, radius 20px per design system */
     .asset-icon {
       width: 72px;
       height: 72px;
@@ -762,20 +812,17 @@ interface HistoryEntry {
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: all 200ms ease;
+      transition: all var(--transition);
     }
 
-    .asset-icon.cat-laptop { background: #EFF6FF; color: #3B82F6; }
-    .asset-icon.cat-monitor { background: #F3E8FF; color: #8B5CF6; }
-    .asset-icon.cat-phone { background: #DCFCE7; color: #22C55E; }
-    .asset-icon.cat-accessory { background: #FEF3C7; color: #F59E0B; }
-    .asset-icon.cat-printer { background: #CFFAFE; color: #06B6D4; }
-    .asset-icon.cat-desktop { background: #FEE2E2; color: #EF4444; }
+    .asset-icon.cat-laptop   { background: #EFF6FF; color: var(--primary); }
+    .asset-icon.cat-monitor  { background: var(--purple-light); color: var(--purple); }
+    .asset-icon.cat-phone    { background: var(--success-light); color: var(--success); }
+    .asset-icon.cat-accessory { background: var(--warning-light); color: var(--warning); }
+    .asset-icon.cat-printer  { background: var(--info-light); color: var(--info); }
+    .asset-icon.cat-desktop  { background: var(--danger-light); color: var(--danger); }
 
-    .asset-icon :deep(svg) {
-      width: 32px;
-      height: 32px;
-    }
+    .asset-icon :deep(svg) { width: 32px; height: 32px; }
 
     .asset-main-info {
       display: flex;
@@ -789,10 +836,11 @@ interface HistoryEntry {
       gap: 16px;
     }
 
+    /* Page Title: 36px / 700 */
     .asset-name {
       font-size: 36px;
       font-weight: 700;
-      color: #0F172A;
+      color: var(--text-primary);
       margin: 0;
     }
 
@@ -801,57 +849,56 @@ interface HistoryEntry {
       align-items: center;
       gap: 12px;
       font-size: 14px;
-      color: #64748B;
+      color: var(--text-secondary);
     }
 
-    .separator {
-      color: #E5EAF3;
-    }
+    .separator { color: var(--border-color); }
 
+    /* ─── Header Actions ────────────────────────────────────────── */
     .header-actions {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .action-dropdown {
-      position: relative;
-    }
+    .action-dropdown { position: relative; }
 
     .action-menu-btn {
       width: 44px;
       height: 44px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: white;
-      border: 2px solid #E5EAF3;
-      color: #64748B;
-      transition: all 200ms ease;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
     .action-menu-btn:hover {
       background: #F3F6FB;
-      border-color: #3B82F6;
-      color: #3B82F6;
+      border-color: var(--primary);
+      color: var(--primary);
       transform: scale(1.05);
     }
 
+    /* Dropdown: shadow-dropdown, radius-xl */
     .action-menu {
       position: absolute;
-      top: 100%;
+      top: calc(100% + 8px);
       right: 0;
-      margin-top: 8px;
-      background: white;
-      border: 1px solid #E5EAF3;
-      border-radius: 16px;
-      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-dropdown);
       min-width: 220px;
       z-index: 50;
       overflow: hidden;
     }
 
+    /* Body Text: 14px / 400 */
     .menu-item {
       display: flex;
       align-items: center;
@@ -859,35 +906,27 @@ interface HistoryEntry {
       width: 100%;
       padding: 14px 16px;
       font-size: 14px;
-      color: #0F172A;
+      color: var(--text-primary);
       background: none;
       border: none;
       text-align: left;
-      transition: all 200ms ease;
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
-    .menu-item:hover {
-      background: #F3F6FB;
-    }
+    .menu-item:hover { background: #F3F6FB; }
 
-    .menu-item.danger {
-      color: #EF4444;
-    }
+    .menu-item.danger { color: var(--danger); }
+    .menu-item.danger:hover { background: var(--danger-light); }
 
-    .menu-item.danger:hover {
-      background: #FEE2E2;
-    }
+    .menu-divider { height: 1px; background: var(--border-color); margin: 4px 0; }
 
-    .menu-divider {
-      height: 1px;
-      background: #E5EAF3;
-      margin: 4px 0;
-    }
-
+    /* ─── Content Layout ─────────────────────────────────────────── */
     .content-layout {
       display: grid;
       grid-template-columns: 1fr 380px;
       gap: 24px;
+      align-items: start;
     }
 
     .main-content {
@@ -896,67 +935,128 @@ interface HistoryEntry {
       gap: 24px;
     }
 
+    /* ─── Quick Stats Row ───────────────────────────────────────── */
     .quick-stats-row {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 16px;
     }
 
+    /* Card: radius-lg, shadow-card */
     .quick-stat {
-      background: white;
-      border-radius: 24px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
       padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
-      transition: all 200ms ease;
+      box-shadow: var(--shadow-card);
+      transition: all var(--transition);
     }
 
     .quick-stat:hover {
       transform: translateY(-4px);
-      box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12);
+      box-shadow: var(--shadow-card-hover);
     }
 
+    /* Label: 14px / 500 */
     .quick-stat .stat-label {
       font-size: 14px;
       font-weight: 500;
-      color: #64748B;
+      color: var(--text-secondary);
     }
 
+    /* Stat value: 18px / 600 (card title weight) */
     .quick-stat .stat-value {
       font-size: 18px;
       font-weight: 600;
-      color: #0F172A;
+      color: var(--text-primary);
     }
 
-    .detail-tabs {
-      background: white;
-      border-radius: 24px;
-      padding: 0 20px;
-      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
-    }
+    /* ─── Tabs Container ────────────────────────────────────────── */
+  /* ─── Detail Tabs Strip ─────────────────────────────────────── */
+.detail-tabs {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 0 8px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
 
+.detail-tabs::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  position: relative;
+  padding: 18px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 200ms ease;
+  outline: none;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+/* underline track */
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: transparent;
+  transition: background 200ms ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn:hover::after {
+  background: var(--border-color);
+}
+
+.tab-btn.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.tab-btn.active::after {
+  background: var(--primary);
+}
+
+    /* ─── Tab Content Panel ─────────────────────────────────────── */
     .tab-content {
-      background: white;
-      border-radius: 24px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
       padding: 28px;
-      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      box-shadow: var(--shadow-card);
     }
 
+    /* ─── Sidebar ───────────────────────────────────────────────── */
     .sidebar-content {
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
 
-    /* Assignment Card Styles */
+    /* ─── Assignment Card ───────────────────────────────────────── */
     .assignment-info {
       display: flex;
       align-items: center;
       gap: 16px;
       padding-bottom: 20px;
-      border-bottom: 1px solid #E5EAF3;
+      border-bottom: 1px solid var(--border-color);
       margin-bottom: 20px;
     }
 
@@ -966,20 +1066,18 @@ interface HistoryEntry {
       gap: 4px;
     }
 
+    /* Card Title: 18px / 600 */
     .assignee-name {
       font-size: 18px;
       font-weight: 600;
-      color: #0F172A;
+      color: var(--text-primary);
+      margin: 0;
     }
 
-    .assignee-id {
-      font-size: 14px;
-      color: #64748B;
-    }
-
+    .assignee-id,
     .assignee-dept {
       font-size: 14px;
-      color: #64748B;
+      color: var(--text-secondary);
     }
 
     .assignment-meta {
@@ -995,20 +1093,20 @@ interface HistoryEntry {
       align-items: center;
     }
 
+    /* Caption: 12px / 400 */
     .meta-label {
-      font-size: 14px;
-      color: #64748B;
+      font-size: 12px;
+      color: var(--text-secondary);
     }
 
+    /* Body Text: 14px / 500 label weight */
     .meta-value {
       font-size: 14px;
       font-weight: 500;
-      color: #0F172A;
+      color: var(--text-primary);
     }
 
-    .action-btn {
-      width: 100%;
-    }
+    .action-btn { width: 100%; }
 
     .unassigned-state {
       display: flex;
@@ -1016,30 +1114,22 @@ interface HistoryEntry {
       align-items: center;
       gap: 12px;
       padding: 24px;
-      color: #64748B;
+      color: var(--text-secondary);
       text-align: center;
     }
 
-    .unassigned-state span {
-      font-size: 14px;
-    }
+    .unassigned-state span { font-size: 14px; }
 
-    /* Warranty Card Styles */
+    /* ─── Warranty Card ─────────────────────────────────────────── */
     .warranty-display {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
-    .warranty-status {
-      display: flex;
-      justify-content: center;
-    }
+    .warranty-status { display: flex; justify-content: center; }
 
-    .warranty-dates {
-      display: flex;
-      gap: 20px;
-    }
+    .warranty-dates { display: flex; gap: 20px; }
 
     .date-item {
       flex: 1;
@@ -1048,16 +1138,8 @@ interface HistoryEntry {
       gap: 4px;
     }
 
-    .date-label {
-      font-size: 12px;
-      color: #64748B;
-    }
-
-    .date-value {
-      font-size: 14px;
-      font-weight: 500;
-      color: #0F172A;
-    }
+    .date-label { font-size: 12px; color: var(--text-secondary); }
+    .date-value { font-size: 14px; font-weight: 500; color: var(--text-primary); }
 
     .warranty-progress {
       display: flex;
@@ -1067,25 +1149,25 @@ interface HistoryEntry {
 
     .progress-bar {
       height: 8px;
-      background: #E5EAF3;
+      background: var(--border-color);
       border-radius: 4px;
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
       border-radius: 4px;
       transition: width 300ms ease;
     }
 
     .progress-label {
       font-size: 12px;
-      color: #64748B;
+      color: var(--text-secondary);
       text-align: center;
     }
 
-    /* Location Card Styles */
+    /* ─── Location Card ─────────────────────────────────────────── */
     .location-display {
       display: flex;
       align-items: flex-start;
@@ -1095,37 +1177,21 @@ interface HistoryEntry {
     .location-icon {
       width: 48px;
       height: 48px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       background: #EFF6FF;
-      color: #3B82F6;
+      color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
-    .location-details {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .location-details { display: flex; flex-direction: column; gap: 4px; }
+    .location-name { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .location-building,
+    .location-floor { font-size: 14px; color: var(--text-secondary); }
 
-    .location-name {
-      font-size: 16px;
-      font-weight: 600;
-      color: #0F172A;
-    }
-
-    .location-building {
-      font-size: 14px;
-      color: #64748B;
-    }
-
-    .location-floor {
-      font-size: 14px;
-      color: #64748B;
-    }
-
-    /* Quick Actions */
+    /* ─── Quick Actions Card ────────────────────────────────────── */
     .quick-actions {
       display: flex;
       flex-direction: column;
@@ -1137,21 +1203,35 @@ interface HistoryEntry {
       align-items: center;
       gap: 12px;
       padding: 14px 16px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       font-size: 14px;
-      color: #0F172A;
+      color: var(--text-primary);
       background: #F3F6FB;
       border: none;
-      transition: all 200ms ease;
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
     .quick-action:hover {
       background: #EFF6FF;
-      color: #3B82F6;
+      color: var(--primary);
       transform: translateX(4px);
     }
 
-    /* Info Grid */
+    /* ─── Info Grid (overview / procurement) ────────────────────── */
+    .overview-section,
+    .assignment-section,
+    .history-section,
+    .maintenance-section,
+    .documents-section,
+    .procurement-section,
+    .warranty-section,
+    .location-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
     .info-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -1164,22 +1244,22 @@ interface HistoryEntry {
       gap: 6px;
     }
 
-    .info-item.full-width {
-      grid-column: span 2;
-    }
+    .info-item.full-width { grid-column: span 2; }
 
+    /* Caption: 12px / 500 for labels */
     .info-label {
       font-size: 12px;
       font-weight: 500;
-      color: #64748B;
+      color: var(--text-secondary);
     }
 
+    /* Body: 14px / 400 */
     .info-value {
       font-size: 14px;
-      color: #0F172A;
+      color: var(--text-primary);
     }
 
-    /* Specs Grid */
+    /* ─── Specs Grid ────────────────────────────────────────────── */
     .specs-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1192,21 +1272,13 @@ interface HistoryEntry {
       gap: 6px;
       padding: 16px;
       background: #F3F6FB;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
     }
 
-    .spec-label {
-      font-size: 12px;
-      color: #64748B;
-    }
+    .spec-label { font-size: 12px; color: var(--text-secondary); }
+    .spec-value { font-size: 14px; font-weight: 500; color: var(--text-primary); }
 
-    .spec-value {
-      font-size: 14px;
-      font-weight: 500;
-      color: #0F172A;
-    }
-
-    /* Audit Timeline */
+    /* ─── Audit Timeline ────────────────────────────────────────── */
     .audit-timeline {
       display: flex;
       flex-direction: column;
@@ -1217,7 +1289,7 @@ interface HistoryEntry {
       display: flex;
       gap: 16px;
       padding-bottom: 20px;
-      border-bottom: 1px solid #E5EAF3;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .audit-item:last-child {
@@ -1225,24 +1297,25 @@ interface HistoryEntry {
       padding-bottom: 0;
     }
 
+    /* Icon containers: radius-sm (14px) per icon action buttons rule */
     .audit-icon {
       width: 44px;
       height: 44px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .audit-icon.icon-assignment { background: #EFF6FF; color: #3B82F6; }
-    .audit-icon.icon-return { background: #DCFCE7; color: #22C55E; }
-    .audit-icon.icon-maintenance { background: #FEF3C7; color: #F59E0B; }
-    .audit-icon.icon-transfer { background: #F3E8FF; color: #8B5CF6; }
+    .audit-icon.icon-assignment { background: #EFF6FF; color: var(--primary); }
+    .audit-icon.icon-return     { background: var(--success-light); color: var(--success); }
+    .audit-icon.icon-maintenance { background: var(--warning-light); color: var(--warning); }
+    .audit-icon.icon-transfer   { background: var(--purple-light); color: var(--purple); }
 
-    .audit-content {
-      flex: 1;
-    }
+    .audit-icon :deep(svg) { width: 20px; height: 20px; }
+
+    .audit-content { flex: 1; }
 
     .audit-header {
       display: flex;
@@ -1251,29 +1324,13 @@ interface HistoryEntry {
       margin-bottom: 6px;
     }
 
-    .audit-action {
-      font-size: 15px;
-      font-weight: 600;
-      color: #0F172A;
-    }
+    /* Table Header: 15px / 600 */
+    .audit-action { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .audit-date   { font-size: 12px; color: var(--text-secondary); }
+    .audit-details { font-size: 14px; color: var(--text-secondary); margin: 0 0 6px 0; }
+    .audit-meta   { font-size: 12px; color: var(--text-secondary); }
 
-    .audit-date {
-      font-size: 12px;
-      color: #64748B;
-    }
-
-    .audit-details {
-      font-size: 14px;
-      color: #64748B;
-      margin: 0 0 6px 0;
-    }
-
-    .audit-meta {
-      font-size: 12px;
-      color: #64748B;
-    }
-
-    /* Maintenance List */
+    /* ─── Maintenance List ──────────────────────────────────────── */
     .maintenance-list {
       display: flex;
       flex-direction: column;
@@ -1285,24 +1342,22 @@ interface HistoryEntry {
       gap: 16px;
       padding: 20px;
       background: #F3F6FB;
-      border-radius: 16px;
+      border-radius: var(--radius-md);
     }
 
     .maintenance-icon {
       width: 48px;
       height: 48px;
-      border-radius: 14px;
-      background: #FEF3C7;
-      color: #F59E0B;
+      border-radius: var(--radius-sm);
+      background: var(--warning-light);
+      color: var(--warning);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .maintenance-content {
-      flex: 1;
-    }
+    .maintenance-content { flex: 1; }
 
     .maintenance-header {
       display: flex;
@@ -1311,24 +1366,11 @@ interface HistoryEntry {
       margin-bottom: 6px;
     }
 
-    .maintenance-type {
-      font-size: 15px;
-      font-weight: 600;
-      color: #0F172A;
-    }
+    .maintenance-type  { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .maintenance-desc  { font-size: 14px; color: var(--text-secondary); margin: 0 0 12px 0; }
+    .maintenance-meta  { font-size: 12px; color: var(--text-secondary); }
 
-    .maintenance-desc {
-      font-size: 14px;
-      color: #64748B;
-      margin: 0 0 12px 0;
-    }
-
-    .maintenance-meta {
-      font-size: 12px;
-      color: #64748B;
-    }
-
-    /* Documents List */
+    /* ─── Documents List ────────────────────────────────────────── */
     .documents-list {
       display: flex;
       flex-direction: column;
@@ -1341,45 +1383,29 @@ interface HistoryEntry {
       gap: 14px;
       padding: 16px;
       background: #F3F6FB;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
     }
 
     .doc-icon {
       width: 44px;
       height: 44px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       background: #EFF6FF;
-      color: #3B82F6;
+      color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .doc-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .doc-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .doc-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .doc-meta { font-size: 12px; color: var(--text-secondary); }
 
-    .doc-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #0F172A;
-    }
+    .doc-actions { display: flex; gap: 8px; }
 
-    .doc-meta {
-      font-size: 12px;
-      color: #64748B;
-    }
-
-    .doc-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .doc-action {
+    /* Icon Action Button: 44×44, radius-sm */
+    .doc-action-btn {
       width: 36px;
       height: 36px;
       border-radius: 10px;
@@ -1388,23 +1414,25 @@ interface HistoryEntry {
       justify-content: center;
       background: none;
       border: none;
-      color: #64748B;
-      transition: all 200ms ease;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
-    .doc-action:hover {
-      background: white;
-      color: #3B82F6;
+    .doc-action-btn:hover {
+      background: var(--bg-card);
+      color: var(--primary);
       transform: scale(1.05);
     }
 
+    /* ─── Card Footer ───────────────────────────────────────────── */
     .card-footer {
       padding-top: 20px;
-      border-top: 1px solid #E5EAF3;
+      border-top: 1px solid var(--border-color);
       margin-top: 20px;
     }
 
-    /* Assignment History */
+    /* ─── History / Assignment History ─────────────────────────── */
     .history-list {
       display: flex;
       flex-direction: column;
@@ -1417,28 +1445,14 @@ interface HistoryEntry {
       gap: 14px;
       padding: 14px;
       background: #F3F6FB;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
     }
 
-    .history-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .history-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .history-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .history-date  { font-size: 12px; color: var(--text-secondary); }
 
-    .history-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: #0F172A;
-    }
-
-    .history-date {
-      font-size: 12px;
-      color: #64748B;
-    }
-
-    /* Empty State */
+    /* ─── Empty States ──────────────────────────────────────────── */
     .empty-assignment {
       display: flex;
       flex-direction: column;
@@ -1446,28 +1460,36 @@ interface HistoryEntry {
       gap: 16px;
       padding: 48px;
       text-align: center;
-      color: #64748B;
+      color: var(--text-secondary);
+    }
+
+    /* Empty state icon container: 80×80, radius 24px */
+    .empty-icon-container {
+      width: 80px;
+      height: 80px;
+      border-radius: 24px;
+      background: #F3F6FB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
     }
 
     .empty-assignment h3 {
       font-size: 18px;
       font-weight: 600;
-      color: #0F172A;
+      color: var(--text-primary);
       margin: 0;
     }
 
-    .empty-assignment p {
-      font-size: 14px;
-      color: #64748B;
-      margin: 0;
-    }
+    .empty-assignment p { font-size: 14px; color: var(--text-secondary); margin: 0; }
 
-    /* Current Assignment */
+    /* ─── Current Assignment (assignment tab) ───────────────────── */
     .current-assignment {
       display: flex;
       gap: 24px;
       padding-bottom: 24px;
-      border-bottom: 1px solid #E5EAF3;
+      border-bottom: 1px solid var(--border-color);
       margin-bottom: 20px;
     }
 
@@ -1478,12 +1500,9 @@ interface HistoryEntry {
       margin-top: 20px;
     }
 
-    .assignment-actions {
-      display: flex;
-      gap: 12px;
-    }
+    .assignment-actions { display: flex; gap: 12px; }
 
-    /* Warranty Section */
+    /* ─── Warranty Section (tab) ────────────────────────────────── */
     .warranty-details {
       display: flex;
       flex-direction: column;
@@ -1494,33 +1513,40 @@ interface HistoryEntry {
       text-align: center;
       padding: 28px;
       background: #F3F6FB;
-      border-radius: 20px;
+      border-radius: var(--radius-md);
     }
 
     .warranty-message {
       font-size: 14px;
-      color: #64748B;
+      color: var(--text-secondary);
       margin: 10px 0 0 0;
     }
 
     .warranty-progress-section {
       padding: 24px;
       background: #F3F6FB;
-      border-radius: 20px;
+      border-radius: var(--radius-md);
     }
 
     .warranty-progress-section h4 {
       font-size: 14px;
       font-weight: 600;
-      color: #0F172A;
+      color: var(--text-primary);
       margin: 0 0 16px 0;
     }
 
     .timeline-bar {
       height: 10px;
-      background: #E5EAF3;
+      background: var(--border-color);
       border-radius: 5px;
       overflow: hidden;
+    }
+
+    .timeline-progress {
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+      border-radius: 5px;
+      transition: width 300ms ease;
     }
 
     .timeline-labels {
@@ -1528,29 +1554,30 @@ interface HistoryEntry {
       justify-content: space-between;
       margin-top: 10px;
       font-size: 12px;
-      color: #64748B;
+      color: var(--text-secondary);
     }
 
-    /* Location Section */
+    /* ─── Location Section (tab) ────────────────────────────────── */
     .location-visual {
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
 
-    .location-building {
+    .location-building-banner {
       display: flex;
       align-items: center;
       gap: 16px;
       padding: 24px;
       background: #EFF6FF;
-      border-radius: 20px;
-      color: #3B82F6;
+      border-radius: var(--radius-md);
+      color: var(--primary);
     }
 
     .building-name {
       font-size: 20px;
       font-weight: 600;
+      color: var(--primary);
     }
 
     .location-details-grid {
@@ -1559,26 +1586,39 @@ interface HistoryEntry {
       gap: 20px;
     }
 
-    .location-detail {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .location-detail { display: flex; flex-direction: column; gap: 6px; }
+    .detail-label { font-size: 12px; color: var(--text-secondary); }
+    .detail-value { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+
+    /* ─── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 1366px) {
+      .content-layout { grid-template-columns: 1fr 340px; }
+      .quick-stats-row { grid-template-columns: repeat(5, 1fr); }
     }
 
-    .detail-label {
-      font-size: 12px;
-      color: #64748B;
+    @media (max-width: 1024px) {
+      .content-layout { grid-template-columns: 1fr; }
+      .quick-stats-row { grid-template-columns: repeat(3, 1fr); }
+      .specs-grid { grid-template-columns: repeat(2, 1fr); }
+      .assignment-meta-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    .detail-value {
-      font-size: 15px;
-      font-weight: 500;
-      color: #0F172A;
+    @media (max-width: 768px) {
+      .asset-details-page { padding: 20px 16px; }
+      .asset-header { flex-direction: column; }
+      .asset-name { font-size: 28px; }
+      .quick-stats-row { grid-template-columns: repeat(2, 1fr); }
+      .info-grid { grid-template-columns: 1fr; }
+      .info-item.full-width { grid-column: span 1; }
+      .specs-grid { grid-template-columns: 1fr; }
+      .location-details-grid { grid-template-columns: repeat(2, 1fr); }
+      .assignment-meta-grid { grid-template-columns: 1fr; }
+      .header-actions { flex-wrap: wrap; }
     }
 
-    /* Icons */
-    .printIcon, .editIcon, .assignIcon, .transferIcon, .returnIcon, .ticketIcon, .addIcon, .uploadIcon {
-      display: flex;
+    @media (max-width: 480px) {
+      .quick-stats-row { grid-template-columns: 1fr; }
+      .asset-info { flex-direction: column; }
     }
   `]
 })
@@ -1686,54 +1726,47 @@ export class AssetDetailsComponent {
 
   readonly warrantyProgress = computed(() => {
     const start = new Date(this.asset().warrantyStart).getTime();
-    const end = new Date(this.asset().warrantyEnd).getTime();
-    const now = new Date().getTime();
-    const total = end - start;
-    const elapsed = now - start;
-    return Math.min(100, Math.max(0, (elapsed / total) * 100));
+    const end   = new Date(this.asset().warrantyEnd).getTime();
+    const now   = new Date().getTime();
+    return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
   });
 
   readonly warrantyDaysLeft = computed(() => {
-    const end = new Date(this.asset().warrantyEnd);
-    const now = new Date();
-    const diff = end.getTime() - now.getTime();
+    const end  = new Date(this.asset().warrantyEnd);
+    const diff = end.getTime() - new Date().getTime();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   });
 
   constructor(router: Router, route: ActivatedRoute) {
     this.router = router;
-    this.route = route;
+    this.route  = route;
   }
 
-  toggleActionMenu(): void {
-    this.showActionMenu.update(v => !v);
-  }
+  toggleActionMenu(): void { this.showActionMenu.update(v => !v); }
 
-  goBack(): void {
-    this.router.navigate(['/assets']);
-  }
+  goBack(): void { this.router.navigate(['/assets']); }
 
   getCategoryIcon(category: string): string {
     const icons: Record<string, string> = {
-      'Laptop': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
-      'Monitor': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
-      'Phone': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+      'Laptop':    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+      'Monitor':   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+      'Phone':     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
       'Accessory': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
-      'Printer': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
-      'Desktop': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
+      'Printer':   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+      'Desktop':   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
     };
     return icons[category] || icons['Laptop'];
   }
 
   getStatusColor(status: string): 'green' | 'blue' | 'amber' | 'red' | 'slate' {
-    const colors: Record<string, 'green' | 'blue' | 'amber' | 'red' | 'slate'> = {
-      'available': 'green',
-      'assigned': 'blue',
-      'maintenance': 'amber',
-      'retired': 'slate',
-      'lost': 'red'
+    const map: Record<string, 'green' | 'blue' | 'amber' | 'red' | 'slate'> = {
+      available:   'green',
+      assigned:    'blue',
+      maintenance: 'amber',
+      retired:     'slate',
+      lost:        'red'
     };
-    return colors[status] || 'slate';
+    return map[status] || 'slate';
   }
 
   getWarrantyClass(): string {
@@ -1741,56 +1774,47 @@ export class AssetDetailsComponent {
   }
 
   getWarrantyBadgeColor(): 'green' | 'amber' | 'red' {
-    const colors: Record<string, 'green' | 'amber' | 'red'> = {
-      'active': 'green',
-      'expiring': 'amber',
-      'expired': 'red'
+    const map: Record<string, 'green' | 'amber' | 'red'> = {
+      active:   'green',
+      expiring: 'amber',
+      expired:  'red'
     };
-    return colors[this.asset().warrantyStatus] || 'green';
+    return map[this.asset().warrantyStatus] || 'green';
   }
 
   getWarrantyMessage(): string {
-    if (this.asset().warrantyStatus === 'active') {
-      return `This asset is covered under warranty for ${this.warrantyDaysLeft()} more days.`;
-    } else if (this.asset().warrantyStatus === 'expiring') {
-      return 'Warranty is expiring soon. Consider renewal.';
-    }
+    const s = this.asset().warrantyStatus;
+    if (s === 'active')   return `This asset is covered under warranty for ${this.warrantyDaysLeft()} more days.`;
+    if (s === 'expiring') return 'Warranty is expiring soon. Consider renewal.';
     return 'Warranty has expired. Extended support may be available.';
   }
 
   getMaintenanceStatusColor(status: string): 'green' | 'amber' | 'blue' {
-    const colors: Record<string, 'green' | 'amber' | 'blue'> = {
-      'completed': 'green',
-      'scheduled': 'blue',
-      'in_progress': 'amber'
+    const map: Record<string, 'green' | 'amber' | 'blue'> = {
+      completed:   'green',
+      scheduled:   'blue',
+      in_progress: 'amber'
     };
-    return colors[status] || 'blue';
+    return map[status] || 'blue';
   }
 
   getAuditIcon(actionType: string): string {
     const icons: Record<string, string> = {
-      assignment: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
-      return: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
+      assignment:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      return:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
       maintenance: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
-      transfer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'
+      transfer:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'
     };
     return icons[actionType] || icons['assignment'];
   }
 
-  performAction(action: string): void {
-    this.showActionMenu.set(false);
-    // Handle actions
-  }
+  performAction(action: string): void { this.showActionMenu.set(false); }
 
   raiseTicket(): void {
     this.router.navigate(['/raise-ticket'], { queryParams: { assetId: this.asset().id } });
   }
 
-  createMaintenance(): void {
-    // Navigate to maintenance creation
-  }
+  createMaintenance(): void { }
 
-  viewHistory(): void {
-    this.activeTab.set('history');
-  }
+  viewHistory(): void { this.activeTab.set('history'); }
 }
