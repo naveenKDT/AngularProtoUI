@@ -168,15 +168,15 @@ interface HistoryEntry {
 
           <!-- Tabs -->
         <div class="detail-tabs">
-  @for (tab of detailTabs; track tab.key) {
-    <button
-      class="tab-btn"
-      [class.active]="activeTab() === tab.key"
-      (click)="activeTab.set(tab.key)">
-      {{ tab.label }}
-    </button>
-  }
-</div>
+          @for (tab of detailTabs; track tab.key) {
+            <button
+              class="tab-btn"
+              [class.active]="activeTab() === tab.key"
+              (click)="activeTab.set(tab.key)">
+              {{ tab.label }}
+            </button>
+          }
+        </div>
 
           <!-- Tab Content -->
           <div class="tab-content">

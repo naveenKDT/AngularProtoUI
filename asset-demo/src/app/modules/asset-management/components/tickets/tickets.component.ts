@@ -269,13 +269,19 @@ interface ActivityLog {
             }
 
             <!-- Detail Tabs -->
-            <div class="detail-tabs">
-              <knod-tabs 
-                [tabs]="detailTabs" 
-                [activeTab]="activeDetailTab()"
-                (tabChange)="activeDetailTab.set($event)">
-              </knod-tabs>
-            </div>
+           <div class="detail-tabs">
+  @for (tab of detailTabs; track tab.key) {
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeDetailTab() === tab.key"
+      (click)="activeDetailTab.set(tab.key)">
+      {{ tab.label }}
+    </button>
+  }
+</div>  
+            
+            
 
             <!-- Tab Content -->
             <div class="detail-content">
@@ -721,8 +727,7 @@ interface ActivityLog {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      overflow-y: auto;
-      max-height: 560px;
+      overflow-y: auto;      
       padding-right: 8px;
     }
 
@@ -984,10 +989,93 @@ interface ActivityLog {
 
     /* Detail Tabs */
     .detail-tabs {
-      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+
+      padding: 0 20px;
+
+      background: transparent;
+
       border-bottom: 1px solid #E5EAF3;
+
+      overflow-x: auto;
+      scrollbar-width: none;
     }
 
+    .detail-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      position: relative;
+
+      height: 52px;
+
+      padding: 0;
+
+      background: transparent;
+      border: none;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 14px;
+      font-weight: 500;
+
+      color: var(--text-secondary);
+
+      cursor: pointer;
+
+      white-space: nowrap;
+
+      transition: all 200ms ease;
+
+      flex-shrink: 0;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn::after {
+      content: '';
+
+      position: absolute;
+
+      left: 0;
+      right: 0;
+      bottom: -1px;
+
+      height: 3px;
+
+      border-radius: 3px 3px 0 0;
+
+      background: transparent;
+
+      transition: all 200ms ease;
+    }
+
+    .tab-btn.active {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .tab-btn.active::after {
+      background: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .detail-tabs {
+        gap: 24px;
+        padding: 0 16px;
+      }
+
+      .tab-btn {
+        font-size: 13px;
+      }
+    }
     .detail-content {
       flex: 1;
       padding: 28px;
@@ -1458,7 +1546,6 @@ interface ActivityLog {
   `]
 })
 
-})
 export class TicketsComponent {
   private router: Router;
 
