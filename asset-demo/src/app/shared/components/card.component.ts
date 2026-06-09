@@ -9,12 +9,21 @@ import { CommonModule } from '@angular/common';
     <div [class]="cardClasses()">
       @if (title() || subtitle()) {
         <div class="card-header">
-          @if (title()) {
-            <h3 class="card-title">{{ title() }}</h3>
-          }
-          @if (subtitle()) {
-            <p class="card-subtitle">{{ subtitle() }}</p>
-          }
+          <div class="card-header-content">
+            @if (title()) {
+              <div class="card-title-row">
+                <div class="card-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M9 12h6M9 16h6M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+                  </svg>
+                </div>
+                <h3 class="card-title">{{ title() }}</h3>
+              </div>
+            }
+            @if (subtitle()) {
+              <p class="card-subtitle">{{ subtitle() }}</p>
+            }
+          </div>
         </div>
       }
       <div class="card-body" [class.no-padding]="noPadding()">
@@ -28,62 +37,110 @@ import { CommonModule } from '@angular/common';
     </div>
   `,
   styles: [`
-        .card {
-      background: var(--bg-card);
-      border-radius: var(--radius-3xl);
-      box-shadow: var(--shadow-card);
-      border: 1px solid var(--bg-border);
-      transition: all var(--transition-normal);
+    :host {
+      display: block;
+    }
+
+    .card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
+      position: relative;
+    }
 
-      &:hover {
-        box-shadow: var(--shadow-card)-hover;
-      }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A78BFA 100%);
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
 
-      &.hoverable:hover {
-        transform: translateY(-4px);
-      }
+    .card:hover {
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1);
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.2);
+    }
 
-      &.no-padding {
-        .card-body {
-          padding: 0;
-        }
-      }
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .hoverable:hover {
+      transform: translateY(-4px);
+    }
+
+    .no-padding .card-body {
+      padding: 0;
     }
 
     .card-header {
-      padding: var(--spacing-6) var(--spacing-6);
-      border-bottom: 1px solid var(--bg-border);
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+      background: linear-gradient(135deg, #FAFBFC 0%, #F8FAFC 100%);
+    }
+
+    .card-header-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border-radius: 10px;
+      color: #6366F1;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
     }
 
     .card-title {
-      font-size: var(--font-size-lg);
-      font-weight: var(--font-weight-semibold);
-      color: var(--text-primary);
-      margin: 0 0 var(--spacing-1) 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 0;
+      letter-spacing: -0.01em;
     }
 
     .card-subtitle {
-      font-size: var(--font-size-sm);
-      color: var(--text-secondary);
+      font-size: 14px;
+      color: #64748B;
       margin: 0;
+      line-height: 1.5;
     }
 
     .card-body {
-      padding: var(--spacing-6) var(--spacing-6);
+      padding: 28px;
     }
 
     .card-footer {
-      padding: var(--spacing-5) var(--spacing-6);
-      border-top: 1px solid var(--bg-border);
-      background: rgba(var(--bg-main), 0.3);
+      padding: 20px 28px;
+      border-top: 1px solid rgba(226, 232, 240, 0.6);
+      background: linear-gradient(135deg, #FAFBFC 0%, #F8FAFC 100%);
     }
 
     @media (max-width: 768px) {
       .card-header,
       .card-body,
       .card-footer {
-        padding: var(--spacing-4);
+        padding: 20px;
       }
     }
   `]

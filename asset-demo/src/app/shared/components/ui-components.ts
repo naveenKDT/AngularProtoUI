@@ -11,10 +11,19 @@ import { FormsModule } from '@angular/forms';
       @if (title || headerTemplate) {
         <div class="card-header">
           @if (title) {
-            <h3 class="card-title">{{ title }}</h3>
-          }
-          @if (subtitle) {
-            <p class="card-subtitle">{{ subtitle }}</p>
+            <div class="card-title-row">
+              <div class="card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M9 12h6M9 16h6M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+                </svg>
+              </div>
+              <div class="card-title-content">
+                <h3 class="card-title">{{ title }}</h3>
+                @if (subtitle) {
+                  <p class="card-subtitle">{{ subtitle }}</p>
+                }
+              </div>
+            </div>
           }
           <ng-content select="[card-actions]"></ng-content>
         </div>
@@ -31,50 +40,97 @@ import { FormsModule } from '@angular/forms';
   `,
   styles: [`
     .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A78BFA 100%);
+      opacity: 0;
+      transition: opacity 300ms ease;
     }
 
     .card-bordered {
-      border: 1px solid var(--color-slate-200);
+      border: 1px solid rgba(226, 232, 240, 0.8);
       box-shadow: none;
     }
 
     .card-clickable {
       cursor: pointer;
-      transition: all var(--transition-fast);
     }
 
     .card-clickable:hover {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      transform: translateY(-1px);
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1);
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .card-clickable:hover::before {
+      opacity: 1;
     }
 
     .card-header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--color-slate-100);
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+      background: linear-gradient(135deg, #FAFBFC 0%, #F8FAFC 100%);
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border-radius: 12px;
+      color: #6366F1;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+      flex-shrink: 0;
+    }
+
+    .card-title-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .card-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--color-slate-900);
+      font-size: 17px;
+      font-weight: 700;
+      color: #0F172A;
       margin: 0;
+      letter-spacing: -0.01em;
     }
 
     .card-subtitle {
-      font-size: 12px;
-      color: var(--color-slate-500);
-      margin: 4px 0 0 0;
+      font-size: 14px;
+      color: #64748B;
+      margin: 0;
+      line-height: 1.5;
     }
 
     .card-body {
-      padding: 20px;
+      padding: 28px;
     }
 
     .card-body.no-padding {
@@ -82,9 +138,9 @@ import { FormsModule } from '@angular/forms';
     }
 
     .card-footer {
-      padding: 16px 20px;
-      border-top: 1px solid var(--color-slate-100);
-      background: var(--color-slate-50);
+      padding: 20px 28px;
+      border-top: 1px solid rgba(226, 232, 240, 0.6);
+      background: linear-gradient(135deg, #FAFBFC 0%, #F8FAFC 100%);
     }
   `]
 })
@@ -131,15 +187,18 @@ export class CardComponent {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 10px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      border-radius: 8px;
-      transition: all var(--transition-fast);
+      gap: 10px;
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      border-radius: 14px;
+      transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
       border: none;
       cursor: pointer;
       white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     .btn:disabled {
@@ -148,72 +207,90 @@ export class CardComponent {
     }
 
     .btn-primary {
-      background: var(--color-primary-600);
+      background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
       color: white;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: var(--color-primary-700);
+      background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
     }
 
     .btn-secondary {
-      background: var(--color-slate-100);
-      color: var(--color-slate-700);
+      background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+      color: #334155;
+      border: 1px solid #E2E8F0;
     }
 
     .btn-secondary:hover:not(:disabled) {
-      background: var(--color-slate-200);
+      background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+      border-color: #CBD5E1;
+      color: #1E293B;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
     }
 
     .btn-outline {
       background: transparent;
-      color: var(--color-slate-700);
-      border: 1px solid var(--color-slate-300);
+      color: #6366F1;
+      border: 2px solid #6366F1;
     }
 
     .btn-outline:hover:not(:disabled) {
-      background: var(--color-slate-50);
-      border-color: var(--color-slate-400);
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      transform: translateY(-2px);
     }
 
     .btn-ghost {
       background: transparent;
-      color: var(--color-slate-600);
+      color: #64748B;
     }
 
     .btn-ghost:hover:not(:disabled) {
-      background: var(--color-slate-100);
+      background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+      color: #1E293B;
     }
 
     .btn-danger {
-      background: var(--color-red-600);
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
       color: white;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
     }
 
     .btn-danger:hover:not(:disabled) {
-      background: var(--color-red-700);
+      background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
     }
 
     .btn-sm {
-      padding: 6px 12px;
+      padding: 10px 16px;
       font-size: 12px;
+      border-radius: 10px;
     }
 
     .btn-lg {
-      padding: 12px 24px;
-      font-size: 14px;
+      padding: 18px 32px;
+      font-size: 15px;
+      border-radius: 16px;
     }
 
     .btn-icon-only {
-      padding: 8px;
+      padding: 14px;
     }
 
     .btn-icon-only.btn-sm {
-      padding: 6px;
+      padding: 10px;
     }
 
     .btn-icon-only.btn-lg {
-      padding: 10px;
+      padding: 18px;
     }
 
     .btn-icon {
@@ -227,8 +304,8 @@ export class CardComponent {
     }
 
     .btn-spinner {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border: 2px solid currentColor;
       border-top-color: transparent;
       border-radius: 50%;
