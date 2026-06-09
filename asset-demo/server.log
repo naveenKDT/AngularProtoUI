@@ -1,26 +1,36 @@
 
 > asset-demo@0.0.0 start
-> ng serve
+> ng serve --port 4200
 
 ❯ Building...
 ✔ Building...
 Initial chunk files | Names                    |  Raw size
-main.js             | main                     |  76.42 kB | 
+main.js             | main                     |  79.41 kB | 
 styles.css          | styles                   |   8.71 kB | 
-chunk-YQOESBWP.js   | -                        | 754 bytes | 
+chunk-VUJOFXKG.js   | -                        | 938 bytes | 
 polyfills.js        | polyfills                |  95 bytes | 
 
-                    | Initial total            |  85.98 kB
+                    | Initial total            |  89.15 kB
 
 Lazy chunk files    | Names                    |  Raw size
-chunk-G5EG2AD6.js   | -                        | 120.59 kB | 
-chunk-36G7OTSY.js   | leaves-component         |  63.70 kB | 
-chunk-FVVAGUNC.js   | administration-component |  62.76 kB | 
-chunk-CTH4DNRO.js   | onboarding-component     |  60.86 kB | 
-chunk-5ZHVXBY5.js   | dashboard-component      |  46.96 kB | 
-chunk-MC23NODW.js   | profile-component        |  46.84 kB | 
+chunk-DFZH736L.js   | it-clearance-component   | 146.82 kB | 
+chunk-AQMZMDQO.js   | asset-details-component  | 141.58 kB | 
+chunk-EA6NQ4U2.js   | -                        | 120.61 kB | 
+chunk-WZVCNXRV.js   | offboarding-component    | 118.97 kB | 
+chunk-WGMPPFAT.js   | requests-component       | 110.94 kB | 
+chunk-VFNGVEB6.js   | tickets-component        | 110.46 kB | 
+chunk-TVU43EZS.js   | reports-component        | 110.39 kB | 
+chunk-UAVWR3DE.js   | -                        |  96.50 kB | 
+chunk-VV5VXRMG.js   | raise-ticket-component   |  80.82 kB | 
+chunk-CH4G5DK2.js   | add-asset-component      |  78.58 kB | 
+chunk-PRYAZ2E3.js   | assets-component         |  65.17 kB | 
+chunk-HJJ26BSM.js   | raise-request-component  |  64.83 kB | 
+chunk-WFTY32H4.js   | leaves-component         |  63.70 kB | 
+chunk-UTBFT2PK.js   | administration-component |  62.76 kB | 
+chunk-CEYR34RI.js   | onboarding-component     |  60.86 kB | 
+...and 2 more lazy chunks files. Use "--verbose" to show all the files.
 
-Application bundle generation complete. [5.959 seconds] - 2026-06-08T09:47:30.882Z
+Application bundle generation complete. [6.411 seconds] - 2026-06-09T06:33:22.297Z
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of DashboardComponent[0m [1m[35m[plugin angular-compiler][0m
 
@@ -120,32 +130,11 @@ Application bundle generation complete. [5.959 seconds] - 2026-06-08T09:47:30.88
           ╵                                                      [32m~~~~~[0m
 
 
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: ProgressComponent is not used within the template of AssetsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/assets/assets.component.ts:47:4:
-[37m      47 │     [32mProgressComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TabsComponent is not used within the template of AssetsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/assets/assets.component.ts:48:4:
-[37m      48 │     [32mTabsComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SelectComponent is not used within the template of AssetsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/assets/assets.component.ts:51:4:
-[37m      51 │     [32mSelectComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of AssetsComponent[0m [1m[35m[plugin angular-compiler][0m
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of AssetsComponent[0m [1m[35m[plugin angular-compiler][0m
 
     src/app/knodtec/features/assets/assets.component.ts:52:4:
-[37m      52 │     [32mInputComponent[37m
-         ╵     [32m~~~~~~~~~~~~~~[0m
+[37m      52 │     [32mDatePipe[37m,
+         ╵     [32m~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CurrencyPipe is not used within the template of DashboardComponent[0m [1m[35m[plugin angular-compiler][0m

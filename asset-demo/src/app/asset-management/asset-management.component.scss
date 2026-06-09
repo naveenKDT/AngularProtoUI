@@ -1006,7 +1006,118 @@ pre {
   }
 }
 
-// Create Form Layout
+// Single Page Form Layout
+.single-page-form {
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.form-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-body {
+  padding: 20px;
+}
+
+.form-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.form-section:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-header h3 {
+  font-size: 15px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.section-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.section-content {
+  padding-left: 40px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.doc-upload-item {
+  display: grid;
+  gap: 8px;
+}
+
+.empty-hint {
+  color: #64748b;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.min-h-24 {
+  min-height: 96px;
+}
+
+// Create Form Layout (for wizard - keeping for reference)
 .create-form-layout {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -1307,6 +1418,10 @@ pre {
   .summary-grid {
     grid-template-columns: 1fr;
   }
+
+  .documents-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -1327,5 +1442,28 @@ pre {
 
   .nav-right {
     flex-wrap: wrap;
+  }
+
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .form-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .section-content {
+    padding-left: 0;
+  }
+
+  .documents-grid {
+    grid-template-columns: 1fr;
   }
 }
