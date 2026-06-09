@@ -3,14 +3,19 @@ import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   Asset,
+  AssetCategory,
   AssetClearanceStatus,
+  AssetCondition,
+  AssetDocumentUpload,
   AssetHistoryEvent,
   AssetHistoryType,
   AssetRequest,
+  AssetSpecifications,
   AssignmentDraft,
   Employee,
   ExitClearanceAssetItem,
   ExitClearanceCase,
+  InitialStatus,
   OffboardingCase,
   OffboardingStageStatus,
   ReturnCondition,
@@ -130,19 +135,269 @@ export class AssetManagementComponent {
   });
 
   readonly newAsset = signal({
-    name: 'Dell Latitude 7440',
-    tag: 'AST-1051',
-    category: 'Laptop',
-    type: 'Business Laptop',
-    brand: 'Dell',
-    model: 'Latitude 7440',
-    serialNumber: 'DL-7440-55Z2',
-    purchaseCost: 96500,
-    purchaseDate: '2026-06-04',
-    vendor: 'Softline Systems',
-    warrantyStart: '2026-06-04',
-    warrantyEnd: '2029-06-03',
+    // Basic Info
+    tag: '',
+    name: '',
+    category: '' as AssetCategory | '',
+    type: '',
+    brand: '',
+    model: '',
+    modelNumber: '',
+    serialNumber: '',
+    condition: 'New' as AssetCondition,
+    status: 'Available' as InitialStatus,
+    // Location
+    building: '',
+    floor: '',
+    zone: '',
+    desk: '',
+    city: '',
+    state: '',
+    // Procurement
+    purchaseDate: '',
+    purchaseCost: 0,
+    vendor: '',
+    purchaseOrderNumber: '',
+    invoiceNumber: '',
+    deliveryDate: '',
+    paymentTerms: '',
+    // Warranty
+    warrantyProvider: '',
+    warrantyPeriod: 0,
+    warrantyStart: '',
+    warrantyEnd: '',
+    warrantyContact: '',
+    warrantyEmail: '',
+    // Additional
+    notes: '',
   });
+
+  readonly newAssetSpecifications = signal<AssetSpecifications>({});
+
+  readonly newAssetDocuments = signal<AssetDocumentUpload[]>([]);
+
+  readonly createFormStep = signal(0);
+
+  readonly assetCategoriesList: AssetCategory[] = ['Laptop', 'Desktop', 'Phone', 'Monitor', 'Accessory', 'ID Card', 'Printer', 'Office Device'];
+
+  readonly assetConditions: AssetCondition[] = ['New', 'Good', 'Fair', 'Damaged'];
+
+  readonly initialStatuses: InitialStatus[] = ['Available', 'In Storage', 'Maintenance'];
+
+  getSpecificationsFields(): string[] {
+    const category = this.newAsset().category;
+    if (category === 'Laptop' || category === 'Desktop') {
+      return ['processor', 'ram', 'storage', 'operatingSystem', 'display', 'color'];
+    }
+    if (category === 'Phone') {
+      return ['imeiNumber', 'storage', 'osVersion', 'color'];
+    }
+    if (category === 'Monitor') {
+      return ['screenSize', 'resolution'];
+    }
+    if (category === 'Printer') {
+      return ['printerType', 'connectivity'];
+    }
+    return [];
+  }
+
+  getSpecificationLabel(key: string): string {
+    const labels: Record<string, string> = {
+      processor: 'Processor',
+      ram: 'RAM',
+      storage: 'Storage',
+      operatingSystem: 'Operating System',
+      display: 'Display',
+      color: 'Color',
+      imeiNumber: 'IMEI Number',
+      osVersion: 'OS Version',
+      screenSize: 'Screen Size',
+      resolution: 'Resolution',
+      printerType: 'Printer Type',
+      connectivity: 'Connectivity',
+    };
+    return labels[key] || key;
+  }
+
+  updateFormStep(step: number): void {
+    this.createFormStep.set(step);
+  }
+
+  nextFormStep(): void {
+    this.createFormStep.update((step) => Math.min(step + 1, 4));
+  }
+
+  prevFormStep(): void {
+    this.createFormStep.update((step) => Math.max(step - 1, 0));
+  }
+
+  updateNewAssetForm(key: string, value: unknown): void {
+    this.newAsset.update((asset) => ({ ...asset, [key]: value }));
+    // Auto-calculate warranty end date when warranty period or start date changes
+    if (key === 'warrantyPeriod' || key === 'warrantyStart') {
+      const asset = this.newAsset();
+      if (asset.warrantyPeriod > 0 && asset.warrantyStart) {
+        const startDate = new Date(asset.warrantyStart);
+        const endDate = new Date(startDate);
+        endDate.setFullYear(endDate.getFullYear() + asset.warrantyPeriod);
+        endDate.setDate(endDate.getDate() - 1);
+        this.newAsset.update((a) => ({ ...a, warrantyEnd: endDate.toISOString().split('T')[0] }));
+      }
+    }
+  }
+
+  updateSpecification(key: keyof AssetSpecifications, value: string): void {
+    this.newAssetSpecifications.update((spec) => ({ ...spec, [key]: value }));
+  }
+
+  handleFileUpload(event: Event, docType: AssetDocumentUpload['type']): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) {
+      const doc: AssetDocumentUpload = {
+        id: `DOC-${Date.now()}`,
+        name: file.name,
+        type: docType,
+        file: file,
+        previewUrl: URL.createObjectURL(file),
+      };
+      this.newAssetDocuments.update((docs) => [...docs, doc]);
+    }
+  }
+
+  removeDocument(docId: string): void {
+    this.newAssetDocuments.update((docs) => docs.filter((d) => d.id !== docId));
+  }
+
+  saveNewAsset(): void {
+    const asset = this.newAsset();
+    const newAssetData: Asset = {
+      id: `AST-${Date.now()}`,
+      tag: `AST-${Math.floor(Math.random() * 9000) + 1000}`,
+      name: asset.name,
+      category: asset.category as AssetCategory,
+      type: asset.type,
+      brand: asset.brand,
+      model: asset.model,
+      modelNumber: asset.modelNumber,
+      serialNumber: asset.serialNumber,
+      condition: asset.condition,
+      status: asset.status === 'Available' ? 'available' : asset.status === 'In Storage' ? 'available' : 'maintenance',
+      // Location
+      building: asset.building,
+      floor: asset.floor,
+      zone: asset.zone,
+      desk: asset.desk,
+      city: asset.city,
+      state: asset.state,
+      // Procurement
+      purchaseDate: asset.purchaseDate,
+      purchaseCost: asset.purchaseCost,
+      vendor: asset.vendor,
+      purchaseOrderNumber: asset.purchaseOrderNumber,
+      invoiceNumber: asset.invoiceNumber,
+      deliveryDate: asset.deliveryDate,
+      paymentTerms: asset.paymentTerms,
+      // Warranty
+      warrantyProvider: asset.warrantyProvider,
+      warrantyPeriod: asset.warrantyPeriod,
+      warrantyStart: asset.warrantyStart,
+      warrantyEnd: asset.warrantyEnd,
+      warrantyStatus: 'active',
+      warrantyContact: asset.warrantyContact,
+      warrantyEmail: asset.warrantyEmail,
+      // Specifications
+      specifications: this.newAssetSpecifications(),
+      // Documents
+      documents: this.newAssetDocuments(),
+      // Additional
+      notes: asset.notes,
+    };
+
+    this.assets.update((assets) => [...assets, newAssetData]);
+
+    // Add history event
+    this.addHistoryEvent({
+      assetId: newAssetData.id,
+      type: 'created',
+      title: 'Asset created',
+      description: `${newAssetData.name} was added to the inventory.`,
+      source: 'manual',
+    });
+
+    // Reset form and go to assets page
+    this.resetNewAssetForm();
+    this.openPage('assets');
+  }
+
+  resetNewAssetForm(): void {
+    this.newAsset.set({
+      tag: '',
+      name: '',
+      category: '',
+      type: '',
+      brand: '',
+      model: '',
+      modelNumber: '',
+      serialNumber: '',
+      condition: 'New',
+      status: 'Available',
+      building: '',
+      floor: '',
+      zone: '',
+      desk: '',
+      city: '',
+      state: '',
+      purchaseDate: '',
+      purchaseCost: 0,
+      vendor: '',
+      purchaseOrderNumber: '',
+      invoiceNumber: '',
+      deliveryDate: '',
+      paymentTerms: '',
+      warrantyProvider: '',
+      warrantyPeriod: 0,
+      warrantyStart: '',
+      warrantyEnd: '',
+      warrantyContact: '',
+      warrantyEmail: '',
+      notes: '',
+    });
+    this.newAssetSpecifications.set({});
+    this.newAssetDocuments.set([]);
+    this.createFormStep.set(0);
+  }
+
+  isFormValid(): boolean {
+    const asset = this.newAsset();
+    return !!(
+      asset.name &&
+      asset.category &&
+      asset.brand &&
+      asset.model &&
+      asset.serialNumber &&
+      asset.condition &&
+      asset.status &&
+      asset.purchaseDate &&
+      asset.purchaseCost > 0 &&
+      asset.vendor &&
+      asset.warrantyPeriod > 0 &&
+      asset.warrantyStart &&
+      asset.building &&
+      asset.city
+    );
+  }
+
+  filterDocuments(type: string): AssetDocumentUpload[] {
+    return this.newAssetDocuments().filter((doc) => doc.type === type);
+  }
+
+  triggerFileInput(docType: string): void {
+    const input = document.querySelector(`input[data-doc-type="${docType}"]`) as HTMLInputElement;
+    if (input) {
+      input.click();
+    }
+  }
 
   readonly selectedAsset = computed(() => {
     return this.assets().find((asset) => asset.id === this.selectedAssetId()) ?? this.assets()[0];
@@ -169,7 +424,7 @@ export class AssetManagementComponent {
           .includes(query);
       const matchesStatus = this.statusFilter() === 'all' || asset.status === this.statusFilter();
       const matchesCategory = this.categoryFilter() === 'all' || asset.category === this.categoryFilter();
-      const matchesLocation = this.locationFilter() === 'all' || asset.location === this.locationFilter();
+      const matchesLocation = this.locationFilter() === 'all' || asset.building === this.locationFilter();
       return matchesQuery && matchesStatus && matchesCategory && matchesLocation;
     });
   });
@@ -250,7 +505,11 @@ export class AssetManagementComponent {
   ]);
 
   readonly categories = computed(() => Array.from(new Set(this.assets().map((asset) => asset.category))));
-  readonly locations = computed(() => Array.from(new Set(this.assets().map((asset) => asset.location))));
+  readonly locations = computed(() => Array.from(new Set(this.assets().map((asset) => asset.building))));
+
+  readonly cities = computed(() => Array.from(new Set(this.assets().map((asset) => asset.city))));
+
+  readonly assetCondition = computed(() => Array.from(new Set(this.assets().map((asset) => asset.condition))));
   readonly departmentReportRows = computed(() => {
     return this.employees().map((employee) => ({
       department: employee.department,
@@ -657,7 +916,7 @@ export class AssetManagementComponent {
       type,
       fromEmployeeId: previousHolderId,
       toEmployeeId: employee.id,
-      fromLocation: previousEmployee?.location ?? asset.storage ?? asset.location,
+      fromLocation: previousEmployee?.location ?? asset.building,
       toLocation: employee.location,
       title: type === 'transferred' ? 'Asset transferred' : 'Asset assigned',
       description:
@@ -795,7 +1054,7 @@ export class AssetManagementComponent {
         fromEmployeeId: event.fromEmployeeId,
         toEmployeeId: event.toEmployeeId,
         fromLocation: event.fromLocation,
-        toLocation: event.toLocation ?? asset?.location,
+        toLocation: event.toLocation ?? asset?.building,
         condition: event.condition,
         notes: event.notes,
         metadata: event.metadata,

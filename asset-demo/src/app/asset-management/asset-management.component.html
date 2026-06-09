@@ -192,7 +192,7 @@
                   <td>{{ asset.brand }}</td>
                   <td><span class="badge" [ngClass]="'badge-' + asset.status">{{ asset.status | titlecase }}</span></td>
                   <td>{{ employeeById(asset.assignedToId)?.name || '-' }}</td>
-                  <td>{{ asset.location }}</td>
+                  <td>{{ asset.building }}</td>
                   <td>{{ asset.warrantyEnd | date: 'mediumDate' }}</td>
                   <td>
                     <div class="flex gap-2">
@@ -239,12 +239,14 @@
             <article class="card">
               <div class="card-title">Asset Information</div>
               <dl class="info-list">
-                <div><dt>Asset ID</dt><dd>{{ selectedAsset().id }}</dd></div>
                 <div><dt>Asset Tag</dt><dd>{{ selectedAsset().tag }}</dd></div>
+                <div><dt>Asset Name</dt><dd>{{ selectedAsset().name }}</dd></div>
                 <div><dt>Category</dt><dd>{{ selectedAsset().category }}</dd></div>
-                <div><dt>Type</dt><dd>{{ selectedAsset().type }}</dd></div>
                 <div><dt>Brand</dt><dd>{{ selectedAsset().brand }}</dd></div>
                 <div><dt>Model</dt><dd>{{ selectedAsset().model }}</dd></div>
+                <div><dt>Serial Number</dt><dd>{{ selectedAsset().serialNumber }}</dd></div>
+                <div><dt>Condition</dt><dd>{{ selectedAsset().condition }}</dd></div>
+                <div><dt>Status</dt><dd><span class="badge" [ngClass]="'badge-' + selectedAsset().status">{{ selectedAsset().status | titlecase }}</span></dd></div>
               </dl>
             </article>
             <article class="card">
@@ -253,27 +255,85 @@
                 <div><dt>Purchase Date</dt><dd>{{ selectedAsset().purchaseDate | date: 'mediumDate' }}</dd></div>
                 <div><dt>Purchase Cost</dt><dd>{{ selectedAsset().purchaseCost | currency: 'INR' }}</dd></div>
                 <div><dt>Vendor</dt><dd>{{ selectedAsset().vendor }}</dd></div>
-                <div><dt>Invoice</dt><dd>{{ selectedAsset().invoiceNumber }}</dd></div>
+                <div><dt>Invoice #</dt><dd>{{ selectedAsset().invoiceNumber || '-' }}</dd></div>
+                <div><dt>PO #</dt><dd>{{ selectedAsset().purchaseOrderNumber || '-' }}</dd></div>
+                <div><dt>Delivery Date</dt><dd>{{ selectedAsset().deliveryDate ? (selectedAsset().deliveryDate | date: 'mediumDate') : '-' }}</dd></div>
+                <div><dt>Payment Terms</dt><dd>{{ selectedAsset().paymentTerms || '-' }}</dd></div>
               </dl>
             </article>
             <article class="card">
               <div class="card-title">Warranty</div>
               <dl class="info-list">
-                <div><dt>Start</dt><dd>{{ selectedAsset().warrantyStart | date: 'mediumDate' }}</dd></div>
-                <div><dt>End</dt><dd>{{ selectedAsset().warrantyEnd | date: 'mediumDate' }}</dd></div>
+                <div><dt>Provider</dt><dd>{{ selectedAsset().warrantyProvider || '-' }}</dd></div>
+                <div><dt>Start Date</dt><dd>{{ selectedAsset().warrantyStart | date: 'mediumDate' }}</dd></div>
+                <div><dt>End Date</dt><dd>{{ selectedAsset().warrantyEnd | date: 'mediumDate' }}</dd></div>
+                <div><dt>Period</dt><dd>{{ selectedAsset().warrantyPeriod }} year(s)</dd></div>
                 <div><dt>Status</dt><dd><span class="badge" [ngClass]="'badge-' + selectedAsset().warrantyStatus">{{ selectedAsset().warrantyStatus | titlecase }}</span></dd></div>
+                <div><dt>Contact</dt><dd>{{ selectedAsset().warrantyContact || '-' }}</dd></div>
+                <div><dt>Email</dt><dd>{{ selectedAsset().warrantyEmail || '-' }}</dd></div>
               </dl>
             </article>
             <article class="card">
               <div class="card-title">Location</div>
               <dl class="info-list">
-                <div><dt>Office</dt><dd>{{ selectedAsset().office }}</dd></div>
-                <div><dt>Floor</dt><dd>{{ selectedAsset().floor }}</dd></div>
+                <div><dt>Building</dt><dd>{{ selectedAsset().building }}</dd></div>
+                <div><dt>Floor</dt><dd>{{ selectedAsset().floor || '-' }}</dd></div>
+                <div><dt>Zone</dt><dd>{{ selectedAsset().zone || '-' }}</dd></div>
                 <div><dt>Desk</dt><dd>{{ selectedAsset().desk || '-' }}</dd></div>
-                <div><dt>Storage</dt><dd>{{ selectedAsset().storage || '-' }}</dd></div>
+                <div><dt>City</dt><dd>{{ selectedAsset().city }}</dd></div>
+                <div><dt>State</dt><dd>{{ selectedAsset().state || '-' }}</dd></div>
               </dl>
             </article>
           </section>
+          @if (selectedAsset().specifications) {
+            <section class="card mt-4">
+              <div class="card-title">Technical Specifications</div>
+              <dl class="info-list specifications-grid">
+                @if (selectedAsset().specifications!.processor) {
+                  <div><dt>Processor</dt><dd>{{ selectedAsset().specifications!.processor }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.ram) {
+                  <div><dt>RAM</dt><dd>{{ selectedAsset().specifications!.ram }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.storage) {
+                  <div><dt>Storage</dt><dd>{{ selectedAsset().specifications!.storage }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.operatingSystem) {
+                  <div><dt>Operating System</dt><dd>{{ selectedAsset().specifications!.operatingSystem }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.display) {
+                  <div><dt>Display</dt><dd>{{ selectedAsset().specifications!.display }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.color) {
+                  <div><dt>Color</dt><dd>{{ selectedAsset().specifications!.color }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.imeiNumber) {
+                  <div><dt>IMEI Number</dt><dd>{{ selectedAsset().specifications!.imeiNumber }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.osVersion) {
+                  <div><dt>OS Version</dt><dd>{{ selectedAsset().specifications!.osVersion }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.screenSize) {
+                  <div><dt>Screen Size</dt><dd>{{ selectedAsset().specifications!.screenSize }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.resolution) {
+                  <div><dt>Resolution</dt><dd>{{ selectedAsset().specifications!.resolution }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.printerType) {
+                  <div><dt>Printer Type</dt><dd>{{ selectedAsset().specifications!.printerType }}</dd></div>
+                }
+                @if (selectedAsset().specifications!.connectivity) {
+                  <div><dt>Connectivity</dt><dd>{{ selectedAsset().specifications!.connectivity }}</dd></div>
+                }
+              </dl>
+            </section>
+          }
+          @if (selectedAsset().notes) {
+            <section class="card mt-4">
+              <div class="card-title">Notes</div>
+              <p class="text-sm text-slate-600">{{ selectedAsset().notes }}</p>
+            </section>
+          }
         }
 
         @if (detailTab() === 'assignment') {
@@ -375,26 +435,409 @@
       }
 
       @if (page() === 'create') {
-        <section class="wizard-grid grid grid-cols-[260px_1fr] gap-4">
-          <aside class="card grid content-start gap-2">
-            @for (step of ['Asset Information', 'Device Details', 'Procurement', 'Warranty', 'Documents']; track step; let i = $index) {
-              <div class="step" [class.step-active]="i === 0"><span>{{ i + 1 }}</span>{{ step }}</div>
+        <section class="create-form-layout">
+          <aside class="step-sidebar card">
+            @for (step of [
+              { label: 'Basic Information', icon: '1' },
+              { label: 'Location', icon: '2' },
+              { label: 'Procurement', icon: '3' },
+              { label: 'Warranty', icon: '4' },
+              { label: 'Specifications', icon: '5' },
+              { label: 'Documents', icon: '6' },
+              { label: 'Additional', icon: '7' }
+            ]; track step.label; let i = $index) {
+              <button class="step" [class.step-active]="createFormStep() === i" type="button" (click)="updateFormStep(i)">
+                <span>{{ step.icon }}</span>{{ step.label }}
+              </button>
             }
           </aside>
-          <article class="card">
-            <div class="card-title">Asset Information</div>
-            <div class="form-grid grid grid-cols-2 gap-4">
-              @for (field of ['name', 'tag', 'category', 'type', 'brand', 'model', 'serialNumber', 'vendor', 'purchaseDate', 'warrantyStart', 'warrantyEnd']; track field) {
-                <label class="form-label">{{ field | titlecase }}
-                  <input class="field" [ngModel]="$any(newAsset())[field]" (ngModelChange)="updateNewAsset(field, $event)">
-                </label>
-              }
-              <label class="form-label">Purchase Cost
-                <input class="field" type="number" [ngModel]="newAsset().purchaseCost" (ngModelChange)="updateNewAsset('purchaseCost', +$event)">
-              </label>
+
+          <div class="form-content">
+            <!-- Step 0: Basic Information -->
+            @if (createFormStep() === 0) {
+              <article class="card">
+                <div class="card-title mb-4">Basic Information</div>
+                <div class="form-section">
+                  <div class="form-row">
+                    <label class="form-label">Asset Tag
+                      <input class="field" [ngModel]="newAsset().tag" (ngModelChange)="updateNewAssetForm('tag', $event)" placeholder="Auto-generated" disabled>
+                      <span class="field-hint">Auto-generated on save</span>
+                    </label>
+                    <label class="form-label">Asset Name <span class="required">*</span>
+                      <input class="field" [ngModel]="newAsset().name" (ngModelChange)="updateNewAssetForm('name', $event)" placeholder="e.g., Dell Latitude 7440">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Category <span class="required">*</span>
+                      <select class="field" [ngModel]="newAsset().category" (ngModelChange)="updateNewAssetForm('category', $event)">
+                        <option value="">Select category</option>
+                        @for (cat of assetCategoriesList; track cat) {
+                          <option [value]="cat">{{ cat }}</option>
+                        }
+                      </select>
+                    </label>
+                    <label class="form-label">Type / Sub-category
+                      <input class="field" [ngModel]="newAsset().type" (ngModelChange)="updateNewAssetForm('type', $event)" placeholder="e.g., Business Laptop">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Brand <span class="required">*</span>
+                      <input class="field" [ngModel]="newAsset().brand" (ngModelChange)="updateNewAssetForm('brand', $event)" placeholder="e.g., Dell">
+                    </label>
+                    <label class="form-label">Model <span class="required">*</span>
+                      <input class="field" [ngModel]="newAsset().model" (ngModelChange)="updateNewAssetForm('model', $event)" placeholder="e.g., Latitude 7440">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Model Number
+                      <input class="field" [ngModel]="newAsset().modelNumber" (ngModelChange)="updateNewAssetForm('modelNumber', $event)" placeholder="Optional model number">
+                    </label>
+                    <label class="form-label">Serial Number <span class="required">*</span>
+                      <input class="field" [ngModel]="newAsset().serialNumber" (ngModelChange)="updateNewAssetForm('serialNumber', $event)" placeholder="e.g., DL-7440-55Z2">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Asset Condition <span class="required">*</span>
+                      <select class="field" [ngModel]="newAsset().condition" (ngModelChange)="updateNewAssetForm('condition', $event)">
+                        @for (cond of assetConditions; track cond) {
+                          <option [value]="cond">{{ cond }}</option>
+                        }
+                      </select>
+                    </label>
+                    <label class="form-label">Initial Status <span class="required">*</span>
+                      <select class="field" [ngModel]="newAsset().status" (ngModelChange)="updateNewAssetForm('status', $event)">
+                        @for (status of initialStatuses; track status) {
+                          <option [value]="status">{{ status }}</option>
+                        }
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </article>
+            }
+
+            <!-- Step 1: Location -->
+            @if (createFormStep() === 1) {
+              <article class="card">
+                <div class="card-title mb-4">Location Information</div>
+                <div class="form-section">
+                  <div class="form-row">
+                    <label class="form-label">Building / Office <span class="required">*</span>
+                      <input class="field" [ngModel]="newAsset().building" (ngModelChange)="updateNewAssetForm('building', $event)" placeholder="e.g., HQ Building A">
+                    </label>
+                    <label class="form-label">Floor
+                      <input class="field" [ngModel]="newAsset().floor" (ngModelChange)="updateNewAssetForm('floor', $event)" placeholder="e.g., 3rd Floor">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Zone / Department Area
+                      <input class="field" [ngModel]="newAsset().zone" (ngModelChange)="updateNewAssetForm('zone', $event)" placeholder="e.g., Engineering Zone">
+                    </label>
+                    <label class="form-label">Desk / Station
+                      <input class="field" [ngModel]="newAsset().desk" (ngModelChange)="updateNewAssetForm('desk', $event)" placeholder="e.g., D-34">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">City <span class="required">*</span>
+                      <input class="field" [ngModel]="newAsset().city" (ngModelChange)="updateNewAssetForm('city', $event)" placeholder="e.g., Bangalore">
+                    </label>
+                    <label class="form-label">State
+                      <input class="field" [ngModel]="newAsset().state" (ngModelChange)="updateNewAssetForm('state', $event)" placeholder="e.g., Karnataka">
+                    </label>
+                  </div>
+                </div>
+              </article>
+            }
+
+            <!-- Step 2: Procurement -->
+            @if (createFormStep() === 2) {
+              <article class="card">
+                <div class="card-title mb-4">Purchase Information</div>
+                <div class="form-section">
+                  <div class="form-row">
+                    <label class="form-label">Purchase Date <span class="required">*</span>
+                      <input class="field" type="date" [ngModel]="newAsset().purchaseDate" (ngModelChange)="updateNewAssetForm('purchaseDate', $event)">
+                    </label>
+                    <label class="form-label">Purchase Cost <span class="required">*</span>
+                      <input class="field" type="number" [ngModel]="newAsset().purchaseCost" (ngModelChange)="updateNewAssetForm('purchaseCost', +$event)" placeholder="0.00">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Vendor / Supplier <span class="required">*</span>
+                      <input class="field" [ngModel]="newAsset().vendor" (ngModelChange)="updateNewAssetForm('vendor', $event)" placeholder="e.g., Softline Systems">
+                    </label>
+                    <label class="form-label">Purchase Order Number
+                      <input class="field" [ngModel]="newAsset().purchaseOrderNumber" (ngModelChange)="updateNewAssetForm('purchaseOrderNumber', $event)" placeholder="e.g., PO-2024-001">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Invoice Number
+                      <input class="field" [ngModel]="newAsset().invoiceNumber" (ngModelChange)="updateNewAssetForm('invoiceNumber', $event)" placeholder="e.g., INV-2024-0055">
+                    </label>
+                    <label class="form-label">Delivery Date
+                      <input class="field" type="date" [ngModel]="newAsset().deliveryDate" (ngModelChange)="updateNewAssetForm('deliveryDate', $event)">
+                    </label>
+                  </div>
+                  <div class="form-row form-row-full">
+                    <label class="form-label">Payment Terms
+                      <input class="field" [ngModel]="newAsset().paymentTerms" (ngModelChange)="updateNewAssetForm('paymentTerms', $event)" placeholder="e.g., Net 30, Prepaid, EMI">
+                    </label>
+                  </div>
+                </div>
+              </article>
+            }
+
+            <!-- Step 3: Warranty -->
+            @if (createFormStep() === 3) {
+              <article class="card">
+                <div class="card-title mb-4">Warranty Information</div>
+                <div class="form-section">
+                  <div class="form-row">
+                    <label class="form-label">Warranty Provider
+                      <input class="field" [ngModel]="newAsset().warrantyProvider" (ngModelChange)="updateNewAssetForm('warrantyProvider', $event)" placeholder="e.g., Dell Care">
+                    </label>
+                    <label class="form-label">Warranty Period (Years) <span class="required">*</span>
+                      <input class="field" type="number" min="1" max="10" [ngModel]="newAsset().warrantyPeriod" (ngModelChange)="updateNewAssetForm('warrantyPeriod', +$event)" placeholder="e.g., 3">
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Warranty Start Date <span class="required">*</span>
+                      <input class="field" type="date" [ngModel]="newAsset().warrantyStart" (ngModelChange)="updateNewAssetForm('warrantyStart', $event)">
+                    </label>
+                    <label class="form-label">Warranty End Date
+                      <input class="field" type="date" [ngModel]="newAsset().warrantyEnd" (ngModelChange)="updateNewAssetForm('warrantyEnd', $event)" disabled>
+                      <span class="field-hint">Auto-calculated from period and start date</span>
+                    </label>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">Support Contact
+                      <input class="field" [ngModel]="newAsset().warrantyContact" (ngModelChange)="updateNewAssetForm('warrantyContact', $event)" placeholder="e.g., +91-9876543210">
+                    </label>
+                    <label class="form-label">Support Email
+                      <input class="field" type="email" [ngModel]="newAsset().warrantyEmail" (ngModelChange)="updateNewAssetForm('warrantyEmail', $event)" placeholder="e.g., support@dellcare.com">
+                    </label>
+                  </div>
+                </div>
+              </article>
+            }
+
+            <!-- Step 4: Technical Specifications -->
+            @if (createFormStep() === 4) {
+              <article class="card">
+                <div class="card-title mb-4">Technical Specifications</div>
+                @if (!newAsset().category) {
+                  <div class="empty-state">Please select a category first to see relevant specifications.</div>
+                } @else {
+                  <p class="spec-category-hint mb-4">Showing specifications for: <strong>{{ newAsset().category }}</strong></p>
+                  <div class="form-section">
+                    @if (newAsset().category === 'Laptop' || newAsset().category === 'Desktop') {
+                      <div class="form-row">
+                        <label class="form-label">Processor
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['processor']" (ngModelChange)="updateSpecification('processor', $event)" placeholder="e.g., Intel Core i7-1355U">
+                        </label>
+                        <label class="form-label">RAM
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['ram']" (ngModelChange)="updateSpecification('ram', $event)" placeholder="e.g., 16GB DDR5">
+                        </label>
+                      </div>
+                      <div class="form-row">
+                        <label class="form-label">Storage
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['storage']" (ngModelChange)="updateSpecification('storage', $event)" placeholder="e.g., 512GB SSD">
+                        </label>
+                        <label class="form-label">Operating System
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['operatingSystem']" (ngModelChange)="updateSpecification('operatingSystem', $event)" placeholder="e.g., Windows 11 Pro">
+                        </label>
+                      </div>
+                      <div class="form-row">
+                        <label class="form-label">Display
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['display']" (ngModelChange)="updateSpecification('display', $event)" placeholder="e.g., 14-inch FHD">
+                        </label>
+                        <label class="form-label">Color
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['color']" (ngModelChange)="updateSpecification('color', $event)" placeholder="e.g., Silver">
+                        </label>
+                      </div>
+                    }
+                    @if (newAsset().category === 'Phone') {
+                      <div class="form-row">
+                        <label class="form-label">IMEI Number
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['imeiNumber']" (ngModelChange)="updateSpecification('imeiNumber', $event)" placeholder="15-digit IMEI">
+                        </label>
+                        <label class="form-label">Storage
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['storage']" (ngModelChange)="updateSpecification('storage', $event)" placeholder="e.g., 256GB">
+                        </label>
+                      </div>
+                      <div class="form-row">
+                        <label class="form-label">OS Version
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['osVersion']" (ngModelChange)="updateSpecification('osVersion', $event)" placeholder="e.g., iOS 17.4">
+                        </label>
+                        <label class="form-label">Color
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['color']" (ngModelChange)="updateSpecification('color', $event)" placeholder="e.g., Space Black">
+                        </label>
+                      </div>
+                    }
+                    @if (newAsset().category === 'Monitor') {
+                      <div class="form-row">
+                        <label class="form-label">Screen Size
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['screenSize']" (ngModelChange)="updateSpecification('screenSize', $event)" placeholder="e.g., 27 inches">
+                        </label>
+                        <label class="form-label">Resolution
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['resolution']" (ngModelChange)="updateSpecification('resolution', $event)" placeholder="e.g., 3840x2160 (4K)">
+                        </label>
+                      </div>
+                    }
+                    @if (newAsset().category === 'Printer') {
+                      <div class="form-row">
+                        <label class="form-label">Printer Type
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['printerType']" (ngModelChange)="updateSpecification('printerType', $event)" placeholder="e.g., Laser, Inkjet">
+                        </label>
+                        <label class="form-label">Connectivity
+                          <input class="field" [ngModel]="$any(newAssetSpecifications())['connectivity']" (ngModelChange)="updateSpecification('connectivity', $event)" placeholder="e.g., USB, WiFi, Ethernet">
+                        </label>
+                      </div>
+                    }
+                    @if (newAsset().category === 'Accessory' || newAsset().category === 'ID Card' || newAsset().category === 'Office Device') {
+                      <div class="empty-state">No specific technical specifications for this category.</div>
+                    }
+                  </div>
+                }
+              </article>
+            }
+
+            <!-- Step 5: Documents -->
+            @if (createFormStep() === 5) {
+              <article class="card">
+                <div class="card-title mb-4">Documents & Attachments</div>
+                <div class="documents-upload-grid">
+                  <div class="upload-section">
+                    <label class="form-label mb-2">Asset Photo</label>
+                    <label class="upload-zone">
+                      <input type="file" accept="image/*" class="hidden" [attr.data-doc-type]="'Asset Photo'" (change)="handleFileUpload($event, 'Asset Photo')">
+                      <span>Click or drag to upload</span>
+                      <small>JPG, PNG up to 5MB</small>
+                    </label>
+                    @for (doc of filterDocuments('Asset Photo'); track doc.id) {
+                      <div class="uploaded-file">
+                        <span>{{ doc.name }}</span>
+                        <button class="remove-btn" type="button" (click)="removeDocument(doc.id)">×</button>
+                      </div>
+                    }
+                  </div>
+                  <div class="upload-section">
+                    <label class="form-label mb-2">Purchase Invoice</label>
+                    <label class="upload-zone">
+                      <input type="file" accept=".pdf,.jpg,.png" class="hidden" [attr.data-doc-type]="'Purchase Invoice'" (change)="handleFileUpload($event, 'Purchase Invoice')">
+                      <span>Click or drag to upload</span>
+                      <small>PDF, JPG, PNG up to 10MB</small>
+                    </label>
+                    @for (doc of filterDocuments('Purchase Invoice'); track doc.id) {
+                      <div class="uploaded-file">
+                        <span>{{ doc.name }}</span>
+                        <button class="remove-btn" type="button" (click)="removeDocument(doc.id)">×</button>
+                      </div>
+                    }
+                  </div>
+                  <div class="upload-section">
+                    <label class="form-label mb-2">Warranty Certificate</label>
+                    <label class="upload-zone">
+                      <input type="file" accept=".pdf,.jpg,.png" class="hidden" [attr.data-doc-type]="'Warranty Certificate'" (change)="handleFileUpload($event, 'Warranty Certificate')">
+                      <span>Click or drag to upload</span>
+                      <small>PDF, JPG, PNG up to 10MB</small>
+                    </label>
+                    @for (doc of filterDocuments('Warranty Certificate'); track doc.id) {
+                      <div class="uploaded-file">
+                        <span>{{ doc.name }}</span>
+                        <button class="remove-btn" type="button" (click)="removeDocument(doc.id)">×</button>
+                      </div>
+                    }
+                  </div>
+                  <div class="upload-section">
+                    <label class="form-label mb-2">Additional Attachments</label>
+                    <label class="upload-zone">
+                      <input type="file" multiple class="hidden" [attr.data-doc-type]="'Additional Attachment'" (change)="handleFileUpload($event, 'Additional Attachment')">
+                      <span>Click or drag to upload</span>
+                      <small>Any file type up to 10MB</small>
+                    </label>
+                    @for (doc of filterDocuments('Additional Attachment'); track doc.id) {
+                      <div class="uploaded-file">
+                        <span>{{ doc.name }}</span>
+                        <button class="remove-btn" type="button" (click)="removeDocument(doc.id)">×</button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </article>
+            }
+
+            <!-- Step 6: Additional Information -->
+            @if (createFormStep() === 6) {
+              <article class="card">
+                <div class="card-title mb-4">Additional Information</div>
+                <div class="form-section">
+                  <div class="form-row form-row-full">
+                    <label class="form-label">Notes
+                      <textarea class="field min-h-32" [ngModel]="newAsset().notes" (ngModelChange)="updateNewAssetForm('notes', $event)" placeholder="Any additional notes or comments about this asset..."></textarea>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-summary mt-6">
+                  <h3 class="summary-title">Form Summary</h3>
+                  <div class="summary-grid">
+                    <div class="summary-section">
+                      <h4>Basic Information</h4>
+                      <dl>
+                        <div><dt>Asset Name</dt><dd>{{ newAsset().name || '-' }}</dd></div>
+                        <div><dt>Category</dt><dd>{{ newAsset().category || '-' }}</dd></div>
+                        <div><dt>Brand</dt><dd>{{ newAsset().brand || '-' }}</dd></div>
+                        <div><dt>Model</dt><dd>{{ newAsset().model || '-' }}</dd></div>
+                        <div><dt>Serial Number</dt><dd>{{ newAsset().serialNumber || '-' }}</dd></div>
+                        <div><dt>Condition</dt><dd>{{ newAsset().condition || '-' }}</dd></div>
+                      </dl>
+                    </div>
+                    <div class="summary-section">
+                      <h4>Location</h4>
+                      <dl>
+                        <div><dt>Building</dt><dd>{{ newAsset().building || '-' }}</dd></div>
+                        <div><dt>City</dt><dd>{{ newAsset().city || '-' }}</dd></div>
+                      </dl>
+                    </div>
+                    <div class="summary-section">
+                      <h4>Procurement</h4>
+                      <dl>
+                        <div><dt>Purchase Date</dt><dd>{{ newAsset().purchaseDate || '-' }}</dd></div>
+                        <div><dt>Purchase Cost</dt><dd>{{ newAsset().purchaseCost | currency:'INR' }}</dd></div>
+                        <div><dt>Vendor</dt><dd>{{ newAsset().vendor || '-' }}</dd></div>
+                      </dl>
+                    </div>
+                    <div class="summary-section">
+                      <h4>Warranty</h4>
+                      <dl>
+                        <div><dt>Warranty Period</dt><dd>{{ newAsset().warrantyPeriod }} years</dd></div>
+                        <div><dt>Warranty Start</dt><dd>{{ newAsset().warrantyStart || '-' }}</dd></div>
+                        <div><dt>Warranty End</dt><dd>{{ newAsset().warrantyEnd || '-' }}</dd></div>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            }
+
+            <!-- Form Navigation -->
+            <div class="form-navigation">
+              <div class="nav-left">
+                @if (createFormStep() > 0) {
+                  <button class="btn btn-secondary" type="button" (click)="prevFormStep()">← Previous</button>
+                }
+              </div>
+              <div class="nav-right">
+                @if (createFormStep() < 6) {
+                  <button class="btn btn-primary" type="button" (click)="nextFormStep()">Next →</button>
+                } @else {
+                  <button class="btn btn-secondary" type="button" (click)="resetNewAssetForm()">Cancel</button>
+                  <button class="btn btn-primary" type="button" (click)="saveNewAsset()" [disabled]="!isFormValid()">Save Asset</button>
+                }
+              </div>
             </div>
-            <div class="upload-zone mt-4">Upload files</div>
-          </article>
+          </div>
         </section>
       }
 
