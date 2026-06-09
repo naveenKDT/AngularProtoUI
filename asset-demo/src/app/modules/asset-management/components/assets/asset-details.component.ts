@@ -709,6 +709,9 @@ interface HistoryEntry {
   `,
   styles: [`
     .asset-details-page {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 32px;
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -722,19 +725,20 @@ interface HistoryEntry {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 13px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--color-slate-600);
-      background: transparent;
-      border: none;
-      transition: all var(--transition-fast);
+      color: #64748B;
+      background: white;
+      border: 2px solid #E5EAF3;
+      transition: all 200ms ease;
     }
 
     .back-btn:hover {
-      background: var(--color-slate-100);
-      color: var(--color-slate-900);
+      background: #F3F6FB;
+      border-color: #3B82F6;
+      color: #3B82F6;
     }
 
     .asset-header {
@@ -747,25 +751,26 @@ interface HistoryEntry {
     .asset-info {
       display: flex;
       align-items: flex-start;
-      gap: 16px;
+      gap: 20px;
     }
 
     .asset-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 12px;
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      transition: all 200ms ease;
     }
 
-    .asset-icon.cat-laptop { background: var(--color-primary-50); color: var(--color-primary-600); }
-    .asset-icon.cat-monitor { background: var(--color-indigo-50); color: var(--color-indigo-600); }
-    .asset-icon.cat-phone { background: var(--color-violet-50); color: var(--color-violet-600); }
-    .asset-icon.cat-accessory { background: var(--color-cyan-50); color: var(--color-cyan-600); }
-    .asset-icon.cat-printer { background: var(--color-success-50); color: var(--color-success-600); }
-    .asset-icon.cat-desktop { background: var(--color-amber-50); color: var(--color-amber-600); }
+    .asset-icon.cat-laptop { background: #EFF6FF; color: #3B82F6; }
+    .asset-icon.cat-monitor { background: #F3E8FF; color: #8B5CF6; }
+    .asset-icon.cat-phone { background: #DCFCE7; color: #22C55E; }
+    .asset-icon.cat-accessory { background: #FEF3C7; color: #F59E0B; }
+    .asset-icon.cat-printer { background: #CFFAFE; color: #06B6D4; }
+    .asset-icon.cat-desktop { background: #FEE2E2; color: #EF4444; }
 
     .asset-icon :deep(svg) {
       width: 32px;
@@ -775,32 +780,32 @@ interface HistoryEntry {
     .asset-main-info {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
     }
 
     .asset-title-row {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
     }
 
     .asset-name {
-      font-size: 24px;
+      font-size: 36px;
       font-weight: 700;
-      color: var(--color-slate-900);
+      color: #0F172A;
       margin: 0;
     }
 
     .asset-meta-row {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--color-slate-500);
+      gap: 12px;
+      font-size: 14px;
+      color: #64748B;
     }
 
     .separator {
-      color: var(--color-slate-300);
+      color: #E5EAF3;
     }
 
     .header-actions {
@@ -814,33 +819,35 @@ interface HistoryEntry {
     }
 
     .action-menu-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: white;
-      border: 1px solid var(--color-slate-200);
-      color: var(--color-slate-500);
-      transition: all var(--transition-fast);
+      border: 2px solid #E5EAF3;
+      color: #64748B;
+      transition: all 200ms ease;
     }
 
     .action-menu-btn:hover {
-      background: var(--color-slate-50);
-      border-color: var(--color-slate-300);
+      background: #F3F6FB;
+      border-color: #3B82F6;
+      color: #3B82F6;
+      transform: scale(1.05);
     }
 
     .action-menu {
       position: absolute;
       top: 100%;
       right: 0;
-      margin-top: 4px;
+      margin-top: 8px;
       background: white;
-      border: 1px solid var(--color-slate-200);
-      border-radius: 8px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      min-width: 200px;
+      border: 1px solid #E5EAF3;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+      min-width: 220px;
       z-index: 50;
       overflow: hidden;
     }
@@ -848,41 +855,45 @@ interface HistoryEntry {
     .menu-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       width: 100%;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: var(--color-slate-700);
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #0F172A;
       background: none;
       border: none;
       text-align: left;
-      transition: all var(--transition-fast);
+      transition: all 200ms ease;
     }
 
     .menu-item:hover {
-      background: var(--color-slate-50);
+      background: #F3F6FB;
     }
 
     .menu-item.danger {
-      color: var(--color-red-600);
+      color: #EF4444;
+    }
+
+    .menu-item.danger:hover {
+      background: #FEE2E2;
     }
 
     .menu-divider {
       height: 1px;
-      background: var(--color-slate-100);
+      background: #E5EAF3;
       margin: 4px 0;
     }
 
     .content-layout {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr 380px;
       gap: 24px;
     }
 
     .main-content {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     .quick-stats-row {
@@ -893,42 +904,50 @@ interface HistoryEntry {
 
     .quick-stat {
       background: white;
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 24px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 8px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      transition: all 200ms ease;
+    }
+
+    .quick-stat:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12);
     }
 
     .quick-stat .stat-label {
-      font-size: 11px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--color-slate-500);
-      text-transform: uppercase;
+      color: #64748B;
     }
 
     .quick-stat .stat-value {
-      font-size: 14px;
+      font-size: 18px;
       font-weight: 600;
-      color: var(--color-slate-900);
+      color: #0F172A;
     }
 
     .detail-tabs {
       background: white;
-      border-radius: 8px;
-      padding: 0 16px;
+      border-radius: 24px;
+      padding: 0 20px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
     }
 
     .tab-content {
       background: white;
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
     }
 
     .sidebar-content {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     /* Assignment Card Styles */
@@ -936,38 +955,38 @@ interface HistoryEntry {
       display: flex;
       align-items: center;
       gap: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--color-slate-100);
-      margin-bottom: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #E5EAF3;
+      margin-bottom: 20px;
     }
 
     .assignment-details {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
 
     .assignee-name {
-      font-size: 15px;
+      font-size: 18px;
       font-weight: 600;
-      color: var(--color-slate-900);
+      color: #0F172A;
     }
 
     .assignee-id {
-      font-size: 12px;
-      color: var(--color-slate-500);
+      font-size: 14px;
+      color: #64748B;
     }
 
     .assignee-dept {
-      font-size: 12px;
-      color: var(--color-slate-500);
+      font-size: 14px;
+      color: #64748B;
     }
 
     .assignment-meta {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .meta-item {
@@ -977,14 +996,14 @@ interface HistoryEntry {
     }
 
     .meta-label {
-      font-size: 12px;
-      color: var(--color-slate-500);
+      font-size: 14px;
+      color: #64748B;
     }
 
     .meta-value {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--color-slate-700);
+      color: #0F172A;
     }
 
     .action-btn {
@@ -995,21 +1014,21 @@ interface HistoryEntry {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 20px;
-      color: var(--color-slate-400);
+      gap: 12px;
+      padding: 24px;
+      color: #64748B;
       text-align: center;
     }
 
     .unassigned-state span {
-      font-size: 13px;
+      font-size: 14px;
     }
 
     /* Warranty Card Styles */
     .warranty-display {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
 
     .warranty-status {
@@ -1019,50 +1038,50 @@ interface HistoryEntry {
 
     .warranty-dates {
       display: flex;
-      gap: 16px;
+      gap: 20px;
     }
 
     .date-item {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
 
     .date-label {
-      font-size: 11px;
-      color: var(--color-slate-500);
+      font-size: 12px;
+      color: #64748B;
     }
 
     .date-value {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--color-slate-700);
+      color: #0F172A;
     }
 
     .warranty-progress {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
     .progress-bar {
-      height: 6px;
-      background: var(--color-slate-100);
-      border-radius: 3px;
+      height: 8px;
+      background: #E5EAF3;
+      border-radius: 4px;
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
-      background: var(--color-primary-500);
-      border-radius: 3px;
-      transition: width 0.3s ease;
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      border-radius: 4px;
+      transition: width 300ms ease;
     }
 
     .progress-label {
       font-size: 12px;
-      color: var(--color-slate-500);
+      color: #64748B;
       text-align: center;
     }
 
@@ -1070,15 +1089,15 @@ interface HistoryEntry {
     .location-display {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: 16px;
     }
 
     .location-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: var(--color-primary-50);
-      color: var(--color-primary-600);
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: #EFF6FF;
+      color: #3B82F6;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1087,60 +1106,62 @@ interface HistoryEntry {
     .location-details {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
 
     .location-name {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 600;
-      color: var(--color-slate-900);
+      color: #0F172A;
     }
 
     .location-building {
-      font-size: 12px;
-      color: var(--color-slate-500);
+      font-size: 14px;
+      color: #64748B;
     }
 
     .location-floor {
-      font-size: 12px;
-      color: var(--color-slate-500);
+      font-size: 14px;
+      color: #64748B;
     }
 
     /* Quick Actions */
     .quick-actions {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .quick-action {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      color: var(--color-slate-700);
-      background: var(--color-slate-50);
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      color: #0F172A;
+      background: #F3F6FB;
       border: none;
-      transition: all var(--transition-fast);
+      transition: all 200ms ease;
     }
 
     .quick-action:hover {
-      background: var(--color-slate-100);
+      background: #EFF6FF;
+      color: #3B82F6;
+      transform: translateX(4px);
     }
 
     /* Info Grid */
     .info-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 20px;
     }
 
     .info-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
 
     .info-item.full-width {
@@ -1148,15 +1169,14 @@ interface HistoryEntry {
     }
 
     .info-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
-      color: var(--color-slate-500);
-      text-transform: uppercase;
+      color: #64748B;
     }
 
     .info-value {
       font-size: 14px;
-      color: var(--color-slate-900);
+      color: #0F172A;
     }
 
     /* Specs Grid */
@@ -1169,35 +1189,35 @@ interface HistoryEntry {
     .spec-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      padding: 12px;
-      background: var(--color-slate-50);
-      border-radius: 6px;
+      gap: 6px;
+      padding: 16px;
+      background: #F3F6FB;
+      border-radius: 14px;
     }
 
     .spec-label {
-      font-size: 11px;
-      color: var(--color-slate-500);
+      font-size: 12px;
+      color: #64748B;
     }
 
     .spec-value {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--color-slate-700);
+      color: #0F172A;
     }
 
     /* Audit Timeline */
     .audit-timeline {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
 
     .audit-item {
       display: flex;
-      gap: 12px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--color-slate-100);
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #E5EAF3;
     }
 
     .audit-item:last-child {
@@ -1206,19 +1226,19 @@ interface HistoryEntry {
     }
 
     .audit-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .audit-icon.icon-assignment { background: var(--color-primary-50); color: var(--color-primary-600); }
-    .audit-icon.icon-return { background: var(--color-success-50); color: var(--color-success-600); }
-    .audit-icon.icon-maintenance { background: var(--color-amber-50); color: var(--color-amber-600); }
-    .audit-icon.icon-transfer { background: var(--color-violet-50); color: var(--color-violet-600); }
+    .audit-icon.icon-assignment { background: #EFF6FF; color: #3B82F6; }
+    .audit-icon.icon-return { background: #DCFCE7; color: #22C55E; }
+    .audit-icon.icon-maintenance { background: #FEF3C7; color: #F59E0B; }
+    .audit-icon.icon-transfer { background: #F3E8FF; color: #8B5CF6; }
 
     .audit-content {
       flex: 1;
@@ -1228,52 +1248,52 @@ interface HistoryEntry {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .audit-action {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
-      color: var(--color-slate-900);
+      color: #0F172A;
     }
 
     .audit-date {
       font-size: 12px;
-      color: var(--color-slate-500);
+      color: #64748B;
     }
 
     .audit-details {
-      font-size: 13px;
-      color: var(--color-slate-600);
-      margin: 0 0 4px 0;
+      font-size: 14px;
+      color: #64748B;
+      margin: 0 0 6px 0;
     }
 
     .audit-meta {
-      font-size: 11px;
-      color: var(--color-slate-400);
+      font-size: 12px;
+      color: #64748B;
     }
 
     /* Maintenance List */
     .maintenance-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
 
     .maintenance-item {
       display: flex;
-      gap: 12px;
-      padding: 16px;
-      background: var(--color-slate-50);
-      border-radius: 8px;
+      gap: 16px;
+      padding: 20px;
+      background: #F3F6FB;
+      border-radius: 16px;
     }
 
     .maintenance-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: var(--color-amber-50);
-      color: var(--color-amber-600);
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: #FEF3C7;
+      color: #F59E0B;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1288,48 +1308,48 @@ interface HistoryEntry {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .maintenance-type {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
-      color: var(--color-slate-900);
+      color: #0F172A;
     }
 
     .maintenance-desc {
-      font-size: 13px;
-      color: var(--color-slate-600);
-      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #64748B;
+      margin: 0 0 12px 0;
     }
 
     .maintenance-meta {
-      font-size: 11px;
-      color: var(--color-slate-500);
+      font-size: 12px;
+      color: #64748B;
     }
 
     /* Documents List */
     .documents-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 12px;
     }
 
     .document-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: var(--color-slate-50);
-      border-radius: 6px;
+      gap: 14px;
+      padding: 16px;
+      background: #F3F6FB;
+      border-radius: 14px;
     }
 
     .doc-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 6px;
-      background: var(--color-primary-50);
-      color: var(--color-primary-600);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: #EFF6FF;
+      color: #3B82F6;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1340,47 +1360,48 @@ interface HistoryEntry {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
 
     .doc-name {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--color-slate-900);
+      color: #0F172A;
     }
 
     .doc-meta {
-      font-size: 11px;
-      color: var(--color-slate-500);
+      font-size: 12px;
+      color: #64748B;
     }
 
     .doc-actions {
       display: flex;
-      gap: 4px;
+      gap: 8px;
     }
 
     .doc-action {
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: none;
       border: none;
-      color: var(--color-slate-500);
-      transition: all var(--transition-fast);
+      color: #64748B;
+      transition: all 200ms ease;
     }
 
     .doc-action:hover {
-      background: var(--color-slate-100);
-      color: var(--color-slate-700);
+      background: white;
+      color: #3B82F6;
+      transform: scale(1.05);
     }
 
     .card-footer {
-      padding-top: 16px;
-      border-top: 1px solid var(--color-slate-100);
-      margin-top: 16px;
+      padding-top: 20px;
+      border-top: 1px solid #E5EAF3;
+      margin-top: 20px;
     }
 
     /* Assignment History */
@@ -1393,28 +1414,28 @@ interface HistoryEntry {
     .history-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: var(--color-slate-50);
-      border-radius: 6px;
+      gap: 14px;
+      padding: 14px;
+      background: #F3F6FB;
+      border-radius: 14px;
     }
 
     .history-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
 
     .history-title {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--color-slate-700);
+      color: #0F172A;
     }
 
     .history-date {
-      font-size: 11px;
-      color: var(--color-slate-500);
+      font-size: 12px;
+      color: #64748B;
     }
 
     /* Empty State */
@@ -1422,44 +1443,44 @@ interface HistoryEntry {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
       padding: 48px;
       text-align: center;
-      color: var(--color-slate-400);
+      color: #64748B;
     }
 
     .empty-assignment h3 {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
-      color: var(--color-slate-700);
+      color: #0F172A;
       margin: 0;
     }
 
     .empty-assignment p {
-      font-size: 13px;
-      color: var(--color-slate-500);
+      font-size: 14px;
+      color: #64748B;
       margin: 0;
     }
 
     /* Current Assignment */
     .current-assignment {
       display: flex;
-      gap: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--color-slate-100);
-      margin-bottom: 16px;
+      gap: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #E5EAF3;
+      margin-bottom: 20px;
     }
 
     .assignment-meta-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 16px;
+      gap: 20px;
+      margin-top: 20px;
     }
 
     .assignment-actions {
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
 
     /* Warranty Section */
@@ -1471,88 +1492,88 @@ interface HistoryEntry {
 
     .warranty-status-card {
       text-align: center;
-      padding: 24px;
-      background: var(--color-slate-50);
-      border-radius: 8px;
+      padding: 28px;
+      background: #F3F6FB;
+      border-radius: 20px;
     }
 
     .warranty-message {
-      font-size: 13px;
-      color: var(--color-slate-500);
-      margin: 8px 0 0 0;
+      font-size: 14px;
+      color: #64748B;
+      margin: 10px 0 0 0;
     }
 
     .warranty-progress-section {
-      padding: 20px;
-      background: var(--color-slate-50);
-      border-radius: 8px;
+      padding: 24px;
+      background: #F3F6FB;
+      border-radius: 20px;
     }
 
     .warranty-progress-section h4 {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
-      color: var(--color-slate-700);
-      margin: 0 0 12px 0;
+      color: #0F172A;
+      margin: 0 0 16px 0;
     }
 
     .timeline-bar {
-      height: 8px;
-      background: var(--color-slate-200);
-      border-radius: 4px;
+      height: 10px;
+      background: #E5EAF3;
+      border-radius: 5px;
       overflow: hidden;
     }
 
     .timeline-labels {
       display: flex;
       justify-content: space-between;
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--color-slate-500);
+      margin-top: 10px;
+      font-size: 12px;
+      color: #64748B;
     }
 
     /* Location Section */
     .location-visual {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     .location-building {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 20px;
-      background: var(--color-primary-50);
-      border-radius: 8px;
-      color: var(--color-primary-600);
+      gap: 16px;
+      padding: 24px;
+      background: #EFF6FF;
+      border-radius: 20px;
+      color: #3B82F6;
     }
 
     .building-name {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
     }
 
     .location-details-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      gap: 20px;
     }
 
     .location-detail {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
 
     .detail-label {
-      font-size: 11px;
-      color: var(--color-slate-500);
+      font-size: 12px;
+      color: #64748B;
     }
 
     .detail-value {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 500;
-      color: var(--color-slate-900);
+      color: #0F172A;
     }
 
     /* Icons */
