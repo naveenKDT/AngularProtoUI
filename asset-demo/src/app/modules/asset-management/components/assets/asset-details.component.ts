@@ -8,7 +8,7 @@ import {
   AvatarComponent,
   ButtonComponent,
   TabsComponent
-} from '../../../shared/components/ui-components';
+} from '../../../../shared/components/ui-components';
 
 interface MaintenanceRecord {
   id: string;

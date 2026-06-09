@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PageHeaderComponent, BreadcrumbComponent, BadgeComponent, ModalComponent } from '../../shared/components';
+import { PageHeaderComponent, BreadcrumbComponent, BadgeComponent, ModalComponent } from '../../../shared/components';
 
 interface Department {
   id: number;

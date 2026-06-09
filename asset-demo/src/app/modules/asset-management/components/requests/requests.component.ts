@@ -13,7 +13,7 @@ import {
   SelectComponent,
   TextareaComponent,
   SearchComponent
-} from '../../../shared/components/ui-components';
+} from '../../../../shared/components/ui-components';
 
 interface Request {
   id: string;

@@ -9,7 +9,7 @@ import {
   InputComponent,
   SelectComponent,
   TextareaComponent
-} from '../../../shared/components/ui-components';
+} from '../../../../shared/components/ui-components';
 
 interface Asset {
   id: string;

@@ -10,7 +10,7 @@ import {
   TabsComponent,
   ButtonComponent,
   SearchComponent
-} from '../../../shared/components/ui-components';
+} from '../../../../shared/components/ui-components';
 
 interface AssetClearance {
   assetId: string;

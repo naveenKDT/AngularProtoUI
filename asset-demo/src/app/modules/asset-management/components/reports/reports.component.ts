@@ -10,7 +10,7 @@ import {
   TabsComponent,
   ButtonComponent,
   StatCardComponent
-} from '../../../shared/components/ui-components';
+} from '../../../../shared/components/ui-components';
 
 interface ReportCategory {
   id: string;

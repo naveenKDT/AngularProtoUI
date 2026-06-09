@@ -9,7 +9,7 @@ import {
   ButtonComponent,
   TabsComponent,
   SearchComponent
-} from '../../../shared/components/ui-components';
+} from '../../../../shared/components/ui-components';
 
 interface Ticket {
   id: string;
