@@ -16,8 +16,9 @@ import {
   ServiceCategory,
 } from './asset-management.models';
 
-const categories: AssetCategory[] = ['Laptop', 'Phone', 'Monitor', 'Accessory', 'ID Card', 'Printer', 'Office Device'];
-const locations = ['Bengaluru HQ', 'Hyderabad Office', 'Pune Office', 'Mumbai Office', 'Remote', 'Storage Room B'];
+const categories: AssetCategory[] = ['Laptop', 'Desktop', 'Phone', 'Monitor', 'Accessory', 'ID Card', 'Printer', 'Office Device'];
+const buildings = ['Bengaluru HQ', 'Hyderabad Office', 'Pune Office', 'Mumbai Office'];
+const cities = ['Bangalore', 'Hyderabad', 'Pune', 'Mumbai'];
 const departments = ['Engineering', 'People Ops', 'Finance', 'Sales', 'IT Support', 'Design'];
 const assetNames = [
   ['Dell Latitude 7440', 'Dell', 'Latitude 7440', 'Business Laptop'],
@@ -29,6 +30,7 @@ const assetNames = [
   ['Dell UltraSharp U2723QE', 'Dell', 'U2723QE', 'Monitor'],
   ['Zebra ZC300', 'Zebra', 'ZC300', 'ID Card Printer'],
 ];
+const conditions = ['New', 'Good', 'Fair', 'Damaged'] as const;
 
 const requestTypes: AssetServiceRequestType[] = ['New Asset', 'Replacement', 'Repair', 'Lost Asset', 'Software Installation', 'Hardware Support', 'Access Request', 'General IT Support'];
 
@@ -62,7 +64,7 @@ export const MOCK_EMPLOYEES: Employee[] = Array.from({ length: 20 }, (_, index) 
     name,
     department: departments[index % departments.length],
     designation: ['Product Engineer', 'HR Partner', 'Finance Analyst', 'Sales Manager', 'IT Specialist'][index % 5],
-    location: locations[index % locations.length],
+    location: buildings[index % buildings.length],
     avatar: name
       .split(' ')
       .map((part) => part[0])
@@ -77,7 +79,8 @@ export const MOCK_ASSETS: Asset[] = Array.from({ length: 50 }, (_, index) => {
   const maintenance = index % 11 === 0;
   const retired = index % 17 === 0;
   const warrantyExpiring = index % 9 === 0;
-  const location = assigned ? MOCK_EMPLOYEES[index % MOCK_EMPLOYEES.length].location : locations[index % locations.length];
+  const building = buildings[index % buildings.length];
+  const city = cities[index % cities.length];
 
   return {
     id: `AST-ID-${String(1001 + index)}`,
@@ -87,21 +90,43 @@ export const MOCK_ASSETS: Asset[] = Array.from({ length: 50 }, (_, index) => {
     type: base[3],
     brand: base[1],
     model: base[2],
+    modelNumber: `MN-${1000 + index}`,
     serialNumber: `${base[1].slice(0, 2).toUpperCase()}-${String(7440 + index)}-${String(index * 37).padStart(4, '0')}`,
+    condition: conditions[index % conditions.length],
     status: retired ? 'retired' : maintenance ? 'maintenance' : assigned ? 'assigned' : 'available',
     assignedToId: assigned && !retired ? MOCK_EMPLOYEES[index % MOCK_EMPLOYEES.length].id : undefined,
-    location,
-    office: location,
+    // Location
+    building,
     floor: String((index % 10) + 1),
+    zone: departments[index % departments.length],
     desk: assigned ? `${String.fromCharCode(65 + (index % 6))}-${800 + index}` : undefined,
-    storage: assigned ? undefined : 'Storage Room B',
+    city,
+    state: 'Karnataka',
+    // Procurement
     purchaseDate: `2025-${String((index % 12) + 1).padStart(2, '0')}-${String((index % 26) + 1).padStart(2, '0')}`,
     purchaseCost: 2500 + index * 3200,
     vendor: ['Softline Systems', 'Dell Care', 'Apple Enterprise', 'OfficeKart', 'SecureIT'][index % 5],
+    purchaseOrderNumber: `PO-${2025 + Math.floor(index / 12)}-${String(index % 100).padStart(3, '0')}`,
     invoiceNumber: `INV-${88421 + index}`,
+    deliveryDate: `2025-${String((index % 12) + 1).padStart(2, '0')}-${String((index % 26) + 1).padStart(2, '0')}`,
+    paymentTerms: ['Net 30', 'Prepaid', 'EMI'][index % 3],
+    // Warranty
+    warrantyProvider: ['Dell Care', 'AppleCare', 'HP Support'][index % 3],
+    warrantyPeriod: [1, 2, 3][index % 3],
     warrantyStart: `2025-${String((index % 12) + 1).padStart(2, '0')}-01`,
     warrantyEnd: warrantyExpiring ? '2026-06-20' : `2027-${String((index % 12) + 1).padStart(2, '0')}-28`,
     warrantyStatus: warrantyExpiring ? 'expiring' : retired ? 'expired' : 'active',
+    warrantyContact: '+91-9876543210',
+    warrantyEmail: 'support@example.com',
+    // Specifications
+    specifications: {
+      processor: 'Intel Core i7-1355U',
+      ram: '16GB DDR5',
+      storage: '512GB SSD',
+      operatingSystem: 'Windows 11 Pro',
+    },
+    // Additional
+    notes: index % 3 === 0 ? 'Issued for remote work setup.' : undefined,
   };
 });
 
@@ -365,10 +390,10 @@ export const MOCK_HISTORY: AssetHistoryEvent[] = MOCK_ASSETS.flatMap((asset, ind
       actorName: 'Rahul Jain',
       timestamp: createdAt,
       source: 'manual',
-      toLocation: asset.storage || asset.office,
+      toLocation: asset.building,
       title: 'Asset created',
       description: `${asset.name} was added to the asset registry.`,
-      metadata: { invoiceNumber: asset.invoiceNumber, vendor: asset.vendor },
+      metadata: { invoiceNumber: asset.invoiceNumber ?? '', vendor: asset.vendor },
     },
     {
       id: `HIS-${asset.tag}-DOC`,
@@ -394,7 +419,7 @@ export const MOCK_HISTORY: AssetHistoryEvent[] = MOCK_ASSETS.flatMap((asset, ind
       timestamp: `2025-${String(((index + 1) % 12) + 1).padStart(2, '0')}-08T14:30:00`,
       source: 'workflow',
       toEmployeeId: employee.id,
-      fromLocation: asset.storage || 'Storage Room B',
+      fromLocation: asset.building,
       toLocation: employee.location,
       title: 'Asset assigned',
       description: `${asset.name} was assigned to ${employee.name}.`,

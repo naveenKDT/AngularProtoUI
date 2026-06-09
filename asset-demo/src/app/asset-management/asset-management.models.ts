@@ -1,6 +1,8 @@
 export type AssetStatus = 'available' | 'assigned' | 'maintenance' | 'retired' | 'lost';
 export type WarrantyStatus = 'active' | 'expiring' | 'expired';
-export type AssetCategory = 'Laptop' | 'Phone' | 'Monitor' | 'Accessory' | 'ID Card' | 'Printer' | 'Office Device';
+export type AssetCategory = 'Laptop' | 'Desktop' | 'Phone' | 'Monitor' | 'Accessory' | 'ID Card' | 'Printer' | 'Office Device';
+export type AssetCondition = 'New' | 'Good' | 'Fair' | 'Damaged';
+export type InitialStatus = 'Available' | 'In Storage' | 'Maintenance';
 export type RequestStatus = 'submitted' | 'manager_review' | 'it_review' | 'approved' | 'assigned' | 'repairing' | 'replaced' | 'rejected' | 'closed';
 export type MaintenanceStatus = 'open' | 'in_progress' | 'closed';
 export type ReturnCondition = 'good' | 'damaged' | 'missing' | 'under_repair' | 'lost';
@@ -34,6 +36,33 @@ export interface Employee {
   avatar: string;
 }
 
+export interface AssetSpecifications {
+  // Laptop/Desktop
+  processor?: string;
+  ram?: string;
+  storage?: string;
+  operatingSystem?: string;
+  display?: string;
+  color?: string;
+  // Mobile
+  imeiNumber?: string;
+  osVersion?: string;
+  // Monitor
+  screenSize?: string;
+  resolution?: string;
+  // Printer
+  printerType?: string;
+  connectivity?: string;
+}
+
+export interface AssetDocumentUpload {
+  id: string;
+  name: string;
+  type: 'Asset Photo' | 'Purchase Invoice' | 'Warranty Certificate' | 'Additional Attachment';
+  file?: File;
+  previewUrl?: string;
+}
+
 export interface Asset {
   id: string;
   tag: string;
@@ -42,21 +71,40 @@ export interface Asset {
   type: string;
   brand: string;
   model: string;
+  modelNumber?: string;
   serialNumber: string;
+  condition: AssetCondition;
   status: AssetStatus;
   assignedToId?: string;
-  location: string;
-  office: string;
-  floor: string;
+  // Location
+  building: string;
+  floor?: string;
+  zone?: string;
   desk?: string;
-  storage?: string;
+  city: string;
+  state?: string;
+  // Procurement
   purchaseDate: string;
   purchaseCost: number;
   vendor: string;
-  invoiceNumber: string;
+  purchaseOrderNumber?: string;
+  invoiceNumber?: string;
+  deliveryDate?: string;
+  paymentTerms?: string;
+  // Warranty
+  warrantyProvider?: string;
+  warrantyPeriod: number;
   warrantyStart: string;
   warrantyEnd: string;
   warrantyStatus: WarrantyStatus;
+  warrantyContact?: string;
+  warrantyEmail?: string;
+  // Technical Specifications
+  specifications?: AssetSpecifications;
+  // Documents
+  documents?: AssetDocumentUpload[];
+  // Additional
+  notes?: string;
 }
 
 export interface AssetHistoryEvent {
