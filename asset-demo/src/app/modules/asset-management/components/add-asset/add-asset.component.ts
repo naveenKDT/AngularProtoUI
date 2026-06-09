@@ -1554,7 +1554,27 @@ interface AssetCategory {
       gap: 28px;
     }
 
+    @media (max-width: 1600px) {
+      .add-asset-page { padding: 28px 24px; }
+      .form-grid { gap: 24px; }
+    }
+
+    @media (max-width: 1440px) {
+      .add-asset-page { padding: 24px 20px; }
+      .form-grid { gap: 20px; }
+    }
+
+    @media (max-width: 1280px) {
+      .add-asset-page { padding: 20px 16px; }
+      .form-grid { gap: 18px; }
+    }
+
+    @media (max-width: 1024px) {
+      .form-grid { gap: 16px; }
+    }
+
     @media (max-width: 768px) {
+      .add-asset-page { padding: 16px; }
       .form-grid {
         grid-template-columns: 1fr;
       }
