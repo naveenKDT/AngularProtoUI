@@ -25,6 +25,19 @@ interface OffboardingTask {
   notes?: string;
 }
 
+interface OffboardingDocument {
+  name: string;
+  status: string;
+  issuedOn?: string;
+}
+
+interface OffboardingApproval {
+  role: string;
+  status: string;
+  approvedBy?: string;
+  approvedOn?: string;
+}
+
 interface OffboardingRecord {
   id: string;
   employeeId: string;
@@ -33,18 +46,69 @@ interface OffboardingRecord {
   position: string;
   department: string;
   manager: string;
+  managerEmail?: string;
   joiningDate: string;
   lastWorkingDay: string;
-  separationType: 'Resignation' | 'Termination' | 'Contract End' | 'Retirement';
+  separationType: 'Resignation' | 'Termination' | 'Contract End' | 'Retirement' | 'Mutual Separation';
+  noticePeriod?: string;
+  noticeStatus?: string;
+  exitInterviewRequired?: boolean;
+  resignationLetterReceived?: string;
   status: 'initiated' | 'in_progress' | 'pending_approval' | 'completed' | 'cancelled';
   initiatedOn: string;
   initiatedBy: string;
   progress: number;
   reason?: string;
+  hrNotes?: string;
   tasks: OffboardingTask[];
-  documents: Array<{ name: string; status: string; issuedOn?: string }>;
-  approvals: Array<{ role: string; status: string; approvedBy?: string; approvedOn?: string }>;
+  documents: OffboardingDocument[];
+  approvals: OffboardingApproval[];
 }
+
+interface TaskTemplate {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  assignedTo: string;
+  defaultChecked: boolean;
+}
+
+interface InitiateFormData {
+  // Step 1
+  employeeId: string;
+  employeeName: string;
+  employeeEmail: string;
+  department: string;
+  position: string;
+  manager: string;
+  managerEmail: string;
+  joiningDate: string;
+  // Step 2
+  separationType: string;
+  lastWorkingDay: string;
+  noticePeriod: string;
+  noticeStatus: string;
+  reason: string;
+  resignationLetterReceived: string;
+  exitInterviewRequired: string;
+  hrNotes: string;
+  // Step 3
+  selectedTasks: Record<string, boolean>;
+}
+
+const TASK_TEMPLATES: TaskTemplate[] = [
+  { id: 'kt', title: 'Knowledge transfer', description: 'Complete documentation and KT sessions with the team', category: 'HR', assignedTo: 'Reporting Manager', defaultChecked: true },
+  { id: 'ph', title: 'Project handover', description: 'Hand over all active projects, code, and ongoing work', category: 'HR', assignedTo: 'Reporting Manager', defaultChecked: true },
+  { id: 'ei', title: 'Exit interview', description: 'Conduct structured exit interview and record feedback', category: 'HR', assignedTo: 'HR Team', defaultChecked: true },
+  { id: 'ar', title: 'Asset recovery', description: 'Collect laptop, ID card, access cards, and peripherals', category: 'IT', assignedTo: 'IT Asset Team', defaultChecked: true },
+  { id: 'ax', title: 'Access revocation', description: 'Revoke all system, email, app, and tool access', category: 'IT', assignedTo: 'IT Admin', defaultChecked: true },
+  { id: 'fs', title: 'Final settlement', description: 'Process last payslip, PF, gratuity, and reimbursements', category: 'Finance', assignedTo: 'Finance Team', defaultChecked: true },
+  { id: 'lh', title: 'LMS / HR portal deactivation', description: 'Deactivate all HR system accounts and subscriptions', category: 'IT', assignedTo: 'IT Admin', defaultChecked: false },
+  { id: 'bg', title: 'Background verification closure', description: 'Close any open background verification cases', category: 'HR', assignedTo: 'HR Team', defaultChecked: false },
+];
+
+const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Review & submit'];
 
 @Component({
   selector: 'knodtec-offboarding',
@@ -63,271 +127,221 @@ interface OffboardingRecord {
     TabsComponent
   ],
   template: `
-    <div class="offboarding-page">
-      <!-- Page Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">Employee Offboarding</h1>
-          <p class="page-subtitle">Manage complete employee offboarding lifecycle</p>
+    <div class="ob-page">
+
+      <!-- Top bar -->
+      <div class="ob-topbar">
+        <div class="ob-topbar-left">
+          <h1 class="ob-title">Employee offboarding</h1>
+          <p class="ob-subtitle">HR workspace — manage exit lifecycle, tasks, approvals, and clearances</p>
         </div>
-        <div class="header-actions">
-          <knod-button variant="outline" [icon]="reportIcon">Reports</knod-button>
-          <knod-button variant="primary" [icon]="plusIcon" (click)="navigateToInitiate()">Initiate Offboarding</knod-button>
+        <div class="ob-topbar-actions">
+          <knod-button variant="outline" [icon]="downloadIcon" (click)="exportReport()">Export report</knod-button>
+          <knod-button variant="primary" [icon]="plusIcon" (click)="openInitiateModal()">Initiate offboarding</knod-button>
         </div>
       </div>
 
-      <!-- Stats Row -->
-      <div class="stats-row">
-        <div class="stat-card" (click)="filterByStatus('initiated')">
-          <div class="stat-value">{{ initiatedCount() }}</div>
-          <div class="stat-label">Initiated</div>
-          <div class="stat-indicator blue"></div>
+      <!-- Stats -->
+      <div class="ob-stats-row">
+        <div class="ob-stat-card" (click)="quickFilter('initiated')">
+          <div class="ob-stat-val">{{ initiatedCount() }}</div>
+          <div class="ob-stat-lbl">Initiated</div>
+          <div class="ob-stat-bar" style="background: var(--color-primary-500)"></div>
         </div>
-        <div class="stat-card" (click)="filterByStatus('in_progress')">
-          <div class="stat-value">{{ inProgressCount() }}</div>
-          <div class="stat-label">In Progress</div>
-          <div class="stat-indicator amber"></div>
+        <div class="ob-stat-card" (click)="quickFilter('in_progress')">
+          <div class="ob-stat-val">{{ inProgressCount() }}</div>
+          <div class="ob-stat-lbl">In progress</div>
+          <div class="ob-stat-bar" style="background: var(--color-amber-500)"></div>
         </div>
-        <div class="stat-card" (click)="filterByStatus('pending_approval')">
-          <div class="stat-value">{{ pendingApprovalCount() }}</div>
-          <div class="stat-label">Pending Approval</div>
-          <div class="stat-indicator violet"></div>
+        <div class="ob-stat-card" (click)="quickFilter('pending_approval')">
+          <div class="ob-stat-val">{{ pendingApprovalCount() }}</div>
+          <div class="ob-stat-lbl">Pending approval</div>
+          <div class="ob-stat-bar" style="background: var(--color-violet-500)"></div>
         </div>
-        <div class="stat-card" (click)="filterByStatus('completed')">
-          <div class="stat-value">{{ completedCount() }}</div>
-          <div class="stat-label">Completed</div>
-          <div class="stat-indicator green"></div>
+        <div class="ob-stat-card" (click)="quickFilter('completed')">
+          <div class="ob-stat-val">{{ completedCount() }}</div>
+          <div class="ob-stat-lbl">Completed</div>
+          <div class="ob-stat-bar" style="background: var(--color-success-500)"></div>
         </div>
       </div>
 
-      <!-- Main Content -->
-      <div class="content-layout">
-        <!-- Left: Offboarding List -->
-        <div class="list-panel">
-          <!-- Filters -->
-          <div class="filters-bar">
-            <div class="search-wrapper">
-              <knod-search 
-                placeholder="Search employees..."
-                [value]="searchQuery()"
-                (valueChange)="searchQuery.set($event)">
-              </knod-search>
-            </div>
-            <div class="filter-chips">
-              <button 
-                class="filter-chip" 
-                [class.active]="statusFilter() === 'all'"
-                (click)="statusFilter.set('all')">All</button>
-              <button 
-                class="filter-chip" 
-                [class.active]="statusFilter() === 'active'"
-                (click)="statusFilter.set('active')">Active</button>
-              <button 
-                class="filter-chip" 
-                [class.active]="statusFilter() === 'completed'"
-                (click)="statusFilter.set('completed')">Completed</button>
-            </div>
+      <!-- Main layout -->
+      <div class="ob-main">
+
+        <!-- Sidebar list -->
+        <div class="ob-sidebar">
+          <div class="ob-sidebar-search">
+            <knod-search
+              placeholder="Search by name or ID…"
+              [value]="searchQuery()"
+              (valueChange)="searchQuery.set($event)">
+            </knod-search>
+          </div>
+          <div class="ob-sidebar-filters">
+            <button class="ob-fchip" [class.active]="statusFilter() === 'all'" (click)="statusFilter.set('all')">All</button>
+            <button class="ob-fchip" [class.active]="statusFilter() === 'active'" (click)="statusFilter.set('active')">Active</button>
+            <button class="ob-fchip" [class.active]="statusFilter() === 'completed'" (click)="statusFilter.set('completed')">Completed</button>
           </div>
 
-          <!-- Offboarding List -->
-          <div class="offboarding-list">
+          <div class="ob-emp-list">
             @for (record of filteredRecords(); track record.id) {
-              <div 
-                class="offboarding-item"
-                [class.selected]="selectedRecord()?.id === record.id"
+              <div
+                class="ob-emp-item"
+                [class.active]="selectedRecord()?.id === record.id"
                 (click)="selectRecord(record)">
-                <div class="item-header">
-                  <knod-avatar [name]="record.employeeName" size="md"></knod-avatar>
-                  <div class="item-info">
-                    <span class="item-name">{{ record.employeeName }}</span>
-                    <span class="item-position">{{ record.position }}</span>
+                <div class="ob-emp-top">
+                  <knod-avatar [name]="record.employeeName" size="sm"></knod-avatar>
+                  <div class="ob-emp-info">
+                    <span class="ob-emp-name">{{ record.employeeName }}</span>
+                    <span class="ob-emp-role">{{ record.position }} · {{ record.department }}</span>
                   </div>
-                  <knod-badge [color]="getStatusColor(record.status)">{{ formatStatus(record.status) }}</knod-badge>
+                  <knod-badge [color]="getStatusColor(record.status)" size="sm">{{ formatStatus(record.status) }}</knod-badge>
                 </div>
-                <div class="item-meta">
-                  <span class="meta-item">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8" y1="2" x2="8" y2="6"/>
-                      <line x1="3" y1="10" x2="21" y2="10"/>
+                <div class="ob-emp-meta">
+                  <span class="ob-emp-lwd">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                     </svg>
-                    LWD: {{ record.lastWorkingDay | date:'mediumDate' }}
+                    LWD: {{ record.lastWorkingDay | date:'d MMM yyyy' }}
                   </span>
-                  <span class="meta-separator">•</span>
-                  <span class="meta-item">
-                    <knod-badge [color]="getSeparationColor(record.separationType)" size="sm">{{ record.separationType }}</knod-badge>
-                  </span>
+                  <knod-badge [color]="getSeparationColor(record.separationType)" size="sm">{{ record.separationType }}</knod-badge>
                 </div>
-                <div class="item-progress">
-                  <div class="progress-info">
-                    <span>{{ record.progress }}% Complete</span>
-                    <span class="task-count">{{ getCompletedTaskCount(record) }}/{{ record.tasks.length }} tasks</span>
-                  </div>
-                  <div class="progress-bar">
-                    <div class="progress-fill" [style.width.%]="record.progress"></div>
-                  </div>
+                <div class="ob-emp-prog">
+                  <div class="ob-prog-bar"><div class="ob-prog-fill" [style.width.%]="record.progress"></div></div>
+                  <span class="ob-prog-text">{{ record.progress }}%</span>
                 </div>
               </div>
             }
-
             @if (filteredRecords().length === 0) {
-              <div class="empty-state">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="8.5" cy="7" r="4"/>
-                  <line x1="23" y1="11" x2="17" y2="11"/>
+              <div class="ob-list-empty">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/>
                 </svg>
-                <h3>No records found</h3>
-                <p>No offboarding records match your filters.</p>
+                <p>No records match your filter.</p>
               </div>
             }
           </div>
         </div>
 
-        <!-- Right: Detail Panel -->
-        <div class="detail-panel">
+        <!-- Detail panel -->
+        <div class="ob-detail">
           @if (selectedRecord(); as record) {
-            <!-- Employee Header -->
-            <div class="record-header">
-              <knod-avatar [name]="record.employeeName" size="xl"></knod-avatar>
-              <div class="header-info">
-                <h2 class="header-name">{{ record.employeeName }}</h2>
-                <p class="header-position">{{ record.position }} • {{ record.department }}</p>
-                <div class="header-meta">
-                  <span class="meta-item">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8" y1="2" x2="8" y2="6"/>
-                      <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                    Last Working Day: {{ record.lastWorkingDay | date:'mediumDate' }}
-                  </span>
-                  <span class="meta-item">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    Manager: {{ record.manager }}
-                  </span>
-                </div>
-              </div>
-              <div class="header-actions">
-                <knod-button variant="outline" size="sm" [icon]="editIcon">Edit</knod-button>
-                <knod-button variant="primary" size="sm" [icon]="tasksIcon">Tasks</knod-button>
-              </div>
-            </div>
 
-            <!-- Separation Info -->
-            <div class="separation-info">
-              <div class="separation-type">
-                <knod-badge [color]="getSeparationColor(record.separationType)" size="lg">{{ record.separationType }}</knod-badge>
+            <!-- Record header -->
+            <div class="ob-rec-header">
+              <knod-avatar [name]="record.employeeName" size="lg"></knod-avatar>
+              <div class="ob-rec-header-info">
+                <h2 class="ob-rec-name">{{ record.employeeName }}</h2>
+                <p class="ob-rec-role">{{ record.position }} · {{ record.department }}</p>
+                <div class="ob-rec-badges">
+                  <knod-badge [color]="getStatusColor(record.status)">{{ formatStatus(record.status) }}</knod-badge>
+                  <knod-badge [color]="getSeparationColor(record.separationType)">{{ record.separationType }}</knod-badge>
+                </div>
+                <div class="ob-rec-meta">
+                  <span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    LWD: {{ record.lastWorkingDay | date:'d MMM yyyy' }}
+                  </span>
+                  <span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    {{ record.manager }}
+                  </span>
+                  <span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    {{ record.employeeEmail }}
+                  </span>
+                </div>
               </div>
-              <div class="separation-dates">
-                <div class="date-item">
-                  <span class="date-label">Joined</span>
-                  <span class="date-value">{{ record.joiningDate | date:'mediumDate' }}</span>
-                </div>
-                <div class="date-item">
-                  <span class="date-label">Initiated</span>
-                  <span class="date-value">{{ record.initiatedOn | date:'mediumDate' }}</span>
-                </div>
-                <div class="date-item">
-                  <span class="date-label">Last Day</span>
-                  <span class="date-value">{{ record.lastWorkingDay | date:'mediumDate' }}</span>
-                </div>
-              </div>
-              @if (record.reason) {
-                <div class="separation-reason">
-                  <span class="reason-label">Reason:</span>
-                  <span class="reason-text">{{ record.reason }}</span>
-                </div>
-              }
-            </div>
-
-            <!-- Progress Overview -->
-            <div class="progress-overview">
-              <div class="overall-progress">
-                <div class="progress-circle">
-                  <svg viewBox="0 0 36 36">
-                    <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                    <path class="ring-fill" [attr.stroke-dasharray]="record.progress + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                  </svg>
-                  <span class="progress-value">{{ record.progress }}%</span>
-                </div>
-                <span class="progress-label">Overall Progress</span>
-              </div>
-              <div class="category-progress">
-                @for (cat of getCategoryProgress(record); track cat.name) {
-                  <div class="category-item">
-                    <span class="category-name">{{ cat.name }}</span>
-                    <div class="category-bar">
-                      <div class="category-fill" [style.width.%]="cat.progress"></div>
-                    </div>
-                    <span class="category-count">{{ cat.completed }}/{{ cat.total }}</span>
-                  </div>
+              <div class="ob-rec-header-actions">
+                <knod-button variant="outline" size="sm" [icon]="editIcon" (click)="editRecord(record)">Edit</knod-button>
+                @if (record.status !== 'completed' && record.status !== 'cancelled') {
+                  <knod-button variant="primary" size="sm" [icon]="checkIcon" (click)="completeOffboarding(record)">Mark complete</knod-button>
                 }
               </div>
             </div>
 
-            <!-- Detail Tabs -->
-            <div class="detail-tabs">
-              <knod-tabs 
-                [tabs]="detailTabs" 
-                [activeTab]="activeTab()"
-                (tabChange)="activeTab.set($event)">
-              </knod-tabs>
+            <!-- Sep band -->
+            <div class="ob-sep-band">
+              <div class="ob-sep-date">
+                <label>Joining date</label>
+                <span>{{ record.joiningDate | date:'d MMM yyyy' }}</span>
+              </div>
+              <div class="ob-sep-date">
+                <label>Initiated</label>
+                <span>{{ record.initiatedOn | date:'d MMM yyyy' }}</span>
+              </div>
+              <div class="ob-sep-date">
+                <label>Last working day</label>
+                <span [class.ob-lwd-urgent]="record.status !== 'completed'">{{ record.lastWorkingDay | date:'d MMM yyyy' }}</span>
+              </div>
+              <div class="ob-sep-spacer"></div>
+              <div class="ob-sep-prog">
+                <div class="ob-prog-bar ob-prog-bar-wide"><div class="ob-prog-fill" [style.width.%]="record.progress"></div></div>
+                <span class="ob-sep-prog-text">{{ record.progress }}% done</span>
+              </div>
             </div>
 
-            <!-- Tab Content -->
-            <div class="tab-content">
+            <!-- Tabs -->
+            <div class="ob-tabs-row">
+              @for (tab of detailTabs; track tab.key) {
+                <button
+                  class="ob-tab-btn"
+                  [class.active]="activeTab() === tab.key"
+                  (click)="activeTab.set(tab.key)">
+                  {{ tab.label }}
+                </button>
+              }
+            </div>
+
+            <!-- Tab content -->
+            <div class="ob-tab-body">
               @switch (activeTab()) {
+                @case ('overview') {
+                  <ng-container *ngTemplateOutlet="overviewTab; context: { $implicit: record }"></ng-container>
+                }
                 @case ('tasks') {
-                  <ng-container *ngTemplateOutlet="tasksTab"></ng-container>
+                  <ng-container *ngTemplateOutlet="tasksTab; context: { $implicit: record }"></ng-container>
                 }
                 @case ('approvals') {
-                  <ng-container *ngTemplateOutlet="approvalsTab"></ng-container>
+                  <ng-container *ngTemplateOutlet="approvalsTab; context: { $implicit: record }"></ng-container>
                 }
                 @case ('documents') {
-                  <ng-container *ngTemplateOutlet="documentsTab"></ng-container>
+                  <ng-container *ngTemplateOutlet="documentsTab; context: { $implicit: record }"></ng-container>
                 }
                 @case ('timeline') {
-                  <ng-container *ngTemplateOutlet="timelineTab"></ng-container>
+                  <ng-container *ngTemplateOutlet="timelineTab; context: { $implicit: record }"></ng-container>
                 }
               }
             </div>
 
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-              <button class="action-btn" (click)="sendNotification(record)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
-                Send Reminder
+            <!-- Quick actions -->
+            <div class="ob-quick-actions">
+              <button class="ob-action-btn" (click)="sendReminder(record)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Send reminder
               </button>
-              <button class="action-btn" (click)="addComment(record)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                Add Comment
+              <button class="ob-action-btn" (click)="addNote(record)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Add note
               </button>
-              <button class="action-btn" (click)="completeOffboarding(record)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                Complete Offboarding
+              <button class="ob-action-btn" (click)="downloadChecklist(record)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download checklist
               </button>
+              @if (record.status !== 'completed' && record.status !== 'cancelled') {
+                <button class="ob-action-btn ob-action-btn-danger" (click)="cancelOffboarding(record)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  Cancel
+                </button>
+              }
             </div>
+
           } @else {
-            <div class="empty-detail">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="8.5" cy="7" r="4"/>
-                <line x1="23" y1="11" x2="17" y2="11"/>
+            <div class="ob-detail-empty">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/>
               </svg>
-              <h3>Select an Employee</h3>
+              <h3>No employee selected</h3>
               <p>Choose an employee from the list to view their offboarding details.</p>
             </div>
           }
@@ -335,342 +349,520 @@ interface OffboardingRecord {
       </div>
     </div>
 
-    <!-- Tasks Tab Template -->
-    <ng-template #tasksTab>
-      <div class="tasks-section">
-        <div class="section-header">
-          <h3>Offboarding Tasks</h3>
-          <div class="filter-buttons">
-            <button class="filter-btn" [class.active]="taskFilter() === 'all'" (click)="taskFilter.set('all')">All</button>
-            <button class="filter-btn" [class.active]="taskFilter() === 'pending'" (click)="taskFilter.set('pending')">Pending</button>
-            <button class="filter-btn" [class.active]="taskFilter() === 'completed'" (click)="taskFilter.set('completed')">Completed</button>
+    <!-- ───────── TAB TEMPLATES ───────── -->
+
+    <!-- Overview tab -->
+    <ng-template #overviewTab let-record>
+      <div class="ob-two-col">
+        <knod-card title="Employee information">
+          <div class="ob-info-grid">
+            <div class="ob-info-item"><label>Employee ID</label><span>{{ record.employeeId }}</span></div>
+            <div class="ob-info-item"><label>Department</label><span>{{ record.department }}</span></div>
+            <div class="ob-info-item"><label>Manager</label><span>{{ record.manager }}</span></div>
+            <div class="ob-info-item"><label>Email</label><span class="ob-small-text">{{ record.employeeEmail }}</span></div>
+            <div class="ob-info-item"><label>Joining date</label><span>{{ record.joiningDate | date:'d MMM yyyy' }}</span></div>
+            <div class="ob-info-item"><label>Last working day</label><span>{{ record.lastWorkingDay | date:'d MMM yyyy' }}</span></div>
+            <div class="ob-info-item"><label>Initiated on</label><span>{{ record.initiatedOn | date:'d MMM yyyy' }}</span></div>
+            <div class="ob-info-item"><label>Initiated by</label><span>{{ record.initiatedBy }}</span></div>
+            @if (record.noticePeriod) {
+              <div class="ob-info-item"><label>Notice period</label><span>{{ record.noticePeriod }}</span></div>
+            }
+            @if (record.noticeStatus) {
+              <div class="ob-info-item"><label>Notice status</label><span>{{ record.noticeStatus }}</span></div>
+            }
+          </div>
+          @if (record.reason) {
+            <div class="ob-reason-box">
+              <strong>Reason:</strong> {{ record.reason }}
+            </div>
+          }
+          @if (record.hrNotes) {
+            <div class="ob-reason-box ob-notes-box">
+              <strong>HR notes:</strong> {{ record.hrNotes }}
+            </div>
+          }
+        </knod-card>
+
+        <knod-card title="Task progress by category">
+          <div class="ob-progress-wrap">
+            <div class="ob-circ-wrap">
+              <div class="ob-circ">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="var(--color-slate-200)" stroke-width="3"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="var(--color-primary-500)" stroke-width="3"
+                    [attr.stroke-dasharray]="record.progress + ',100'" stroke-linecap="round" transform="rotate(-90 18 18)"/>
+                </svg>
+                <span class="ob-circ-val">{{ record.progress }}%</span>
+              </div>
+            </div>
+            <div class="ob-cat-rows">
+              @for (cat of getCategoryProgress(record); track cat.name) {
+                <div class="ob-cat-row">
+                  <span class="ob-cat-label">{{ cat.name }}</span>
+                  <div class="ob-cat-bar"><div class="ob-cat-fill" [style.width.%]="cat.progress"></div></div>
+                  <span class="ob-cat-count">{{ cat.completed }}/{{ cat.total }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </knod-card>
+      </div>
+    </ng-template>
+
+    <!-- Tasks tab -->
+    <ng-template #tasksTab let-record>
+      <div class="ob-section-bar">
+        <span class="ob-section-title">{{ getCompletedTaskCount(record) }}/{{ record.tasks.length }} tasks completed</span>
+        <div class="ob-filter-btns">
+          <button class="ob-filter-btn" [class.active]="taskFilter() === 'all'" (click)="taskFilter.set('all')">All</button>
+          <button class="ob-filter-btn" [class.active]="taskFilter() === 'pending'" (click)="taskFilter.set('pending')">Pending</button>
+          <button class="ob-filter-btn" [class.active]="taskFilter() === 'completed'" (click)="taskFilter.set('completed')">Completed</button>
+        </div>
+      </div>
+      @for (task of getFilteredTasks(record); track task.id) {
+        <div class="ob-task-item" [class.ob-task-done]="task.status === 'completed'" [class.ob-task-blocked]="task.status === 'blocked'">
+          <input type="checkbox" class="ob-task-cb" [checked]="task.status === 'completed'" (change)="toggleTask(task)">
+          <div class="ob-task-body">
+            <div class="ob-task-top">
+              <span class="ob-task-title" [class.ob-strikethrough]="task.status === 'completed'">{{ task.title }}</span>
+              <knod-badge [color]="getTaskCategoryColor(task.category)" size="sm">{{ task.category }}</knod-badge>
+            </div>
+            <p class="ob-task-desc">{{ task.description }}</p>
+            <div class="ob-task-meta">
+              <span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {{ task.assignedTo }}
+              </span>
+              <span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Due {{ task.dueDate | date:'d MMM yyyy' }}
+              </span>
+              @if (task.status === 'completed' && task.completedOn) {
+                <span class="ob-task-done-label">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Done {{ task.completedOn | date:'d MMM yyyy' }}
+                </span>
+              } @else {
+                <knod-badge [color]="getTaskStatusColor(task.status)" size="sm">{{ task.status | titlecase }}</knod-badge>
+              }
+            </div>
+            @if (task.notes) {
+              <div class="ob-task-notes">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                {{ task.notes }}
+              </div>
+            }
           </div>
         </div>
-        <div class="tasks-list">
-          @for (task of getFilteredTasks(); track task.id) {
-            <div class="task-item" [class.completed]="task.status === 'completed'" [class.blocked]="task.status === 'blocked'">
-              <div class="task-status">
-                <input type="checkbox" [checked]="task.status === 'completed'" (change)="toggleTask(task)">
-              </div>
-              <div class="task-content">
-                <div class="task-header">
-                  <span class="task-title" [class.strikethrough]="task.status === 'completed'">{{ task.title }}</span>
-                  <knod-badge [color]="getTaskCategoryColor(task.category)">{{ task.category }}</knod-badge>
-                </div>
-                <p class="task-desc">{{ task.description }}</p>
-                <div class="task-meta">
-                  <span class="task-assignee">
-                    <knod-avatar [name]="task.assignedTo" size="sm"></knod-avatar>
-                    {{ task.assignedTo }}
-                  </span>
-                  <span class="task-due">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    {{ task.dueDate | date:'mediumDate' }}
-                  </span>
-                  @if (task.status === 'completed' && task.completedOn) {
-                    <span class="task-completed">
-                      Completed {{ task.completedOn | date:'short' }}
-                    </span>
+      }
+    </ng-template>
+
+    <!-- Approvals tab -->
+    <ng-template #approvalsTab let-record>
+      <div class="ob-section-title" style="margin-bottom: 14px">Approval workflow</div>
+      @for (approval of record.approvals; track approval.role; let i = $index) {
+        <div class="ob-appr-item" [class.ob-appr-done]="approval.status === 'completed'">
+          <div class="ob-appr-icon" [class.done]="approval.status === 'completed'" [class.pending]="approval.status === 'pending'">
+            @if (approval.status === 'completed') {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            } @else {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            }
+          </div>
+          <div class="ob-appr-content">
+            <span class="ob-appr-role">{{ approval.role }}</span>
+            <span class="ob-appr-sub">
+              @if (approval.status === 'completed') {
+                Approved by {{ approval.approvedBy }} · {{ approval.approvedOn | date:'d MMM yyyy' }}
+              } @else {
+                Awaiting approval
+              }
+            </span>
+          </div>
+          @if (approval.status === 'pending') {
+            <knod-button variant="outline" size="sm" (click)="approveItem(record, i)">Approve</knod-button>
+          } @else {
+            <knod-badge color="green">Approved</knod-badge>
+          }
+        </div>
+      }
+    </ng-template>
+
+    <!-- Documents tab -->
+    <ng-template #documentsTab let-record>
+      <div class="ob-section-bar">
+        <span class="ob-section-title">Offboarding documents</span>
+        <knod-button variant="outline" size="sm" [icon]="plusIcon" (click)="addDocument(record)">Add document</knod-button>
+      </div>
+      @for (doc of record.documents; track doc.name; let i = $index) {
+        <div class="ob-doc-item" [class.ob-doc-issued]="doc.status === 'issued'">
+          <div class="ob-doc-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="ob-doc-info">
+            <span class="ob-doc-name">{{ doc.name }}</span>
+            @if (doc.issuedOn) {
+              <span class="ob-doc-date">Issued on {{ doc.issuedOn | date:'d MMM yyyy' }}</span>
+            } @else {
+              <span class="ob-doc-date">Not yet issued</span>
+            }
+          </div>
+          <knod-badge [color]="doc.status === 'issued' ? 'green' : 'slate'">{{ doc.status | titlecase }}</knod-badge>
+          @if (doc.status !== 'issued') {
+            <knod-button variant="outline" size="sm" (click)="issueDocument(record, i)">Issue</knod-button>
+          }
+        </div>
+      }
+    </ng-template>
+
+    <!-- Timeline tab -->
+    <ng-template #timelineTab let-record>
+      <div class="ob-section-title" style="margin-bottom: 14px">Offboarding timeline</div>
+      <div class="ob-timeline">
+        @for (step of getTimelineSteps(record); track step.title) {
+          <div class="ob-tl-item">
+            <div class="ob-tl-dot" [class.done]="step.done" [class.active]="step.active && !step.done">
+              @if (step.done) {
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              } @else if (step.active) {
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+              } @else {
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              }
+            </div>
+            <div class="ob-tl-content">
+              <span class="ob-tl-title">{{ step.title }}</span>
+              @if (step.date) { <span class="ob-tl-date">{{ step.date | date:'d MMM yyyy' }}</span> }
+              <span class="ob-tl-desc">{{ step.desc }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </ng-template>
+
+    <!-- ───────── INITIATE OFFBOARDING MODAL ───────── -->
+    @if (showModal()) {
+      <div class="ob-modal-overlay" (click)="closeModalOutside($event)">
+        <div class="ob-modal" (click)="$event.stopPropagation()">
+
+          <div class="ob-modal-header">
+            <span class="ob-modal-title">{{ stepLabels[modalStep() - 1] }}</span>
+            <knod-button variant="outline" size="sm" [icon]="closeIcon" (click)="closeModal()"></knod-button>
+          </div>
+
+          <!-- Step indicator -->
+          <div class="ob-step-bar">
+            @for (label of stepLabels; track label; let i = $index) {
+              <div class="ob-step-dot">
+                <div class="ob-step-circle"
+                  [class.done]="i + 1 < modalStep()"
+                  [class.active]="i + 1 === modalStep()"
+                  [class.inactive]="i + 1 > modalStep()">
+                  @if (i + 1 < modalStep()) {
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  } @else {
+                    {{ i + 1 }}
                   }
                 </div>
-                @if (task.notes) {
-                  <div class="task-notes">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                    </svg>
-                    {{ task.notes }}
+                <span class="ob-step-label" [class.active]="i + 1 === modalStep()">{{ label }}</span>
+              </div>
+              @if (i < stepLabels.length - 1) {
+                <div class="ob-step-line"></div>
+              }
+            }
+          </div>
+
+          <div class="ob-modal-body">
+
+            <!-- Step 1: Employee info -->
+            @if (modalStep() === 1) {
+              <div class="ob-form-row">
+                <div class="ob-form-field">
+                  <label>Employee ID <span class="ob-required">*</span></label>
+                  <input [(ngModel)]="formData().employeeId" placeholder="e.g. EMP-0234">
+                </div>
+                <div class="ob-form-field">
+                  <label>Full name <span class="ob-required">*</span></label>
+                  <input [(ngModel)]="formData().employeeName" placeholder="Full legal name">
+                </div>
+              </div>
+              <div class="ob-form-row">
+                <div class="ob-form-field">
+                  <label>Work email <span class="ob-required">*</span></label>
+                  <input [(ngModel)]="formData().employeeEmail" placeholder="name@company.com" type="email">
+                </div>
+                <div class="ob-form-field">
+                  <label>Department <span class="ob-required">*</span></label>
+                  <select [(ngModel)]="formData().department">
+                    <option value="">Select…</option>
+                    @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
+                  </select>
+                </div>
+              </div>
+              <div class="ob-form-row">
+                <div class="ob-form-field">
+                  <label>Position / Role <span class="ob-required">*</span></label>
+                  <input [(ngModel)]="formData().position" placeholder="Job title">
+                </div>
+                <div class="ob-form-field">
+                  <label>Reporting manager <span class="ob-required">*</span></label>
+                  <input [(ngModel)]="formData().manager" placeholder="Manager full name">
+                </div>
+              </div>
+              <div class="ob-form-row">
+                <div class="ob-form-field">
+                  <label>Date of joining</label>
+                  <input [(ngModel)]="formData().joiningDate" type="date">
+                </div>
+                <div class="ob-form-field">
+                  <label>Manager email</label>
+                  <input [(ngModel)]="formData().managerEmail" placeholder="manager@company.com" type="email">
+                </div>
+              </div>
+            }
+
+            <!-- Step 2: Separation details -->
+            @if (modalStep() === 2) {
+              <div class="ob-form-row">
+                <div class="ob-form-field">
+                  <label>Separation type <span class="ob-required">*</span></label>
+                  <select [(ngModel)]="formData().separationType">
+                    <option value="">Select…</option>
+                    @for (t of separationTypes; track t) { <option [value]="t">{{ t }}</option> }
+                  </select>
+                </div>
+                <div class="ob-form-field">
+                  <label>Last working day <span class="ob-required">*</span></label>
+                  <input [(ngModel)]="formData().lastWorkingDay" type="date">
+                </div>
+              </div>
+              <div class="ob-form-row">
+                <div class="ob-form-field">
+                  <label>Notice period</label>
+                  <input [(ngModel)]="formData().noticePeriod" placeholder="e.g. 60 days">
+                </div>
+                <div class="ob-form-field">
+                  <label>Notice period status</label>
+                  <select [(ngModel)]="formData().noticeStatus">
+                    <option value="">Select…</option>
+                    @for (s of noticeStatuses; track s) { <option [value]="s">{{ s }}</option> }
+                  </select>
+                </div>
+              </div>
+              <div class="ob-form-row ob-form-row-single">
+                <div class="ob-form-field">
+                  <label>Reason for separation</label>
+                  <textarea [(ngModel)]="formData().reason" placeholder="Brief description of reason for leaving…" rows="3"></textarea>
+                </div>
+              </div>
+              <div class="ob-form-row">
+                <div class="ob-form-field">
+                  <label>Resignation letter received</label>
+                  <select [(ngModel)]="formData().resignationLetterReceived">
+                    <option value="">Select…</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="N/A">N/A</option>
+                  </select>
+                </div>
+                <div class="ob-form-field">
+                  <label>Exit interview required</label>
+                  <select [(ngModel)]="formData().exitInterviewRequired">
+                    <option value="">Select…</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+              </div>
+              <div class="ob-form-row ob-form-row-single">
+                <div class="ob-form-field">
+                  <label>Additional HR notes</label>
+                  <textarea [(ngModel)]="formData().hrNotes" placeholder="Any additional context, instructions, or flags…" rows="2"></textarea>
+                </div>
+              </div>
+            }
+
+            <!-- Step 3: Task setup -->
+            @if (modalStep() === 3) {
+              <p class="ob-form-hint">Select tasks to include in this offboarding checklist. You can adjust assignees and due dates after creating the record.</p>
+              @for (tmpl of taskTemplates; track tmpl.id) {
+                <div class="ob-task-tmpl">
+                  <input type="checkbox" [id]="'tmpl-' + tmpl.id" [checked]="formData().selectedTasks[tmpl.id]" (change)="toggleTemplate(tmpl.id, $any($event.target).checked)">
+                  <label [for]="'tmpl-' + tmpl.id" class="ob-task-tmpl-label">
+                    <span class="ob-task-tmpl-title">{{ tmpl.title }}</span>
+                    <span class="ob-task-tmpl-meta">{{ tmpl.description }} · Assigned to: {{ tmpl.assignedTo }}</span>
+                  </label>
+                  <knod-badge [color]="getTaskCategoryColor(tmpl.category)" size="sm">{{ tmpl.category }}</knod-badge>
+                </div>
+              }
+              <div class="ob-form-divider">
+                <span>Approvals (auto-included in all workflows)</span>
+              </div>
+              @for (a of autoApprovals; track a) {
+                <div class="ob-task-tmpl ob-task-tmpl-disabled">
+                  <input type="checkbox" checked disabled>
+                  <label class="ob-task-tmpl-label">
+                    <span class="ob-task-tmpl-title">{{ a }}</span>
+                    <span class="ob-task-tmpl-meta">Automatically added to every offboarding record</span>
+                  </label>
+                </div>
+              }
+            }
+
+            <!-- Step 4: Review -->
+            @if (modalStep() === 4) {
+              <div class="ob-review-section">
+                <div class="ob-review-label">Employee details</div>
+                @for (row of getReviewEmployeeRows(); track row.key) {
+                  <div class="ob-review-row">
+                    <span>{{ row.key }}</span>
+                    <span>{{ row.val || '—' }}</span>
                   </div>
                 }
               </div>
-            </div>
-          }
+              <div class="ob-review-section">
+                <div class="ob-review-label">Separation details</div>
+                @for (row of getReviewSeparationRows(); track row.key) {
+                  <div class="ob-review-row">
+                    <span>{{ row.key }}</span>
+                    <span>{{ row.val || '—' }}</span>
+                  </div>
+                }
+                @if (formData().reason) {
+                  <div class="ob-reason-box" style="margin-top: 8px">{{ formData().reason }}</div>
+                }
+              </div>
+              <div class="ob-review-section">
+                <div class="ob-review-label">Tasks included</div>
+                <div class="ob-review-tasks">
+                  @for (tmpl of taskTemplates; track tmpl.id) {
+                    @if (formData().selectedTasks[tmpl.id]) {
+                      <knod-badge [color]="getTaskCategoryColor(tmpl.category)" size="sm">{{ tmpl.title }}</knod-badge>
+                    }
+                  }
+                </div>
+              </div>
+              <div class="ob-submit-notice">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Submitting will create the offboarding record, notify the manager and relevant stakeholders, and start the approval workflow.
+              </div>
+            }
+
+          </div>
+
+          <div class="ob-modal-footer">
+            @if (modalStep() > 1) {
+              <knod-button variant="outline" (click)="prevStep()">← Back</knod-button>
+            } @else {
+              <knod-button variant="outline" (click)="closeModal()">Cancel</knod-button>
+            }
+            @if (modalStep() < 4) {
+              <knod-button variant="primary" (click)="nextStep()">Next →</knod-button>
+            } @else {
+              <knod-button variant="primary" [icon]="checkIcon" (click)="submitOffboarding()">Initiate offboarding</knod-button>
+            }
+          </div>
+
         </div>
       </div>
-    </ng-template>
-
-    <!-- Approvals Tab Template -->
-    <ng-template #approvalsTab>
-      <div class="approvals-section">
-        <knod-card title="Approval Workflow">
-          <div class="approval-timeline">
-            @for (approval of selectedRecord()?.approvals; track approval.role) {
-              <div class="approval-item" [class.completed]="approval.status === 'completed'" [class.pending]="approval.status === 'pending'">
-                <div class="approval-icon">
-                  @if (approval.status === 'completed') {
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  } @else {
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="12" y1="8" x2="12" y2="12"/>
-                      <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                  }
-                </div>
-                <div class="approval-content">
-                  <span class="approval-role">{{ approval.role }}</span>
-                  <span class="approval-status">{{ approval.status === 'completed' ? 'Approved' : 'Pending Approval' }}</span>
-                  @if (approval.approvedBy) {
-                    <span class="approval-meta">By {{ approval.approvedBy }} on {{ approval.approvedOn | date:'short' }}</span>
-                  }
-                </div>
-                @if (approval.status === 'pending') {
-                  <knod-button variant="outline" size="sm">Approve</knod-button>
-                }
-              </div>
-            }
-          </div>
-        </knod-card>
-      </div>
-    </ng-template>
-
-    <!-- Documents Tab Template -->
-    <ng-template #documentsTab>
-      <div class="documents-section">
-        <knod-card title="Offboarding Documents">
-          <div class="document-list">
-            @for (doc of selectedRecord()?.documents; track doc.name) {
-              <div class="document-item" [class.issued]="doc.status === 'issued'">
-                <div class="doc-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                  </svg>
-                </div>
-                <div class="doc-info">
-                  <span class="doc-name">{{ doc.name }}</span>
-                  @if (doc.issuedOn) {
-                    <span class="doc-date">Issued on {{ doc.issuedOn | date:'mediumDate' }}</span>
-                  }
-                </div>
-                <knod-badge [color]="doc.status === 'issued' ? 'green' : 'slate'">{{ doc.status | titlecase }}</knod-badge>
-                @if (doc.status !== 'issued') {
-                  <knod-button variant="outline" size="sm">Issue</knod-button>
-                }
-              </div>
-            }
-          </div>
-        </knod-card>
-      </div>
-    </ng-template>
-
-    <!-- Timeline Tab Template -->
-    <ng-template #timelineTab>
-      <div class="timeline-section">
-        <knod-card title="Offboarding Timeline">
-          <div class="timeline">
-            <div class="timeline-item completed">
-              <div class="timeline-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                </svg>
-              </div>
-              <div class="timeline-content">
-                <span class="timeline-title">Offboarding Initiated</span>
-                <span class="timeline-date">{{ selectedRecord()?.initiatedOn | date:'mediumDate' }}</span>
-                <span class="timeline-desc">By {{ selectedRecord()?.initiatedBy }}</span>
-              </div>
-            </div>
-            <div class="timeline-item" [class.completed]="getCompletedTaskCount(selectedRecord()!) > 0">
-              <div class="timeline-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 11l3 3L22 4"/>
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                </svg>
-              </div>
-              <div class="timeline-content">
-                <span class="timeline-title">Tasks Progress</span>
-                <span class="timeline-date">Ongoing</span>
-                <span class="timeline-desc">{{ getCompletedTaskCount(selectedRecord()!) }} of {{ selectedRecord()?.tasks?.length ?? 0 }} tasks completed</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                  <line x1="8" y1="21" x2="16" y2="21"/>
-                  <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
-              </div>
-              <div class="timeline-content">
-                <span class="timeline-title">Asset Clearance</span>
-                <span class="timeline-date">Due: {{ selectedRecord()?.lastWorkingDay | date:'mediumDate' }}</span>
-                <span class="timeline-desc">IT asset return verification</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </div>
-              <div class="timeline-content">
-                <span class="timeline-title">Final Clearance</span>
-                <span class="timeline-date">{{ selectedRecord()?.lastWorkingDay | date:'mediumDate' }}</span>
-                <span class="timeline-desc">All approvals and documents completed</span>
-              </div>
-            </div>
-          </div>
-        </knod-card>
-      </div>
-    </ng-template>
+    }
   `,
   styles: [`
-    .offboarding-page {
+    /* ─── Page shell ─── */
+    .ob-page {
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      max-width: 100%;
-      overflow: hidden;
+      height: 100%;
+      min-height: 0;
+      background: var(--color-slate-50);
     }
 
-    @media (min-width: 768px) {
-      .offboarding-page {
-        gap: 20px;
-      }
-    }
-
-    .page-header {
+    /* ─── Top bar ─── */
+    .ob-topbar {
       display: flex;
-      flex-wrap: wrap;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 20px;
+      background: white;
+      border-bottom: 1px solid var(--color-slate-100);
     }
-
-    .header-content {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .page-title {
-      font-size: 20px;
-      font-weight: 700;
+    .ob-title {
+      font-size: 16px;
+      font-weight: 600;
       color: var(--color-slate-900);
-      margin: 0 0 4px 0;
+      margin: 0 0 2px;
     }
-
-    @media (min-width: 768px) {
-      .page-title {
-        font-size: 24px;
-      }
-    }
-
-    .page-subtitle {
-      font-size: 13px;
+    .ob-subtitle {
+      font-size: 12px;
       color: var(--color-slate-500);
       margin: 0;
     }
-
-    .header-actions {
+    .ob-topbar-actions {
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .stats-row {
+    /* ─── Stats ─── */
+    .ob-stats-row {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
+      padding: 14px 20px;
+      background: var(--color-slate-50);
+      border-bottom: 1px solid var(--color-slate-100);
     }
-
-    @media (min-width: 768px) {
-      .stats-row {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-      }
+    @media (max-width: 768px) {
+      .ob-stats-row { grid-template-columns: repeat(2, 1fr); }
     }
-
-    .stat-card {
+    .ob-stat-card {
       background: white;
+      border: 1px solid var(--color-slate-200);
       border-radius: 8px;
-      padding: 16px;
+      padding: 14px 16px;
       cursor: pointer;
-      transition: all var(--transition-fast);
-      border: 2px solid transparent;
       position: relative;
       overflow: hidden;
+      transition: border-color var(--transition-fast);
     }
+    .ob-stat-card:hover { border-color: var(--color-slate-300); }
+    .ob-stat-val { font-size: 22px; font-weight: 700; color: var(--color-slate-900); }
+    .ob-stat-lbl { font-size: 11px; color: var(--color-slate-500); margin-top: 2px; }
+    .ob-stat-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
 
-    .stat-card:hover {
-      border-color: var(--color-slate-200);
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--color-slate-900);
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--color-slate-500);
-      margin-top: 4px;
-    }
-
-    .stat-indicator {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-    }
-
-    .stat-indicator.blue { background: var(--color-primary-500); }
-    .stat-indicator.amber { background: var(--color-amber-500); }
-    .stat-indicator.violet { background: var(--color-violet-500); }
-    .stat-indicator.green { background: var(--color-success-500); }
-
-    .content-layout {
+    /* ─── Main layout ─── */
+    .ob-main {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-      min-height: 600px;
+      grid-template-columns: 280px 1fr;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    @media (max-width: 1024px) {
+      .ob-main { grid-template-columns: 1fr; }
     }
 
-    @media (min-width: 1280px) {
-      .content-layout {
-        grid-template-columns: 380px 1fr;
-      }
-    }
-
-    .list-panel {
+    /* ─── Sidebar ─── */
+    .ob-sidebar {
       background: white;
-      border-radius: 12px;
-      padding: 16px;
+      border-right: 1px solid var(--color-slate-100);
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      min-width: 0;
+      overflow: hidden;
     }
-
-    @media (min-width: 768px) {
-      .list-panel {
-        padding: 20px;
-      }
-    }
-
-    .filters-bar {
+    .ob-sidebar-search { padding: 12px; border-bottom: 1px solid var(--color-slate-100); }
+    .ob-sidebar-filters {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
+      gap: 6px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--color-slate-100);
     }
-
-    .filter-chips {
-      display: flex;
-      gap: 8px;
-    }
-
-    .filter-chip {
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 12px;
+    .ob-fchip {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
       font-weight: 500;
       background: var(--color-slate-100);
       color: var(--color-slate-600);
@@ -678,438 +870,174 @@ interface OffboardingRecord {
       cursor: pointer;
       transition: all var(--transition-fast);
     }
-
-    .filter-chip.active {
-      background: var(--color-primary-500);
-      color: white;
-    }
-
-    .offboarding-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-      max-height: 500px;
-    }
-
-    .offboarding-item {
-      padding: 16px;
-      border: 1px solid var(--color-slate-200);
-      border-radius: 8px;
+    .ob-fchip.active { background: var(--color-primary-500); color: white; }
+    .ob-emp-list { flex: 1; overflow-y: auto; }
+    .ob-emp-item {
+      padding: 12px;
+      border-bottom: 1px solid var(--color-slate-100);
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: background var(--transition-fast);
     }
-
-    .offboarding-item:hover {
-      border-color: var(--color-slate-300);
-      background: var(--color-slate-50);
-    }
-
-    .offboarding-item.selected {
-      border-color: var(--color-primary-500);
+    .ob-emp-item:hover { background: var(--color-slate-50); }
+    .ob-emp-item.active {
       background: var(--color-primary-50);
+      border-left: 2px solid var(--color-primary-500);
     }
+    .ob-emp-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .ob-emp-info { flex: 1; min-width: 0; }
+    .ob-emp-name { font-size: 13px; font-weight: 600; color: var(--color-slate-900); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ob-emp-role { font-size: 11px; color: var(--color-slate-500); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ob-emp-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .ob-emp-lwd { font-size: 11px; color: var(--color-slate-500); display: flex; align-items: center; gap: 4px; }
+    .ob-emp-prog { display: flex; align-items: center; gap: 8px; }
+    .ob-prog-bar { flex: 1; height: 3px; background: var(--color-slate-200); border-radius: 2px; overflow: hidden; }
+    .ob-prog-fill { height: 100%; background: var(--color-primary-500); border-radius: 2px; }
+    .ob-prog-text { font-size: 10px; color: var(--color-slate-500); min-width: 28px; text-align: right; }
+    .ob-list-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 16px; color: var(--color-slate-400); text-align: center; }
+    .ob-list-empty p { font-size: 12px; margin: 0; }
 
-    .item-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .item-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .item-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--color-slate-900);
-    }
-
-    .item-position {
-      font-size: 12px;
-      color: var(--color-slate-500);
-    }
-
-    .item-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--color-slate-500);
-      margin-bottom: 12px;
-    }
-
-    .meta-separator {
-      color: var(--color-slate-300);
-    }
-
-    .item-progress {
+    /* ─── Detail panel ─── */
+    .ob-detail {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-    }
-
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--color-slate-500);
-    }
-
-    .task-count {
-      color: var(--color-slate-400);
-    }
-
-    .progress-bar {
-      height: 4px;
-      background: var(--color-slate-200);
-      border-radius: 2px;
       overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--color-primary-500);
-      border-radius: 2px;
-    }
-
-    .detail-panel {
-      background: white;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      overflow: hidden;
-    }
-
-    .record-header {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-      padding: 16px;
-      border-bottom: 1px solid var(--color-slate-100);
-    }
-
-    @media (min-width: 768px) {
-      .record-header {
-        flex-direction: row;
-        padding: 20px;
-      }
-    }
-
-    .header-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .header-name {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--color-slate-900);
-      margin: 0;
-    }
-
-    .header-position {
-      font-size: 13px;
-      color: var(--color-slate-500);
-      margin: 4px 0 12px 0;
-    }
-
-    .header-meta {
-      display: flex;
-      gap: 16px;
-    }
-
-    .header-meta .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--color-slate-500);
-      flex-wrap: wrap;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .separation-info {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 16px;
-      padding: 16px;
       background: var(--color-slate-50);
-      border-bottom: 1px solid var(--color-slate-100);
     }
-
-    @media (min-width: 768px) {
-      .separation-info {
-        gap: 24px;
-        padding: 16px 20px;
-      }
-    }
-
-    .separation-type {
-      flex-shrink: 0;
-    }
-
-    .separation-dates {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    @media (min-width: 768px) {
-      .separation-dates {
-        gap: 24px;
-      }
-    }
-
-    .date-item {
+    .ob-detail-empty {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--color-slate-400);
+      text-align: center;
+      padding: 60px 20px;
     }
+    .ob-detail-empty h3 { font-size: 15px; font-weight: 600; color: var(--color-slate-700); margin: 0; }
+    .ob-detail-empty p { font-size: 13px; color: var(--color-slate-500); margin: 0; }
 
-    .date-label {
-      font-size: 10px;
-      color: var(--color-slate-500);
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-
-    .date-value {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-slate-700);
-    }
-
-    .separation-reason {
-      width: 100%;
+    /* ─── Record header ─── */
+    .ob-rec-header {
       display: flex;
       align-items: flex-start;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    @media (min-width: 768px) {
-      .separation-reason {
-        margin-left: auto;
-        margin-top: 0;
-        width: auto;
-      }
-    }
-
-    .reason-label {
-      font-size: 11px;
-      color: var(--color-slate-500);
-    }
-
-    .reason-text {
-      font-size: 12px;
-      color: var(--color-slate-600);
-    }
-
-    .progress-overview {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px;
+      gap: 14px;
+      padding: 16px 20px;
+      background: white;
       border-bottom: 1px solid var(--color-slate-100);
     }
-
-    @media (min-width: 768px) {
-      .progress-overview {
-        flex-direction: row;
-        gap: 24px;
-        padding: 20px;
-      }
-    }
-
-    .overall-progress {
+    .ob-rec-header-info { flex: 1; min-width: 0; }
+    .ob-rec-name { font-size: 17px; font-weight: 600; color: var(--color-slate-900); margin: 0 0 2px; }
+    .ob-rec-role { font-size: 13px; color: var(--color-slate-500); margin: 0 0 8px; }
+    .ob-rec-badges { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .ob-rec-meta {
       display: flex;
-      flex-direction: column;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .ob-rec-meta span {
+      display: flex;
       align-items: center;
       gap: 4px;
-    }
-
-    .progress-circle {
-      width: 80px;
-      height: 80px;
-      position: relative;
-    }
-
-    .progress-circle svg {
-      width: 100%;
-      height: 100%;
-      transform: rotate(-90deg);
-    }
-
-    .ring-bg {
-      fill: none;
-      stroke: var(--color-slate-200);
-      stroke-width: 3;
-    }
-
-    .ring-fill {
-      fill: none;
-      stroke: var(--color-primary-500);
-      stroke-width: 3;
-      stroke-linecap: round;
-    }
-
-    .progress-value {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--color-slate-900);
-    }
-
-    .progress-label {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--color-slate-500);
     }
+    .ob-rec-header-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: flex-start; }
 
-    .category-progress {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .category-item {
+    /* ─── Sep band ─── */
+    .ob-sep-band {
       display: flex;
       align-items: center;
-      gap: 12px;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 12px 20px;
+      background: var(--color-slate-100);
+      border-bottom: 1px solid var(--color-slate-200);
     }
+    .ob-sep-date { display: flex; flex-direction: column; gap: 2px; }
+    .ob-sep-date label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-slate-500); font-weight: 500; }
+    .ob-sep-date span { font-size: 13px; font-weight: 500; color: var(--color-slate-700); }
+    .ob-lwd-urgent { color: var(--color-red-600) !important; }
+    .ob-sep-spacer { flex: 1; }
+    .ob-sep-prog { display: flex; align-items: center; gap: 10px; }
+    .ob-prog-bar-wide { width: 120px; height: 4px; background: var(--color-slate-300); border-radius: 2px; overflow: hidden; flex: none; }
+    .ob-sep-prog-text { font-size: 12px; font-weight: 500; color: var(--color-slate-700); }
 
-    .category-name {
-      width: 80px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--color-slate-700);
-    }
-
-    .category-bar {
-      flex: 1;
-      height: 6px;
-      background: var(--color-slate-200);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    .category-fill {
-      height: 100%;
-      background: var(--color-primary-500);
-      border-radius: 3px;
-    }
-
-    .category-count {
-      font-size: 11px;
-      color: var(--color-slate-500);
-      width: 40px;
-      text-align: right;
-    }
-
-    .detail-tabs {
-      padding: 0 16px;
-      border-bottom: 1px solid var(--color-slate-100);
+    /* ─── Tabs ─── */
+    .ob-tabs-row {
+      display: flex;
+      gap: 0;
+      background: white;
+      border-bottom: 1px solid var(--color-slate-200);
+      padding: 0 20px;
       overflow-x: auto;
     }
-
-    @media (min-width: 768px) {
-      .detail-tabs {
-        padding: 0 20px;
-      }
-    }
-
-    .tab-content {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      min-width: 0;
-    }
-
-    @media (min-width: 768px) {
-      .tab-content {
-        padding: 20px;
-      }
-    }
-
-    .quick-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 12px 16px;
-      border-top: 1px solid var(--color-slate-100);
-      background: var(--color-slate-50);
-    }
-
-    @media (min-width: 768px) {
-      .quick-actions {
-        padding: 16px 20px;
-      }
-    }
-
-    .action-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .ob-tab-btn {
       padding: 10px 16px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--color-slate-700);
-      background: white;
-      border: 1px solid var(--color-slate-200);
-      border-radius: 6px;
+      font-size: 13px;
+      color: var(--color-slate-500);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
       cursor: pointer;
+      white-space: nowrap;
       transition: all var(--transition-fast);
     }
+    .ob-tab-btn:hover { color: var(--color-slate-700); }
+    .ob-tab-btn.active { color: var(--color-primary-600); border-bottom-color: var(--color-primary-500); font-weight: 600; }
 
-    .action-btn:hover {
-      background: var(--color-slate-50);
-      border-color: var(--color-slate-300);
+    /* ─── Tab body ─── */
+    .ob-tab-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
     }
 
-    /* Tasks Section */
-    .tasks-section {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+    /* ─── Overview tab ─── */
+    .ob-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 900px) { .ob-two-col { grid-template-columns: 1fr; } }
+    .ob-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .ob-info-item label { font-size: 11px; color: var(--color-slate-500); display: block; margin-bottom: 3px; }
+    .ob-info-item span { font-size: 13px; font-weight: 500; color: var(--color-slate-800); }
+    .ob-small-text { font-size: 12px !important; }
+    .ob-reason-box {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: var(--color-slate-100);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--color-slate-600);
+      font-style: italic;
     }
-
-    .section-header {
+    .ob-notes-box { background: var(--color-amber-50); border: 1px solid var(--color-amber-200); }
+    .ob-progress-wrap { display: flex; align-items: center; gap: 20px; }
+    .ob-circ-wrap { flex-shrink: 0; }
+    .ob-circ { width: 72px; height: 72px; position: relative; }
+    .ob-circ svg { width: 100%; height: 100%; }
+    .ob-circ-val {
+      position: absolute;
+      inset: 0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-    }
-
-    .section-header h3 {
+      justify-content: center;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--color-slate-900);
-      margin: 0;
     }
+    .ob-cat-rows { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .ob-cat-row { display: flex; align-items: center; gap: 8px; }
+    .ob-cat-label { width: 52px; font-size: 11px; color: var(--color-slate-500); text-align: right; }
+    .ob-cat-bar { flex: 1; height: 5px; background: var(--color-slate-200); border-radius: 3px; overflow: hidden; }
+    .ob-cat-fill { height: 100%; background: var(--color-primary-500); border-radius: 3px; }
+    .ob-cat-count { font-size: 10px; color: var(--color-slate-500); width: 28px; }
 
-    .filter-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .filter-btn {
-      padding: 6px 12px;
+    /* ─── Tasks tab ─── */
+    .ob-section-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .ob-section-title { font-size: 13px; font-weight: 600; color: var(--color-slate-800); }
+    .ob-filter-btns { display: flex; gap: 6px; }
+    .ob-filter-btn {
+      padding: 5px 10px;
       font-size: 12px;
       font-weight: 500;
       color: var(--color-slate-600);
@@ -1117,217 +1045,85 @@ interface OffboardingRecord {
       border: none;
       border-radius: 6px;
       cursor: pointer;
-    }
-
-    .filter-btn.active {
-      background: var(--color-primary-500);
-      color: white;
-    }
-
-    .tasks-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .task-item {
-      display: flex;
-      gap: 12px;
-      padding: 16px;
-      border: 1px solid var(--color-slate-200);
-      border-radius: 8px;
       transition: all var(--transition-fast);
     }
-
-    .task-item:hover {
-      background: var(--color-slate-50);
-    }
-
-    .task-item.completed {
-      background: var(--color-success-50);
-      border-color: var(--color-success-200);
-    }
-
-    .task-item.blocked {
-      background: var(--color-red-50);
-      border-color: var(--color-red-200);
-    }
-
-    .task-status {
-      padding-top: 2px;
-    }
-
-    .task-status input {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-
-    .task-content {
-      flex: 1;
-    }
-
-    .task-header {
+    .ob-filter-btn.active { background: var(--color-primary-500); color: white; }
+    .ob-task-item {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: white;
+      transition: all var(--transition-fast);
     }
-
-    .task-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-slate-900);
-    }
-
-    .task-title.strikethrough {
-      text-decoration: line-through;
-      color: var(--color-slate-500);
-    }
-
-    .task-desc {
-      font-size: 12px;
-      color: var(--color-slate-500);
-      margin: 0 0 10px 0;
-    }
-
-    .task-meta {
+    .ob-task-item:hover { background: var(--color-slate-50); }
+    .ob-task-done { background: var(--color-success-50) !important; border-color: var(--color-success-200) !important; }
+    .ob-task-blocked { background: var(--color-red-50) !important; border-color: var(--color-red-200) !important; }
+    .ob-task-cb { width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; cursor: pointer; accent-color: var(--color-primary-500); }
+    .ob-task-body { flex: 1; }
+    .ob-task-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+    .ob-task-title { font-size: 13px; font-weight: 500; color: var(--color-slate-900); }
+    .ob-strikethrough { text-decoration: line-through; color: var(--color-slate-400) !important; }
+    .ob-task-desc { font-size: 12px; color: var(--color-slate-500); margin: 0 0 8px; }
+    .ob-task-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .ob-task-meta span { font-size: 11px; color: var(--color-slate-500); display: flex; align-items: center; gap: 3px; }
+    .ob-task-done-label { color: var(--color-success-600) !important; }
+    .ob-task-notes {
       display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .task-assignee {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--color-slate-500);
-    }
-
-    .task-due {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      color: var(--color-slate-500);
-    }
-
-    .task-completed {
-      font-size: 11px;
-      color: var(--color-success-600);
-    }
-
-    .task-notes {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      align-items: flex-start;
+      gap: 5px;
       margin-top: 8px;
-      padding: 8px 12px;
+      padding: 7px 10px;
       background: var(--color-slate-100);
-      border-radius: 6px;
+      border-radius: 5px;
       font-size: 11px;
       color: var(--color-slate-600);
     }
 
-    /* Approvals Section */
-    .approvals-section {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .approval-timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .approval-item {
+    /* ─── Approvals tab ─── */
+    .ob-appr-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 16px;
-      background: var(--color-slate-50);
+      padding: 12px;
+      border: 1px solid var(--color-slate-200);
       border-radius: 8px;
+      margin-bottom: 8px;
+      background: white;
     }
-
-    .approval-item.completed {
-      background: var(--color-success-50);
-    }
-
-    .approval-icon {
-      width: 32px;
-      height: 32px;
+    .ob-appr-done { background: var(--color-success-50) !important; border-color: var(--color-success-200) !important; }
+    .ob-appr-icon {
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
+    .ob-appr-icon.done { background: var(--color-success-100); color: var(--color-success-600); }
+    .ob-appr-icon.pending { background: var(--color-slate-100); color: var(--color-slate-500); }
+    .ob-appr-content { flex: 1; }
+    .ob-appr-role { font-size: 13px; font-weight: 600; color: var(--color-slate-900); display: block; }
+    .ob-appr-sub { font-size: 11px; color: var(--color-slate-500); display: block; margin-top: 2px; }
 
-    .approval-item.completed .approval-icon {
-      background: var(--color-success-100);
-      color: var(--color-success-600);
-    }
-
-    .approval-item.pending .approval-icon {
-      background: var(--color-slate-200);
-      color: var(--color-slate-500);
-    }
-
-    .approval-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .approval-role {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--color-slate-900);
-    }
-
-    .approval-status {
-      font-size: 12px;
-      color: var(--color-slate-500);
-    }
-
-    .approval-meta {
-      font-size: 11px;
-      color: var(--color-slate-400);
-    }
-
-    /* Documents Section */
-    .documents-section {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .document-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .document-item {
+    /* ─── Documents tab ─── */
+    .ob-doc-item {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 12px;
-      background: var(--color-slate-50);
-      border-radius: 6px;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: white;
     }
-
-    .document-item.issued {
-      background: var(--color-success-50);
-    }
-
-    .doc-icon {
-      width: 36px;
-      height: 36px;
+    .ob-doc-issued { background: var(--color-success-50) !important; border-color: var(--color-success-200) !important; }
+    .ob-doc-icon {
+      width: 34px;
+      height: 34px;
       border-radius: 6px;
       background: var(--color-primary-100);
       color: var(--color-primary-600);
@@ -1336,151 +1132,267 @@ interface OffboardingRecord {
       justify-content: center;
       flex-shrink: 0;
     }
+    .ob-doc-info { flex: 1; }
+    .ob-doc-name { font-size: 13px; font-weight: 500; color: var(--color-slate-900); display: block; }
+    .ob-doc-date { font-size: 11px; color: var(--color-slate-500); display: block; margin-top: 2px; }
 
-    .doc-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .doc-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-slate-900);
-    }
-
-    .doc-date {
-      font-size: 11px;
-      color: var(--color-slate-500);
-    }
-
-    /* Timeline Section */
-    .timeline-section {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      position: relative;
-      padding-left: 24px;
-    }
-
-    .timeline::before {
+    /* ─── Timeline tab ─── */
+    .ob-timeline { padding-left: 20px; position: relative; }
+    .ob-timeline::before {
       content: '';
       position: absolute;
-      left: 7px;
+      left: 11px;
       top: 0;
       bottom: 0;
-      width: 2px;
+      width: 1px;
       background: var(--color-slate-200);
     }
-
-    .timeline-item {
-      display: flex;
-      gap: 12px;
-      position: relative;
-    }
-
-    .timeline-icon {
+    .ob-tl-item { display: flex; gap: 12px; position: relative; padding-bottom: 20px; }
+    .ob-tl-dot {
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      background: var(--color-slate-200);
-      color: var(--color-slate-500);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      background: var(--color-slate-200);
+      color: var(--color-slate-500);
       position: relative;
       z-index: 1;
+      border: 1px solid var(--color-slate-300);
     }
+    .ob-tl-dot.done { background: var(--color-success-500); color: white; border-color: var(--color-success-600); }
+    .ob-tl-dot.active { background: var(--color-primary-100); color: var(--color-primary-600); border-color: var(--color-primary-400); }
+    .ob-tl-content { flex: 1; padding-top: 3px; }
+    .ob-tl-title { font-size: 13px; font-weight: 600; color: var(--color-slate-900); display: block; }
+    .ob-tl-date { font-size: 11px; color: var(--color-slate-500); display: block; margin-top: 2px; }
+    .ob-tl-desc { font-size: 11px; color: var(--color-slate-400); display: block; margin-top: 2px; }
 
-    .timeline-item.completed .timeline-icon {
-      background: var(--color-success-500);
-      color: white;
-    }
-
-    .timeline-content {
-      flex: 1;
+    /* ─── Quick actions ─── */
+    .ob-quick-actions {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 20px;
+      background: white;
+      border-top: 1px solid var(--color-slate-100);
     }
-
-    .timeline-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--color-slate-900);
-    }
-
-    .timeline-date {
-      font-size: 11px;
-      color: var(--color-slate-500);
-    }
-
-    .timeline-desc {
-      font-size: 11px;
-      color: var(--color-slate-400);
-    }
-
-    .empty-detail,
-    .empty-state {
+    .ob-action-btn {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-slate-700);
+      background: white;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .ob-action-btn:hover { background: var(--color-slate-50); border-color: var(--color-slate-300); }
+    .ob-action-btn-danger { color: var(--color-red-600); border-color: var(--color-red-300); }
+    .ob-action-btn-danger:hover { background: var(--color-red-50); }
+
+    /* ─── Modal ─── */
+  .ob-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.ob-modal {
+  background: white;
+  width: 900px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+    .ob-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-slate-100);
+      flex-shrink: 0;
+    }
+    .ob-modal-title { font-size: 15px; font-weight: 600; color: var(--color-slate-900); }
+    .ob-modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .ob-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--color-slate-100);
+      flex-shrink: 0;
+    }
+
+    /* ─── Step bar ─── */
+    .ob-step-bar {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--color-slate-100);
+      flex-shrink: 0;
+      flex-wrap: nowrap;
+    }
+    .ob-step-dot { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .ob-step-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      color: var(--color-slate-400);
-      text-align: center;
-      padding: 48px;
-    }
-
-    .empty-detail h3,
-    .empty-state h3 {
-      font-size: 16px;
+      font-size: 11px;
       font-weight: 600;
-      color: var(--color-slate-700);
-      margin: 0;
+      flex-shrink: 0;
     }
+    .ob-step-circle.done { background: var(--color-success-100); color: var(--color-success-700); border: 1px solid var(--color-success-300); }
+    .ob-step-circle.active { background: var(--color-primary-100); color: var(--color-primary-700); border: 1px solid var(--color-primary-400); }
+    .ob-step-circle.inactive { background: var(--color-slate-100); color: var(--color-slate-500); border: 1px solid var(--color-slate-200); }
+    .ob-step-label { font-size: 11px; color: var(--color-slate-500); white-space: nowrap; }
+    .ob-step-label.active { color: var(--color-primary-600); font-weight: 600; }
+    .ob-step-line { flex: 1; height: 1px; background: var(--color-slate-200); margin: 0 8px; }
 
-    .empty-detail p,
-    .empty-state p {
+    /* ─── Form fields ─── */
+    .ob-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .ob-form-row-single { grid-template-columns: 1fr; }
+    .ob-form-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-slate-600);
+      margin-bottom: 5px;
+    }
+    .ob-required { color: var(--color-red-500); }
+    .ob-form-field input,
+    .ob-form-field select,
+    .ob-form-field textarea {
+      width: 100%;
+      padding: 8px 12px;
       font-size: 13px;
-      color: var(--color-slate-500);
-      margin: 0;
+      color: var(--color-slate-800);
+      background: white;
+      border: 1px solid var(--color-slate-300);
+      border-radius: 6px;
+      font-family: inherit;
+      transition: border-color var(--transition-fast);
+      outline: none;
     }
-
-    /* Icons */
-    .reportIcon, .plusIcon, .editIcon, .tasksIcon {
+    .ob-form-field input:focus,
+    .ob-form-field select:focus,
+    .ob-form-field textarea:focus {
+      border-color: var(--color-primary-400);
+      box-shadow: 0 0 0 3px var(--color-primary-100);
+    }
+    .ob-form-field textarea { resize: vertical; min-height: 72px; }
+    .ob-form-hint { font-size: 12px; color: var(--color-slate-500); margin-bottom: 14px; }
+    .ob-form-divider {
       display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0 12px;
+    }
+    .ob-form-divider span { font-size: 11px; font-weight: 500; color: var(--color-slate-500); white-space: nowrap; }
+    .ob-form-divider::before,
+    .ob-form-divider::after { content: ''; flex: 1; height: 1px; background: var(--color-slate-200); }
+
+    /* ─── Task template picker ─── */
+    .ob-task-tmpl {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--color-slate-200);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      background: var(--color-slate-50);
+    }
+    .ob-task-tmpl input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; accent-color: var(--color-primary-500); }
+    .ob-task-tmpl-label { flex: 1; cursor: pointer; }
+    .ob-task-tmpl-title { font-size: 12px; font-weight: 500; color: var(--color-slate-800); display: block; }
+    .ob-task-tmpl-meta { font-size: 11px; color: var(--color-slate-500); display: block; margin-top: 1px; }
+    .ob-task-tmpl-disabled { opacity: 0.6; }
+    .ob-task-tmpl-disabled input { cursor: not-allowed; }
+
+    /* ─── Review step ─── */
+    .ob-review-section { margin-bottom: 16px; }
+    .ob-review-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+      color: var(--color-slate-500);
+      margin-bottom: 8px;
+    }
+    .ob-review-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--color-slate-100);
+      font-size: 13px;
+    }
+    .ob-review-row span:first-child { color: var(--color-slate-500); }
+    .ob-review-row span:last-child { font-weight: 500; color: var(--color-slate-800); }
+    .ob-review-tasks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .ob-submit-notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 12px;
+      background: var(--color-primary-50);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--color-primary-700);
+      margin-top: 4px;
     }
   `]
 })
 export class OffboardingComponent {
   private router: Router;
 
-  readonly reportIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
-  readonly plusIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-  readonly editIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-  readonly tasksIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+  readonly downloadIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+  readonly plusIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+  readonly editIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+  readonly checkIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`;
+  readonly closeIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
 
-  readonly searchQuery = signal('');
-  readonly statusFilter = signal('all');
-  readonly activeTab = signal('tasks');
-  readonly taskFilter = signal('all');
+  readonly stepLabels = STEP_LABELS;
+  readonly taskTemplates = TASK_TEMPLATES;
+  readonly departments = ['Engineering', 'Design', 'Marketing', 'Finance', 'HR', 'Operations', 'Sales', 'Legal'];
+  readonly separationTypes = ['Resignation', 'Termination', 'Contract End', 'Retirement', 'Mutual Separation'];
+  readonly noticeStatuses = ['Fully served', 'Partially served', 'Buyout', 'Waived'];
+  readonly autoApprovals = ['Manager approval', 'HR approval', 'Finance clearance', 'IT clearance'];
 
   readonly detailTabs = [
+    { key: 'overview', label: 'Overview' },
     { key: 'tasks', label: 'Tasks' },
     { key: 'approvals', label: 'Approvals' },
     { key: 'documents', label: 'Documents' },
-    { key: 'timeline', label: 'Timeline' }
+    { key: 'timeline', label: 'Timeline' },
   ];
+
+  readonly searchQuery = signal('');
+  readonly statusFilter = signal('all');
+  readonly activeTab = signal('overview');
+  readonly taskFilter = signal('all');
+  readonly showModal = signal(false);
+  readonly modalStep = signal(1);
+
+  private readonly _formData = signal<InitiateFormData>(this.emptyForm());
+  readonly formData = this._formData.asReadonly();
 
   readonly records = signal<OffboardingRecord[]>([
     {
@@ -1494,31 +1406,36 @@ export class OffboardingComponent {
       joiningDate: '2023-01-15',
       lastWorkingDay: '2026-06-15',
       separationType: 'Resignation',
+      noticePeriod: '60 days',
+      noticeStatus: 'Fully served',
+      exitInterviewRequired: true,
       status: 'in_progress',
       initiatedOn: '2026-06-01',
       initiatedBy: 'HR Team',
       progress: 65,
       reason: 'Personal growth opportunity',
       tasks: [
-        { id: 't1', title: 'Knowledge Transfer', description: 'Complete documentation and knowledge transfer', category: 'HR', assignedTo: 'Manager', dueDate: '2026-06-10', status: 'completed', completedOn: '2026-06-09', completedBy: 'Priya Patel' },
-        { id: 't2', title: 'Project Handover', description: 'Complete ongoing project handover', category: 'HR', assignedTo: 'Manager', dueDate: '2026-06-12', status: 'completed', completedOn: '2026-06-11', completedBy: 'Amit Singh' },
-        { id: 't3', title: 'Access Revocation', description: 'Revoke all system access and accounts', category: 'IT', assignedTo: 'IT Admin', dueDate: '2026-06-14', status: 'in_progress', notes: 'Waiting for manager approval' },
-        { id: 't4', title: 'Asset Recovery', description: 'Collect all IT assets from employee', category: 'IT', assignedTo: 'IT Asset Team', dueDate: '2026-06-14', status: 'pending' },
-        { id: 't5', title: 'Final Settlement', description: 'Process final salary and benefits settlement', category: 'Finance', assignedTo: 'Finance Team', dueDate: '2026-06-15', status: 'pending' },
-        { id: 't6', title: 'Exit Interview', description: 'Conduct exit interview', category: 'HR', assignedTo: 'HR Team', dueDate: '2026-06-15', status: 'pending' }
+        { id: 't1', title: 'Knowledge transfer', description: 'Complete documentation and knowledge transfer sessions', category: 'HR', assignedTo: 'Priya Patel', dueDate: '2026-06-10', status: 'completed', completedOn: '2026-06-09', completedBy: 'Priya Patel' },
+        { id: 't2', title: 'Project handover', description: 'Hand over all ongoing projects and code repositories', category: 'HR', assignedTo: 'Amit Singh', dueDate: '2026-06-12', status: 'completed', completedOn: '2026-06-11', completedBy: 'Amit Singh' },
+        { id: 't3', title: 'Access revocation', description: 'Revoke all system, email, and tool access', category: 'IT', assignedTo: 'IT Admin', dueDate: '2026-06-14', status: 'in_progress', notes: 'Waiting for manager sign-off' },
+        { id: 't4', title: 'Asset recovery', description: 'Collect laptop, ID card, and peripherals', category: 'IT', assignedTo: 'IT Asset Team', dueDate: '2026-06-14', status: 'pending' },
+        { id: 't5', title: 'Final settlement', description: 'Process last payslip, PF, and gratuity payout', category: 'Finance', assignedTo: 'Finance Team', dueDate: '2026-06-15', status: 'pending' },
+        { id: 't6', title: 'Exit interview', description: 'Conduct structured exit interview and record feedback', category: 'HR', assignedTo: 'HR Team', dueDate: '2026-06-15', status: 'pending' },
       ],
       documents: [
-        { name: 'Experience Letter', status: 'issued', issuedOn: '2026-06-10' },
-        { name: 'Relieving Letter', status: 'issued', issuedOn: '2026-06-10' },
-        { name: 'Full & Final Settlement', status: 'pending' },
-        { name: 'Exit Interview Form', status: 'pending' }
+        { name: 'Experience letter', status: 'issued', issuedOn: '2026-06-10' },
+        { name: 'Relieving letter', status: 'issued', issuedOn: '2026-06-10' },
+        { name: 'Full & final settlement', status: 'pending' },
+        { name: 'Exit interview form', status: 'pending' },
+        { name: 'NOC from IT', status: 'pending' },
+        { name: 'NOC from Finance', status: 'pending' },
       ],
       approvals: [
-        { role: 'Manager Approval', status: 'completed', approvedBy: 'Priya Patel', approvedOn: '2026-06-02' },
-        { role: 'HR Approval', status: 'completed', approvedBy: 'HR Team', approvedOn: '2026-06-03' },
-        { role: 'Finance Clearance', status: 'pending' },
-        { role: 'IT Clearance', status: 'pending' }
-      ]
+        { role: 'Manager approval', status: 'completed', approvedBy: 'Priya Patel', approvedOn: '2026-06-02' },
+        { role: 'HR approval', status: 'completed', approvedBy: 'HR Team', approvedOn: '2026-06-03' },
+        { role: 'Finance clearance', status: 'pending' },
+        { role: 'IT clearance', status: 'pending' },
+      ],
     },
     {
       id: 'OFF-002',
@@ -1531,28 +1448,33 @@ export class OffboardingComponent {
       joiningDate: '2024-03-01',
       lastWorkingDay: '2026-06-20',
       separationType: 'Resignation',
+      noticePeriod: '30 days',
+      noticeStatus: 'Fully served',
+      exitInterviewRequired: true,
       status: 'initiated',
       initiatedOn: '2026-06-05',
       initiatedBy: 'HR Team',
       progress: 20,
       reason: 'Relocating to another city',
       tasks: [
-        { id: 't1', title: 'Knowledge Transfer', description: 'Complete documentation and knowledge transfer', category: 'HR', assignedTo: 'Manager', dueDate: '2026-06-15', status: 'pending' },
-        { id: 't2', title: 'Design Handover', description: 'Hand over all design files and projects', category: 'HR', assignedTo: 'Manager', dueDate: '2026-06-17', status: 'pending' },
-        { id: 't3', title: 'Access Revocation', description: 'Revoke all system access and accounts', category: 'IT', assignedTo: 'IT Admin', dueDate: '2026-06-19', status: 'pending' },
-        { id: 't4', title: 'Asset Recovery', description: 'Collect all IT assets from employee', category: 'IT', assignedTo: 'IT Asset Team', dueDate: '2026-06-19', status: 'pending' }
+        { id: 't1', title: 'Knowledge transfer', description: 'Complete design documentation and handover', category: 'HR', assignedTo: 'Rahul Verma', dueDate: '2026-06-15', status: 'completed', completedOn: '2026-06-07' },
+        { id: 't2', title: 'Design file handover', description: 'Transfer all Figma/design files to team', category: 'HR', assignedTo: 'Sneha Gupta', dueDate: '2026-06-17', status: 'pending' },
+        { id: 't3', title: 'Access revocation', description: 'Revoke all system and tool access', category: 'IT', assignedTo: 'IT Admin', dueDate: '2026-06-19', status: 'pending' },
+        { id: 't4', title: 'Asset recovery', description: 'Collect laptop, ID card, and peripherals', category: 'IT', assignedTo: 'IT Asset Team', dueDate: '2026-06-19', status: 'pending' },
+        { id: 't5', title: 'Final settlement', description: 'Process last payslip and payout', category: 'Finance', assignedTo: 'Finance Team', dueDate: '2026-06-20', status: 'pending' },
       ],
       documents: [
-        { name: 'Experience Letter', status: 'pending' },
-        { name: 'Relieving Letter', status: 'pending' },
-        { name: 'Full & Final Settlement', status: 'pending' }
+        { name: 'Experience letter', status: 'pending' },
+        { name: 'Relieving letter', status: 'pending' },
+        { name: 'Full & final settlement', status: 'pending' },
+        { name: 'Exit interview form', status: 'pending' },
       ],
       approvals: [
-        { role: 'Manager Approval', status: 'pending' },
-        { role: 'HR Approval', status: 'pending' },
-        { role: 'Finance Clearance', status: 'pending' },
-        { role: 'IT Clearance', status: 'pending' }
-      ]
+        { role: 'Manager approval', status: 'pending' },
+        { role: 'HR approval', status: 'pending' },
+        { role: 'Finance clearance', status: 'pending' },
+        { role: 'IT clearance', status: 'pending' },
+      ],
     },
     {
       id: 'OFF-003',
@@ -1569,24 +1491,25 @@ export class OffboardingComponent {
       initiatedOn: '2026-05-15',
       initiatedBy: 'HR Team',
       progress: 100,
+      reason: 'Contract period concluded',
       tasks: [
-        { id: 't1', title: 'Knowledge Transfer', description: 'Complete documentation and knowledge transfer', category: 'HR', assignedTo: 'Manager', dueDate: '2026-05-25', status: 'completed', completedOn: '2026-05-24', completedBy: 'Manager' },
-        { id: 't2', title: 'Access Revocation', description: 'Revoke all system access and accounts', category: 'IT', assignedTo: 'IT Admin', dueDate: '2026-05-28', status: 'completed', completedOn: '2026-05-27', completedBy: 'IT Admin' },
-        { id: 't3', title: 'Asset Recovery', description: 'Collect all IT assets from employee', category: 'IT', assignedTo: 'IT Asset Team', dueDate: '2026-05-28', status: 'completed', completedOn: '2026-05-28', completedBy: 'IT Asset Team' },
-        { id: 't4', title: 'Final Settlement', description: 'Process final salary and benefits settlement', category: 'Finance', assignedTo: 'Finance Team', dueDate: '2026-05-30', status: 'completed', completedOn: '2026-05-29', completedBy: 'Finance' }
+        { id: 't1', title: 'Knowledge transfer', description: 'Complete knowledge handover documentation', category: 'HR', assignedTo: 'Director', dueDate: '2026-05-25', status: 'completed', completedOn: '2026-05-24', completedBy: 'Director' },
+        { id: 't2', title: 'Access revocation', description: 'Revoke all system and tool access', category: 'IT', assignedTo: 'IT Admin', dueDate: '2026-05-28', status: 'completed', completedOn: '2026-05-27', completedBy: 'IT Admin' },
+        { id: 't3', title: 'Asset recovery', description: 'Collect all IT assets', category: 'IT', assignedTo: 'IT Asset Team', dueDate: '2026-05-28', status: 'completed', completedOn: '2026-05-28', completedBy: 'IT Asset Team' },
+        { id: 't4', title: 'Final settlement', description: 'Process final payslip and settlement', category: 'Finance', assignedTo: 'Finance Team', dueDate: '2026-05-30', status: 'completed', completedOn: '2026-05-29', completedBy: 'Finance Team' },
       ],
       documents: [
-        { name: 'Experience Letter', status: 'issued', issuedOn: '2026-05-29' },
-        { name: 'Relieving Letter', status: 'issued', issuedOn: '2026-05-29' },
-        { name: 'Full & Final Settlement', status: 'issued', issuedOn: '2026-05-30' }
+        { name: 'Experience letter', status: 'issued', issuedOn: '2026-05-29' },
+        { name: 'Relieving letter', status: 'issued', issuedOn: '2026-05-29' },
+        { name: 'Full & final settlement', status: 'issued', issuedOn: '2026-05-30' },
       ],
       approvals: [
-        { role: 'Manager Approval', status: 'completed', approvedBy: 'Director', approvedOn: '2026-05-16' },
-        { role: 'HR Approval', status: 'completed', approvedBy: 'HR Team', approvedOn: '2026-05-17' },
-        { role: 'Finance Clearance', status: 'completed', approvedBy: 'Finance Team', approvedOn: '2026-05-29' },
-        { role: 'IT Clearance', status: 'completed', approvedBy: 'IT Admin', approvedOn: '2026-05-28' }
-      ]
-    }
+        { role: 'Manager approval', status: 'completed', approvedBy: 'Director', approvedOn: '2026-05-16' },
+        { role: 'HR approval', status: 'completed', approvedBy: 'HR Team', approvedOn: '2026-05-17' },
+        { role: 'Finance clearance', status: 'completed', approvedBy: 'Finance Team', approvedOn: '2026-05-29' },
+        { role: 'IT clearance', status: 'completed', approvedBy: 'IT Admin', approvedOn: '2026-05-28' },
+      ],
+    },
   ]);
 
   readonly selectedRecord = signal<OffboardingRecord | null>(null);
@@ -1594,19 +1517,19 @@ export class OffboardingComponent {
   readonly filteredRecords = computed(() => {
     let result = this.records();
     const query = this.searchQuery().toLowerCase();
-    const status = this.statusFilter();
+    const filter = this.statusFilter();
 
     if (query) {
-      result = result.filter(r => 
+      result = result.filter(r =>
         r.employeeName.toLowerCase().includes(query) ||
         r.employeeEmail.toLowerCase().includes(query) ||
         r.employeeId.toLowerCase().includes(query)
       );
     }
 
-    if (status === 'active') {
+    if (filter === 'active') {
       result = result.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
-    } else if (status === 'completed') {
+    } else if (filter === 'completed') {
       result = result.filter(r => r.status === 'completed');
     }
 
@@ -1623,13 +1546,18 @@ export class OffboardingComponent {
     this.selectedRecord.set(this.records()[0]);
   }
 
+  // ─── List actions ───
+
   selectRecord(record: OffboardingRecord): void {
     this.selectedRecord.set(record);
+    this.activeTab.set('overview');
   }
 
-  filterByStatus(status: string): void {
+  quickFilter(status: string): void {
     this.statusFilter.set(this.statusFilter() === status ? 'all' : status);
   }
+
+  // ─── Detail helpers ───
 
   getCompletedTaskCount(record: OffboardingRecord): number {
     return record.tasks.filter(t => t.status === 'completed').length;
@@ -1644,96 +1572,387 @@ export class OffboardingComponent {
         name: cat,
         total: tasks.length,
         completed,
-        progress: tasks.length ? (completed / tasks.length) * 100 : 0
+        progress: tasks.length ? (completed / tasks.length) * 100 : 0,
       };
     });
   }
 
-  getFilteredTasks() {
-    const record = this.selectedRecord();
-    if (!record) return [];
-    
+  getFilteredTasks(record: OffboardingRecord): OffboardingTask[] {
     const filter = this.taskFilter();
     if (filter === 'all') return record.tasks;
+    if (filter === 'pending') return record.tasks.filter(t => t.status !== 'completed');
     return record.tasks.filter(t => t.status === filter);
   }
+
+  getTimelineSteps(record: OffboardingRecord) {
+    const doneApprovals = record.approvals.filter(a => a.status === 'completed').length;
+    const doneDocs = record.documents.filter(d => d.status === 'issued').length;
+    const doneTasks = this.getCompletedTaskCount(record);
+    return [
+      {
+        title: 'Offboarding initiated',
+        date: record.initiatedOn,
+        desc: `Initiated by ${record.initiatedBy}`,
+        done: true,
+        active: false,
+      },
+      {
+        title: 'Manager & HR approval',
+        date: record.approvals.find(a => a.status === 'completed')?.approvedOn || null,
+        desc: `${doneApprovals}/${record.approvals.length} approvals done`,
+        done: record.approvals.every(a => a.status === 'completed'),
+        active: doneApprovals > 0 && doneApprovals < record.approvals.length,
+      },
+      {
+        title: 'Tasks & handover',
+        date: null,
+        desc: `${doneTasks}/${record.tasks.length} tasks completed`,
+        done: doneTasks === record.tasks.length,
+        active: doneTasks > 0 && doneTasks < record.tasks.length,
+      },
+      {
+        title: 'Document issuance',
+        date: null,
+        desc: `${doneDocs}/${record.documents.length} documents issued`,
+        done: record.documents.every(d => d.status === 'issued'),
+        active: doneDocs > 0 && doneDocs < record.documents.length,
+      },
+      {
+        title: 'Final clearance',
+        date: record.lastWorkingDay,
+        desc: 'All approvals and documents completed',
+        done: record.status === 'completed',
+        active: false,
+      },
+    ];
+  }
+
+  // ─── Inline actions ───
 
   toggleTask(task: OffboardingTask): void {
     const record = this.selectedRecord();
     if (!record) return;
 
     const records = this.records();
-    const recordIndex = records.findIndex(r => r.id === record.id);
-    if (recordIndex !== -1) {
-      const taskIndex = records[recordIndex].tasks.findIndex(t => t.id === task.id);
-      if (taskIndex !== -1) {
-        records[recordIndex].tasks[taskIndex].status = task.status === 'completed' ? 'pending' : 'completed';
-        if (records[recordIndex].tasks[taskIndex].status === 'completed') {
-          records[recordIndex].tasks[taskIndex].completedOn = new Date().toISOString();
-        }
-        records[recordIndex].progress = Math.round(
-          (records[recordIndex].tasks.filter(t => t.status === 'completed').length / records[recordIndex].tasks.length) * 100
-        );
-        this.records.set([...records]);
-        this.selectedRecord.set(records[recordIndex]);
-      }
+    const ri = records.findIndex(r => r.id === record.id);
+    if (ri === -1) return;
+    const ti = records[ri].tasks.findIndex(t => t.id === task.id);
+    if (ti === -1) return;
+
+    records[ri].tasks[ti].status = task.status === 'completed' ? 'pending' : 'completed';
+    if (records[ri].tasks[ti].status === 'completed') {
+      records[ri].tasks[ti].completedOn = new Date().toISOString().split('T')[0];
     }
+    records[ri].progress = Math.round(
+      (records[ri].tasks.filter(t => t.status === 'completed').length / records[ri].tasks.length) * 100
+    );
+    if (records[ri].progress === 100) records[ri].status = 'completed';
+
+    this.records.set([...records]);
+    this.selectedRecord.set(records[ri]);
   }
 
-  getStatusColor(status: string): 'green' | 'blue' | 'amber' | 'slate' | 'violet' | 'red' {
-    const colors: Record<string, 'green' | 'blue' | 'amber' | 'slate' | 'violet' | 'red'> = {
-      'initiated': 'blue',
-      'in_progress': 'amber',
-      'pending_approval': 'violet',
-      'completed': 'green',
-      'cancelled': 'slate'
+  approveItem(record: OffboardingRecord, index: number): void {
+    const records = this.records();
+    const ri = records.findIndex(r => r.id === record.id);
+    if (ri === -1) return;
+
+    records[ri].approvals[index] = {
+      ...records[ri].approvals[index],
+      status: 'completed',
+      approvedBy: 'HR Admin',
+      approvedOn: new Date().toISOString().split('T')[0],
     };
-    return colors[status] || 'slate';
+    if (records[ri].status === 'initiated') records[ri].status = 'in_progress';
+
+    this.records.set([...records]);
+    this.selectedRecord.set(records[ri]);
   }
 
-  getSeparationColor(type: string): 'blue' | 'amber' | 'violet' | 'red' {
-    const colors: Record<string, 'blue' | 'amber' | 'violet' | 'red'> = {
-      'Resignation': 'blue',
-      'Termination': 'red',
-      'Contract End': 'violet',
-      'Retirement': 'amber'
+  issueDocument(record: OffboardingRecord, index: number): void {
+    const records = this.records();
+    const ri = records.findIndex(r => r.id === record.id);
+    if (ri === -1) return;
+
+    records[ri].documents[index] = {
+      ...records[ri].documents[index],
+      status: 'issued',
+      issuedOn: new Date().toISOString().split('T')[0],
     };
-    return colors[type] || 'blue';
+
+    this.records.set([...records]);
+    this.selectedRecord.set(records[ri]);
   }
 
-  getTaskCategoryColor(category: string): 'blue' | 'indigo' | 'green' {
-    const colors: Record<string, 'blue' | 'indigo' | 'green'> = {
-      'HR': 'blue',
-      'IT': 'indigo',
-      'Finance': 'green'
-    };
-    return colors[category] || 'blue';
-  }
+  addDocument(record: OffboardingRecord): void {
+    const name = window.prompt('Document name:');
+    if (!name?.trim()) return;
 
-  formatStatus(status: string): string {
-    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  }
+    const records = this.records();
+    const ri = records.findIndex(r => r.id === record.id);
+    if (ri === -1) return;
 
-  navigateToInitiate(): void {
-    this.router.navigate(['/offboarding/initiate']);
-  }
-
-  sendNotification(record: OffboardingRecord): void {
-    // Send notification
-  }
-
-  addComment(record: OffboardingRecord): void {
-    // Add comment
+    records[ri].documents = [...records[ri].documents, { name: name.trim(), status: 'pending' }];
+    this.records.set([...records]);
+    this.selectedRecord.set(records[ri]);
   }
 
   completeOffboarding(record: OffboardingRecord): void {
+    if (!window.confirm(`Mark offboarding for ${record.employeeName} as fully complete?`)) return;
+
     const records = this.records();
-    const index = records.findIndex(r => r.id === record.id);
-    if (index !== -1) {
-      records[index].status = 'completed';
-      records[index].progress = 100;
-      this.records.set([...records]);
-      this.selectedRecord.set(records[index]);
+    const ri = records.findIndex(r => r.id === record.id);
+    if (ri === -1) return;
+
+    records[ri].status = 'completed';
+    records[ri].progress = 100;
+    records[ri].tasks.forEach(t => (t.status = 'completed'));
+
+    this.records.set([...records]);
+    this.selectedRecord.set(records[ri]);
+  }
+
+  cancelOffboarding(record: OffboardingRecord): void {
+    if (!window.confirm(`Cancel offboarding for ${record.employeeName}? This cannot be undone.`)) return;
+
+    const records = this.records();
+    const ri = records.findIndex(r => r.id === record.id);
+    if (ri === -1) return;
+
+    records[ri].status = 'cancelled';
+    this.records.set([...records]);
+    this.selectedRecord.set(records[ri]);
+  }
+
+  editRecord(record: OffboardingRecord): void {
+    // TODO: wire up edit form or navigate to edit route
+    console.log('Edit record:', record.id);
+  }
+
+  sendReminder(record: OffboardingRecord): void {
+    window.alert(`Reminder sent to stakeholders for ${record.employeeName}.`);
+  }
+
+  addNote(record: OffboardingRecord): void {
+    const note = window.prompt('Add a note:');
+    if (note?.trim()) window.alert('Note saved.');
+  }
+
+  downloadChecklist(record: OffboardingRecord): void {
+    window.alert(`Checklist download triggered for ${record.employeeName}.`);
+  }
+
+  exportReport(): void {
+    window.alert('Export report triggered. Connect to your reporting API.');
+  }
+
+  // ─── Color helpers ───
+
+  getStatusColor(status: string): 'green' | 'blue' | 'amber' | 'slate' | 'violet' | 'red' {
+    const map: Record<string, 'green' | 'blue' | 'amber' | 'slate' | 'violet' | 'red'> = {
+      initiated: 'blue',
+      in_progress: 'amber',
+      pending_approval: 'violet',
+      completed: 'green',
+      cancelled: 'slate',
+    };
+    return map[status] ?? 'slate';
+  }
+
+  getSeparationColor(type: string): 'blue' | 'amber' | 'violet' | 'red' {
+    const map: Record<string, 'blue' | 'amber' | 'violet' | 'red'> = {
+      Resignation: 'blue',
+      Termination: 'red',
+      'Contract End': 'violet',
+      Retirement: 'amber',
+      'Mutual Separation': 'amber',
+    };
+    return map[type] ?? 'blue';
+  }
+
+  getTaskCategoryColor(category: string): 'blue' | 'indigo' | 'green' {
+    const map: Record<string, 'blue' | 'indigo' | 'green'> = {
+      HR: 'blue',
+      IT: 'indigo',
+      Finance: 'green',
+    };
+    return map[category] ?? 'blue';
+  }
+
+  getTaskStatusColor(status: string): 'green' | 'amber' | 'red' | 'slate' {
+    const map: Record<string, 'green' | 'amber' | 'red' | 'slate'> = {
+      completed: 'green',
+      in_progress: 'amber',
+      blocked: 'red',
+      pending: 'slate',
+    };
+    return map[status] ?? 'slate';
+  }
+
+  formatStatus(status: string): string {
+    return status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
+  // ─── Modal ───
+
+  openInitiateModal(): void {
+      console.log('OPEN MODAL CLICKED');
+    this._formData.set(this.emptyForm());
+    this.modalStep.set(1);
+    this.showModal.set(true);
+  }
+
+  closeModal(): void {
+    this.showModal.set(false);
+  }
+
+  closeModalOutside(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('ob-modal-overlay')) {
+      this.closeModal();
     }
+  }
+
+  nextStep(): void {
+    const fd = this._formData();
+    if (this.modalStep() === 1) {
+      if (!fd.employeeId || !fd.employeeName || !fd.employeeEmail || !fd.department || !fd.position || !fd.manager) {
+        window.alert('Please fill all required fields before proceeding.');
+        return;
+      }
+    }
+    if (this.modalStep() === 2) {
+      if (!fd.separationType || !fd.lastWorkingDay) {
+        window.alert('Separation type and last working day are required.');
+        return;
+      }
+    }
+    if (this.modalStep() === 3) {
+      if (!TASK_TEMPLATES.some(t => fd.selectedTasks[t.id])) {
+        window.alert('Please select at least one task.');
+        return;
+      }
+    }
+    this.modalStep.update(s => s + 1);
+  }
+
+  prevStep(): void {
+    this.modalStep.update(s => s - 1);
+  }
+
+  toggleTemplate(id: string, checked: boolean): void {
+    const fd = this._formData();
+    this._formData.set({
+      ...fd,
+      selectedTasks: { ...fd.selectedTasks, [id]: checked },
+    });
+  }
+
+  submitOffboarding(): void {
+    const fd = this._formData();
+    const today = new Date().toISOString().split('T')[0];
+    const newId = `OFF-${String(this.records().length + 1).padStart(3, '0')}`;
+
+    const selectedTemplates = TASK_TEMPLATES.filter(t => fd.selectedTasks[t.id]);
+
+    const newRecord: OffboardingRecord = {
+      id: newId,
+      employeeId: fd.employeeId,
+      employeeName: fd.employeeName,
+      employeeEmail: fd.employeeEmail,
+      position: fd.position,
+      department: fd.department,
+      manager: fd.manager,
+      managerEmail: fd.managerEmail,
+      joiningDate: fd.joiningDate || today,
+      lastWorkingDay: fd.lastWorkingDay,
+      separationType: fd.separationType as OffboardingRecord['separationType'],
+      noticePeriod: fd.noticePeriod,
+      noticeStatus: fd.noticeStatus,
+      exitInterviewRequired: fd.exitInterviewRequired === 'Yes',
+      resignationLetterReceived: fd.resignationLetterReceived,
+      status: 'initiated',
+      initiatedOn: today,
+      initiatedBy: 'HR Admin',
+      progress: 0,
+      reason: fd.reason,
+      hrNotes: fd.hrNotes,
+      tasks: selectedTemplates.map((t, i) => ({
+        id: `t${i + 1}`,
+        title: t.title,
+        description: t.description,
+        category: t.category,
+        assignedTo: t.assignedTo,
+        dueDate: fd.lastWorkingDay,
+        status: 'pending',
+      })),
+      documents: [
+        { name: 'Experience letter', status: 'pending' },
+        { name: 'Relieving letter', status: 'pending' },
+        { name: 'Full & final settlement', status: 'pending' },
+        ...(fd.exitInterviewRequired === 'Yes' ? [{ name: 'Exit interview form', status: 'pending' }] : []),
+      ],
+      approvals: [
+        { role: 'Manager approval', status: 'pending' },
+        { role: 'HR approval', status: 'pending' },
+        { role: 'Finance clearance', status: 'pending' },
+        { role: 'IT clearance', status: 'pending' },
+      ],
+    };
+
+    this.records.update(r => [newRecord, ...r]);
+    this.selectedRecord.set(newRecord);
+    this.activeTab.set('overview');
+    this.closeModal();
+    window.alert(`Offboarding initiated for ${fd.employeeName}. Record ID: ${newId}`);
+  }
+
+  // ─── Review rows ───
+
+  getReviewEmployeeRows(): Array<{ key: string; val: string }> {
+    const fd = this._formData();
+    return [
+      { key: 'Name', val: fd.employeeName },
+      { key: 'Employee ID', val: fd.employeeId },
+      { key: 'Email', val: fd.employeeEmail },
+      { key: 'Department', val: fd.department },
+      { key: 'Position', val: fd.position },
+      { key: 'Manager', val: fd.manager },
+    ];
+  }
+
+  getReviewSeparationRows(): Array<{ key: string; val: string }> {
+    const fd = this._formData();
+    return [
+      { key: 'Type', val: fd.separationType },
+      { key: 'Last working day', val: fd.lastWorkingDay },
+      { key: 'Notice period', val: fd.noticePeriod },
+      { key: 'Notice status', val: fd.noticeStatus },
+      { key: 'Resignation letter', val: fd.resignationLetterReceived },
+      { key: 'Exit interview', val: fd.exitInterviewRequired },
+    ];
+  }
+
+  // ─── Helpers ───
+
+  private emptyForm(): InitiateFormData {
+    return {
+      employeeId: '',
+      employeeName: '',
+      employeeEmail: '',
+      department: '',
+      position: '',
+      manager: '',
+      managerEmail: '',
+      joiningDate: '',
+      separationType: '',
+      lastWorkingDay: '',
+      noticePeriod: '',
+      noticeStatus: '',
+      reason: '',
+      resignationLetterReceived: '',
+      exitInterviewRequired: '',
+      hrNotes: '',
+      selectedTasks: Object.fromEntries(TASK_TEMPLATES.map(t => [t.id, t.defaultChecked])),
+    };
   }
 }
