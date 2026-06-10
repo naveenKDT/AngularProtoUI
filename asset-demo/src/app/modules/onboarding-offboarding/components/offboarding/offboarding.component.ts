@@ -782,7 +782,8 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       flex-direction: column;
       height: 100%;
       min-height: 0;
-      background: var(--color-slate-50);
+      background: #F3F6FB;
+      padding: 32px;
     }
 
     /* ─── Top bar ─── */
@@ -791,25 +792,23 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       align-items: flex-start;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
-      padding: 16px 20px;
-      background: white;
-      border-bottom: 1px solid var(--color-slate-100);
+      gap: 16px;
+      margin-bottom: 24px;
     }
     .ob-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--color-slate-900);
-      margin: 0 0 2px;
+      font-size: 36px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 0 0 4px;
     }
     .ob-subtitle {
-      font-size: 12px;
-      color: var(--color-slate-500);
+      font-size: 16px;
+      color: #64748B;
       margin: 0;
     }
     .ob-topbar-actions {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
@@ -817,36 +816,43 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
     .ob-stats-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      padding: 14px 20px;
-      background: var(--color-slate-50);
-      border-bottom: 1px solid var(--color-slate-100);
+      gap: 20px;
+      margin-bottom: 24px;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
       .ob-stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .ob-stats-row { grid-template-columns: 1fr; }
     }
     .ob-stat-card {
       background: white;
-      border: 1px solid var(--color-slate-200);
-      border-radius: 8px;
-      padding: 14px 16px;
+      border-radius: 24px;
+      padding: 24px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      transition: border-color var(--transition-fast);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      transition: all 200ms ease;
     }
-    .ob-stat-card:hover { border-color: var(--color-slate-300); }
-    .ob-stat-val { font-size: 22px; font-weight: 700; color: var(--color-slate-900); }
-    .ob-stat-lbl { font-size: 11px; color: var(--color-slate-500); margin-top: 2px; }
-    .ob-stat-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
+    .ob-stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12);
+    }
+    .ob-stat-val { font-size: 28px; font-weight: 700; color: #0F172A; }
+    .ob-stat-lbl { font-size: 14px; color: #64748B; margin-top: 4px; }
+    .ob-stat-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; }
 
     /* ─── Main layout ─── */
     .ob-main {
       display: grid;
-      grid-template-columns: 280px 1fr;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
       flex: 1;
       min-height: 0;
-      overflow: hidden;
+    }
+    @media (max-width: 1200px) {
+      .ob-main { grid-template-columns: 280px 1fr; gap: 16px; }
     }
     @media (max-width: 1024px) {
       .ob-main { grid-template-columns: 1fr; }
@@ -855,61 +861,68 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
     /* ─── Sidebar ─── */
     .ob-sidebar {
       background: white;
-      border-right: 1px solid var(--color-slate-100);
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
-    .ob-sidebar-search { padding: 12px; border-bottom: 1px solid var(--color-slate-100); }
+    .ob-sidebar-search { padding: 20px; border-bottom: 1px solid #E5EAF3; }
     .ob-sidebar-filters {
       display: flex;
-      gap: 6px;
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--color-slate-100);
+      gap: 8px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #E5EAF3;
     }
     .ob-fchip {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
       font-weight: 500;
-      background: var(--color-slate-100);
-      color: var(--color-slate-600);
+      background: #F1F5F9;
+      color: #64748B;
       border: none;
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: all 200ms ease;
     }
-    .ob-fchip.active { background: var(--color-primary-500); color: white; }
+    .ob-fchip:hover { background: #E5EAF3; color: #0F172A; }
+    .ob-fchip.active { background: #3B82F6; color: white; }
     .ob-emp-list { flex: 1; overflow-y: auto; }
     .ob-emp-item {
-      padding: 12px;
-      border-bottom: 1px solid var(--color-slate-100);
+      padding: 16px 20px;
+      border-bottom: 1px solid #E5EAF3;
       cursor: pointer;
-      transition: background var(--transition-fast);
+      transition: all 200ms ease;
     }
-    .ob-emp-item:hover { background: var(--color-slate-50); }
+    .ob-emp-item:hover { background: #F8FAFC; }
     .ob-emp-item.active {
-      background: var(--color-primary-50);
-      border-left: 2px solid var(--color-primary-500);
+      background: #EFF6FF;
+      border-left: 3px solid #3B82F6;
     }
-    .ob-emp-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .ob-emp-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
     .ob-emp-info { flex: 1; min-width: 0; }
-    .ob-emp-name { font-size: 13px; font-weight: 600; color: var(--color-slate-900); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ob-emp-role { font-size: 11px; color: var(--color-slate-500); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ob-emp-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .ob-emp-lwd { font-size: 11px; color: var(--color-slate-500); display: flex; align-items: center; gap: 4px; }
-    .ob-emp-prog { display: flex; align-items: center; gap: 8px; }
-    .ob-prog-bar { flex: 1; height: 3px; background: var(--color-slate-200); border-radius: 2px; overflow: hidden; }
-    .ob-prog-fill { height: 100%; background: var(--color-primary-500); border-radius: 2px; }
-    .ob-prog-text { font-size: 10px; color: var(--color-slate-500); min-width: 28px; text-align: right; }
-    .ob-list-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 16px; color: var(--color-slate-400); text-align: center; }
-    .ob-list-empty p { font-size: 12px; margin: 0; }
+    .ob-emp-name { font-size: 14px; font-weight: 600; color: #0F172A; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ob-emp-role { font-size: 12px; color: #64748B; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ob-emp-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .ob-emp-lwd { font-size: 12px; color: #64748B; display: flex; align-items: center; gap: 6px; }
+    .ob-emp-prog { display: flex; align-items: center; gap: 10px; }
+    .ob-emp-prog-val { font-size: 12px; color: #64748B; }
+    .ob-emp-prog-bar { flex: 1; height: 6px; background: #E5EAF3; border-radius: 3px; overflow: hidden; }
+    .ob-emp-prog-fill { height: 100%; background: #3B82F6; border-radius: 3px; transition: width 300ms ease; }
+    .ob-emp-tasks { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-top: 1px solid #E5EAF3; }
+    .ob-emp-task-chip { font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 500; }
+    .ob-emp-task-chip.hr { background: #EFF6FF; color: #3B82F6; }
+    .ob-emp-task-chip.it { background: #F3E8FF; color: #8B5CF6; }
+    .ob-emp-task-chip.finance { background: #DCFCE7; color: #22C55E; }
 
     /* ─── Detail panel ─── */
     .ob-detail {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: var(--color-slate-50);
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
     }
     .ob-detail-empty {
       flex: 1;
@@ -1205,44 +1218,44 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
     .ob-action-btn-danger:hover { background: var(--color-red-50); }
 
     /* ─── Modal ─── */
-  .ob-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    padding: 24px;
-  }
-
-  .ob-modal {
-    background: white;
-    border-radius: 28px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
-    width: 100%;
-    max-width: 640px;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    animation: modalEntry 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @keyframes modalEntry {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
+    .ob-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 24px;
     }
-    to {
-      opacity: 1;
-      transform: scale(1);
+
+    .ob-modal {
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalEntry 300ms cubic-bezier(0.4, 0, 0.2, 1);
     }
-  }
+
+    @keyframes modalEntry {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
 
     .ob-modal-header {
       display: flex;
