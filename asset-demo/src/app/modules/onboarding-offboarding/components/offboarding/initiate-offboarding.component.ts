@@ -156,95 +156,52 @@ interface OffboardingFormData {
                 </div>
                 <div>
                   <h2 class="section-title">Select Employee</h2>
-                  <p class="section-desc">Choose an employee from the dropdown to auto-fill their details</p>
+                  <p class="section-desc">Choose an employee from the dropdown to begin the offboarding process</p>
                 </div>
               </div>
 
-              <!-- Employee Selection Dropdown -->
-              <div class="employee-selector-wrapper">
+              <!-- Employee Selection Dropdown - Full Width -->
+              <div class="employee-dropdown-container">
                 <div class="employee-selector">
                   <label class="selector-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="11" cy="11" r="8"/>
-                      <path d="M21 21l-4.35-4.35"/>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    Search Employee
+                    Employee Name
                   </label>
-                  <select class="employee-select" [(ngModel)]="selectedEmployeeId" (change)="onEmployeeSelect($event)">
-                    <option value="">-- Select an employee --</option>
-                    @for (emp of employeeOptions; track emp.id) {
-                      <option [value]="emp.id">{{ emp.name }} ({{ emp.id }}) - {{ emp.department }}</option>
-                    }
-                  </select>
-                  <div class="select-arrow">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="6 9 12 15 18 9"/>
-                    </svg>
+                  <div class="select-wrapper">
+                    <select class="employee-select" [(ngModel)]="selectedEmployeeId" (change)="onEmployeeSelect($event)">
+                      <option value="">-- Select an employee --</option>
+                      @for (emp of employeeOptions; track emp.id) {
+                        <option [value]="emp.id">{{ emp.name }} ({{ emp.id }}) - {{ emp.department }}</option>
+                      }
+                    </select>
+                    <div class="select-arrow">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Auto-filled Employee Info Card -->
-              @if (selectedEmployeeId) {
-                <div class="employee-info-card">
-                  <div class="employee-info-header">
-                    <knod-avatar [name]="formData.employeeName" size="lg"></knod-avatar>
-                    <div class="employee-info-main">
-                      <h3 class="employee-name">{{ formData.employeeName }}</h3>
-                      <p class="employee-position">{{ formData.position }}</p>
-                      <div class="employee-badges">
-                        <knod-badge color="blue" size="sm">{{ formData.department }}</knod-badge>
-                        <knod-badge color="violet" size="sm">{{ formData.employeeId }}</knod-badge>
+              <!-- Employee Details Preview (shown after selection) -->
+              @if (selectedEmployeeId()) {
+                <div class="employee-preview-card">
+                  @if (getSelectedEmployee(); as emp) {
+                    <div class="preview-header">
+                      <knod-avatar [name]="emp.name" size="lg"></knod-avatar>
+                      <div class="preview-info">
+                        <h3 class="preview-name">{{ emp.name }}</h3>
+                        <p class="preview-position">{{ emp.position }}</p>
+                        <div class="preview-badges">
+                          <knod-badge color="blue" size="sm">{{ emp.department }}</knod-badge>
+                          <knod-badge color="violet" size="sm">{{ emp.id }}</knod-badge>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="employee-info-grid">
-                    <div class="info-item">
-                      <div class="info-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                          <polyline points="22,6 12,13 2,6"/>
-                        </svg>
-                      </div>
-                      <div class="info-content">
-                        <span class="info-label">Email</span>
-                        <span class="info-value">{{ formData.employeeEmail }}</span>
-                      </div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                          <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                      </div>
-                      <div class="info-content">
-                        <span class="info-label">Reporting Manager</span>
-                        <span class="info-value">{{ formData.manager }}</span>
-                      </div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                          <line x1="16" y1="2" x2="16" y2="6"/>
-                          <line x1="8" y1="2" x2="8" y2="6"/>
-                          <line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                      </div>
-                      <div class="info-content">
-                        <span class="info-label">Joining Date</span>
-                        <span class="info-value">{{ formData.joiningDate | date:'mediumDate' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="auto-fill-badge">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                      <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                    Auto-filled from employee record
-                  </div>
+                  }
                 </div>
               }
 
@@ -255,7 +212,7 @@ interface OffboardingFormData {
                   <line x1="12" y1="16" x2="12" y2="12"/>
                   <line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
-                <p>Employee details will be automatically populated based on your selection. You can still edit any field if needed.</p>
+                <p>Select the employee who is leaving. Employee details will be available in the next steps.</p>
               </div>
             </div>
           }
@@ -272,7 +229,7 @@ interface OffboardingFormData {
                 </div>
                 <div>
                   <h2 class="section-title">Separation Information</h2>
-                  <p class="section-desc">Enter the offboarding details for {{ formData.employeeName }}</p>
+                  <p class="section-desc">Enter the offboarding details</p>
                 </div>
               </div>
 
@@ -306,17 +263,19 @@ interface OffboardingFormData {
 
               <!-- Employee Summary Mini Card -->
               <div class="mini-summary-card">
-                <div class="mini-summary-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                </div>
-                <div class="mini-summary-content">
-                  <span class="mini-summary-name">{{ formData.employeeName }}</span>
-                  <span class="mini-summary-detail">{{ formData.position }} · {{ formData.department }}</span>
-                </div>
-                <knod-badge color="blue" size="sm">ID: {{ formData.employeeId }}</knod-badge>
+                @if (getSelectedEmployee(); as emp) {
+                  <div class="mini-summary-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  <div class="mini-summary-content">
+                    <span class="mini-summary-name">{{ emp.name }}</span>
+                    <span class="mini-summary-detail">{{ emp.position }} · {{ emp.department }}</span>
+                  </div>
+                  <knod-badge color="blue" size="sm">ID: {{ emp.id }}</knod-badge>
+                }
               </div>
             </div>
           }
@@ -371,12 +330,14 @@ interface OffboardingFormData {
               </div>
               
               <div class="summary-employee-card">
-                <knod-avatar [name]="formData.employeeName" size="md"></knod-avatar>
-                <div class="summary-employee-info">
-                  <span class="summary-employee-name">{{ formData.employeeName }}</span>
-                  <span class="summary-employee-id">{{ formData.employeeId }}</span>
-                </div>
-                <knod-badge color="blue">{{ formData.department }}</knod-badge>
+                @if (getSelectedEmployee(); as emp) {
+                  <knod-avatar [name]="emp.name" size="md"></knod-avatar>
+                  <div class="summary-employee-info">
+                    <span class="summary-employee-name">{{ emp.name }}</span>
+                    <span class="summary-employee-id">{{ emp.id }}</span>
+                  </div>
+                  <knod-badge color="blue">{{ emp.department }}</knod-badge>
+                }
               </div>
 
               <div class="summary-grid">
@@ -416,8 +377,8 @@ interface OffboardingFormData {
                     </svg>
                   </div>
                   <div class="summary-item-content">
-                    <span class="summary-label">Joined On</span>
-                    <span class="summary-value">{{ formData.joiningDate | date:'mediumDate' }}</span>
+                    <span class="summary-label">Position</span>
+                    <span class="summary-value">{{ formData.position || 'Not specified' }}</span>
                   </div>
                 </div>
                 <div class="summary-item">
@@ -429,7 +390,7 @@ interface OffboardingFormData {
                   </div>
                   <div class="summary-item-content">
                     <span class="summary-label">Manager</span>
-                    <span class="summary-value">{{ formData.manager }}</span>
+                    <span class="summary-value">{{ formData.manager || 'Not specified' }}</span>
                   </div>
                 </div>
               </div>
@@ -735,29 +696,34 @@ interface OffboardingFormData {
       margin: 0;
     }
 
-    /* Employee Selector */
-    .employee-selector-wrapper {
+    /* Employee Dropdown */
+    .employee-dropdown-container {
       margin-bottom: 24px;
     }
 
     .employee-selector {
-      position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     .selector-label {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 13px;
+      gap: 10px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--color-slate-600);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+    }
+
+    .select-wrapper {
+      position: relative;
     }
 
     .employee-select {
       width: 100%;
-      padding: 14px 44px 14px 16px;
-      font-size: 15px;
+      padding: 16px 48px 16px 18px;
+      font-size: 16px;
       border: 2px solid var(--color-slate-200);
       border-radius: 12px;
       background: white;
@@ -781,13 +747,13 @@ interface OffboardingFormData {
       position: absolute;
       right: 16px;
       top: 50%;
-      transform: translateY(25%);
+      transform: translateY(-50%);
       color: var(--color-slate-400);
       pointer-events: none;
     }
 
-    /* Employee Info Card */
-    .employee-info-card {
+    /* Employee Preview Card */
+    .employee-preview-card {
       background: linear-gradient(135deg, var(--color-primary-50), var(--color-blue-50));
       border: 2px solid var(--color-primary-200);
       border-radius: 16px;
@@ -807,110 +773,40 @@ interface OffboardingFormData {
       }
     }
 
-    .employee-info-header {
+    .preview-header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-      padding-bottom: 20px;
-      border-bottom: 2px dashed var(--color-primary-200);
+      gap: 18px;
     }
 
-    .employee-info-main {
+    .preview-info {
       flex: 1;
     }
 
-    .employee-name {
+    .preview-name {
       font-size: 20px;
       font-weight: 700;
       color: var(--color-slate-900);
       margin: 0 0 4px 0;
     }
 
-    .employee-position {
+    .preview-position {
       font-size: 14px;
       color: var(--color-slate-600);
-      margin: 0 0 10px 0;
+      margin: 0 0 12px 0;
     }
 
-    .employee-badges {
+    .preview-badges {
       display: flex;
-      gap: 8px;
-    }
-
-    .employee-info-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    .info-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: white;
-      border-radius: 10px;
-      border: 1px solid var(--color-primary-100);
-      transition: all 0.3s ease;
-    }
-
-    .info-item:hover {
-      border-color: var(--color-primary-300);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
-    }
-
-    .info-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: var(--color-primary-100);
-      color: var(--color-primary-600);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .info-content {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .info-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--color-slate-500);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .info-value {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--color-slate-800);
-    }
-
-    .auto-fill-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 16px;
-      padding: 8px 14px;
-      background: var(--color-success-100);
-      color: var(--color-success-700);
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
+      gap: 10px;
     }
 
     /* Info Box */
     .info-box {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 16px;
+      gap: 14px;
+      padding: 18px;
       background: var(--color-blue-50);
       border: 2px solid var(--color-blue-200);
       border-radius: 12px;
@@ -923,9 +819,9 @@ interface OffboardingFormData {
     }
 
     .info-box p {
-      font-size: 13px;
+      font-size: 14px;
       margin: 0;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     /* Form Grid */
@@ -1169,14 +1065,19 @@ interface OffboardingFormData {
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .employee-info-grid {
-        grid-template-columns: 1fr;
-      }
-
       .section-header {
         flex-direction: column;
         align-items: center;
         text-align: center;
+      }
+
+      .preview-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .preview-badges {
+        justify-content: center;
       }
     }
   `]
@@ -1233,32 +1134,22 @@ export class InitiateOffboardingComponent {
     const employeeId = select.value;
     this.selectedEmployeeId.set(employeeId);
 
+    // Just store the selected employee ID - don't auto-fill other fields
+    // Other fields will be entered manually in the next steps
     if (employeeId) {
       const employee = this.employeeOptions.find(e => e.id === employeeId);
       if (employee) {
-        this.formData = {
-          ...this.formData,
-          employeeId: employee.id,
-          employeeName: employee.name,
-          employeeEmail: employee.email,
-          position: employee.position,
-          department: employee.department,
-          manager: employee.manager,
-          joiningDate: employee.joiningDate
-        };
+        this.formData.employeeId = employee.id;
+        this.formData.employeeName = employee.name;
       }
     } else {
-      this.formData = {
-        ...this.formData,
-        employeeId: '',
-        employeeName: '',
-        employeeEmail: '',
-        position: '',
-        department: '',
-        manager: '',
-        joiningDate: ''
-      };
+      this.formData.employeeId = '';
+      this.formData.employeeName = '';
     }
+  }
+
+  getSelectedEmployee(): Employee | undefined {
+    return this.employeeOptions.find(e => e.id === this.selectedEmployeeId());
   }
 
   nextStep(): void {
