@@ -51,6 +51,7 @@ interface MaintenanceFormData {
 }
 
 interface AssignmentFormData {
+   assignedTo: string;   
   assignedToName: string;
   department: string;
   designation: string;
@@ -2068,16 +2069,16 @@ export class AssetDetailsComponent {
     notes: ''
   };
 
-  assignmentForm: AssignmentFormData = {
-    assignedToName: '',
-    department: '',
-    designation: '',
-    assignedLocation: '',
-    assignedDate: '',
-    expectedReturn: '',
-    manager: ''
-  };
-
+assignmentForm: AssignmentFormData = {
+  assignedTo: '',
+  assignedToName: '',
+  department: '',
+  designation: '',
+  assignedLocation: '',
+  assignedDate: '',
+  expectedReturn: '',
+  manager: ''
+};
   readonly detailTabs = [
     { key: 'overview', label: 'Overview' },
     { key: 'assignment', label: 'Assignment' },
