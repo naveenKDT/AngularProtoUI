@@ -546,8 +546,16 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
         <div class="ob-modal" (click)="$event.stopPropagation()">
 
           <div class="ob-modal-header">
-            <span class="ob-modal-title">{{ stepLabels[modalStep() - 1] }}</span>
-            <knod-button variant="outline" size="sm" [icon]="closeIcon" (click)="closeModal()"></knod-button>
+            <div class="ob-modal-header-content">
+              <h2 class="ob-modal-title">Initiate Offboarding</h2>
+              <span class="ob-modal-step-label">{{ stepLabels[modalStep() - 1] }}</span>
+            </div>
+            <button class="ob-modal-close-btn" (click)="closeModal()" aria-label="Close modal">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
           </div>
 
           <!-- Step indicator -->
@@ -559,7 +567,7 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
                   [class.active]="i + 1 === modalStep()"
                   [class.inactive]="i + 1 > modalStep()">
                   @if (i + 1 < modalStep()) {
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                   } @else {
                     {{ i + 1 }}
                   }
@@ -567,7 +575,7 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
                 <span class="ob-step-label" [class.active]="i + 1 === modalStep()">{{ label }}</span>
               </div>
               @if (i < stepLabels.length - 1) {
-                <div class="ob-step-line"></div>
+                <div class="ob-step-line" [class.done]="i + 1 < modalStep()"></div>
               }
             }
           </div>
@@ -1198,38 +1206,81 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
 
     /* ─── Modal ─── */
   .ob-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 24px;
+  }
 
-.ob-modal {
-  background: white;
-  width: 900px;
-  max-width: 95vw;
-  max-height: 90vh;
-  overflow: auto;
-}
+  .ob-modal {
+    background: white;
+    border-radius: 28px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: modalEntry 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes modalEntry {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
     .ob-modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--color-slate-100);
+      padding: 24px 28px;
+      border-bottom: 1px solid #E5EAF3;
       flex-shrink: 0;
     }
-    .ob-modal-title { font-size: 15px; font-weight: 600; color: var(--color-slate-900); }
-    .ob-modal-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .ob-modal-title { font-size: 20px; font-weight: 700; color: #0F172A; margin: 0; }
+    .ob-modal-step-label { font-size: 14px; color: #64748B; margin-top: 4px; }
+    .ob-modal-header-content { display: flex; flex-direction: column; }
+    .ob-modal-close-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F1F5F9;
+      border: none;
+      border-radius: 10px;
+      color: #64748B;
+      cursor: pointer;
+      transition: all 200ms ease;
+    }
+    .ob-modal-close-btn:hover {
+      background: #E5EAF3;
+      color: #0F172A;
+    }
+    .ob-modal-body { flex: 1; overflow-y: auto; padding: 24px 28px; }
     .ob-modal-footer {
       display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      padding: 14px 20px;
-      border-top: 1px solid var(--color-slate-100);
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 28px;
+      border-top: 1px solid #E5EAF3;
+      background: #F3F6FB;
       flex-shrink: 0;
     }
 
@@ -1237,127 +1288,167 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
     .ob-step-bar {
       display: flex;
       align-items: center;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--color-slate-100);
+      justify-content: center;
+      padding: 20px 28px;
+      border-bottom: 1px solid #E5EAF3;
       flex-shrink: 0;
       flex-wrap: nowrap;
+      gap: 8px;
     }
-    .ob-step-dot { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .ob-step-dot { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .ob-step-circle {
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
       flex-shrink: 0;
+      transition: all 200ms ease;
     }
-    .ob-step-circle.done { background: var(--color-success-100); color: var(--color-success-700); border: 1px solid var(--color-success-300); }
-    .ob-step-circle.active { background: var(--color-primary-100); color: var(--color-primary-700); border: 1px solid var(--color-primary-400); }
-    .ob-step-circle.inactive { background: var(--color-slate-100); color: var(--color-slate-500); border: 1px solid var(--color-slate-200); }
-    .ob-step-label { font-size: 11px; color: var(--color-slate-500); white-space: nowrap; }
-    .ob-step-label.active { color: var(--color-primary-600); font-weight: 600; }
-    .ob-step-line { flex: 1; height: 1px; background: var(--color-slate-200); margin: 0 8px; }
+    .ob-step-circle.done { background: #DCFCE7; color: #22C55E; border: 2px solid #22C55E; }
+    .ob-step-circle.active { background: #3B82F6; color: white; border: 2px solid #3B82F6; }
+    .ob-step-circle.inactive { background: #F1F5F9; color: #64748B; border: 2px solid #E5EAF3; }
+    .ob-step-label { font-size: 12px; color: #64748B; white-space: nowrap; font-weight: 500; }
+    .ob-step-label.active { color: #0F172A; font-weight: 600; }
+    .ob-step-line { flex: 1; height: 2px; background: #E5EAF3; max-width: 60px; transition: all 200ms ease; }
+    .ob-step-line.done { background: #22C55E; }
 
     /* ─── Form fields ─── */
     .ob-form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
+      gap: 16px;
+      margin-bottom: 16px;
     }
     .ob-form-row-single { grid-template-columns: 1fr; }
     .ob-form-field label {
       display: block;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 500;
-      color: var(--color-slate-600);
-      margin-bottom: 5px;
+      color: #0F172A;
+      margin-bottom: 6px;
     }
-    .ob-required { color: var(--color-red-500); }
+    .ob-required { color: #EF4444; }
     .ob-form-field input,
     .ob-form-field select,
     .ob-form-field textarea {
       width: 100%;
-      padding: 8px 12px;
-      font-size: 13px;
-      color: var(--color-slate-800);
+      height: 48px;
+      padding: 0 16px;
+      font-size: 14px;
+      color: #0F172A;
       background: white;
-      border: 1px solid var(--color-slate-300);
-      border-radius: 6px;
+      border: 2px solid #CBD5E1;
+      border-radius: 14px;
       font-family: inherit;
-      transition: border-color var(--transition-fast);
+      transition: all 200ms ease;
       outline: none;
+    }
+    .ob-form-field input::placeholder,
+    .ob-form-field textarea::placeholder {
+      color: #94A3B8;
+    }
+    .ob-form-field input:hover,
+    .ob-form-field select:hover,
+    .ob-form-field textarea:hover {
+      border-color: #94A3B8;
     }
     .ob-form-field input:focus,
     .ob-form-field select:focus,
     .ob-form-field textarea:focus {
-      border-color: var(--color-primary-400);
-      box-shadow: 0 0 0 3px var(--color-primary-100);
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     }
-    .ob-form-field textarea { resize: vertical; min-height: 72px; }
-    .ob-form-hint { font-size: 12px; color: var(--color-slate-500); margin-bottom: 14px; }
+    .ob-form-field textarea { 
+      height: auto;
+      min-height: 100px;
+      padding: 12px 16px;
+      resize: vertical; 
+    }
+    .ob-form-hint { font-size: 14px; color: #64748B; margin-bottom: 16px; line-height: 1.5; }
     .ob-form-divider {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin: 16px 0 12px;
+      gap: 16px;
+      margin: 20px 0 16px;
     }
-    .ob-form-divider span { font-size: 11px; font-weight: 500; color: var(--color-slate-500); white-space: nowrap; }
+    .ob-form-divider span { font-size: 12px; font-weight: 500; color: #64748B; white-space: nowrap; }
     .ob-form-divider::before,
-    .ob-form-divider::after { content: ''; flex: 1; height: 1px; background: var(--color-slate-200); }
+    .ob-form-divider::after { content: ''; flex: 1; height: 1px; background: #E5EAF3; }
 
     /* ─── Task template picker ─── */
     .ob-task-tmpl {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      padding: 10px;
-      border: 1px solid var(--color-slate-200);
-      border-radius: 6px;
-      margin-bottom: 6px;
-      background: var(--color-slate-50);
+      gap: 12px;
+      padding: 16px;
+      border: 2px solid #E5EAF3;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      background: white;
+      transition: all 200ms ease;
+      cursor: pointer;
     }
-    .ob-task-tmpl input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; accent-color: var(--color-primary-500); }
+    .ob-task-tmpl:hover {
+      border-color: #CBD5E1;
+      transform: translateY(-2px);
+    }
+    .ob-task-tmpl input[type="checkbox"] { 
+      margin-top: 2px; 
+      flex-shrink: 0; 
+      width: 18px;
+      height: 18px;
+      accent-color: #3B82F6;
+      cursor: pointer;
+    }
     .ob-task-tmpl-label { flex: 1; cursor: pointer; }
-    .ob-task-tmpl-title { font-size: 12px; font-weight: 500; color: var(--color-slate-800); display: block; }
-    .ob-task-tmpl-meta { font-size: 11px; color: var(--color-slate-500); display: block; margin-top: 1px; }
+    .ob-task-tmpl-title { font-size: 14px; font-weight: 500; color: #0F172A; display: block; margin-bottom: 4px; }
+    .ob-task-tmpl-meta { font-size: 12px; color: #64748B; display: block; line-height: 1.4; }
     .ob-task-tmpl-disabled { opacity: 0.6; }
     .ob-task-tmpl-disabled input { cursor: not-allowed; }
 
     /* ─── Review step ─── */
-    .ob-review-section { margin-bottom: 16px; }
+    .ob-review-section { 
+      margin-bottom: 20px;
+      padding: 20px;
+      background: #F3F6FB;
+      border-radius: 16px;
+    }
     .ob-review-label {
-      font-size: 10px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       font-weight: 600;
-      color: var(--color-slate-500);
-      margin-bottom: 8px;
+      color: #64748B;
+      margin-bottom: 12px;
     }
     .ob-review-row {
       display: flex;
       justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--color-slate-100);
-      font-size: 13px;
+      padding: 8px 0;
+      border-bottom: 1px solid #E5EAF3;
+      font-size: 14px;
     }
-    .ob-review-row span:first-child { color: var(--color-slate-500); }
-    .ob-review-row span:last-child { font-weight: 500; color: var(--color-slate-800); }
-    .ob-review-tasks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .ob-review-row:last-child { border-bottom: none; }
+    .ob-review-row span:first-child { color: #64748B; }
+    .ob-review-row span:last-child { font-weight: 500; color: #0F172A; }
+    .ob-review-tasks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .ob-submit-notice {
       display: flex;
       align-items: flex-start;
-      gap: 8px;
-      padding: 12px;
-      background: var(--color-primary-50);
-      border-radius: 6px;
-      font-size: 12px;
-      color: var(--color-primary-700);
-      margin-top: 4px;
+      gap: 12px;
+      padding: 16px;
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 14px;
+      font-size: 14px;
+      color: #2563EB;
+      margin-top: 8px;
     }
+    .ob-submit-notice svg { flex-shrink: 0; margin-top: 2px; }
   `]
 })
 export class OffboardingComponent {
