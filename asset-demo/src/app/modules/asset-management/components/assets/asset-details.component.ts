@@ -9,6 +9,8 @@ import {
   ButtonComponent,
   TabsComponent
 } from '../../../../shared/components/ui-components';
+import { ModalComponent } from '../../../../shared/components/modal.component';
+import { InputComponent } from '../../../../shared/components/input.component';
 
 interface MaintenanceRecord {
   id: string;
@@ -38,6 +40,26 @@ interface HistoryEntry {
   details: string;
 }
 
+interface MaintenanceFormData {
+  type: string;
+  description: string;
+  scheduledDate: string;
+  vendor: string;
+  cost: string;
+  recurrence: string;
+  notes: string;
+}
+
+interface AssignmentFormData {
+  assignedToName: string;
+  department: string;
+  designation: string;
+  assignedLocation: string;
+  assignedDate: string;
+  expectedReturn: string;
+  manager: string;
+}
+
 @Component({
   selector: 'knodtec-asset-details',
   standalone: true,
@@ -51,7 +73,9 @@ interface HistoryEntry {
     BadgeComponent,
     AvatarComponent,
     ButtonComponent,
-    TabsComponent
+    TabsComponent,
+    ModalComponent,
+    InputComponent
   ],
   template: `
     <div class="asset-details-page">
@@ -222,6 +246,12 @@ interface HistoryEntry {
                   <span class="assignee-id">{{ asset().assignedTo }}</span>
                   <span class="assignee-dept">{{ asset().department }}</span>
                 </div>
+                <button class="edit-assignment-btn" (click)="openAssignmentModal()" title="Edit Assignment">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
               </div>
               <div class="assignment-meta">
                 <div class="meta-item">
@@ -233,12 +263,21 @@ interface HistoryEntry {
                   <span class="meta-value">{{ asset().expectedReturn | date:'mediumDate' }}</span>
                 </div>
               </div>
-              <knod-button variant="outline" size="sm" class="action-btn" (click)="raiseTicket()">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                </svg>
-                Raise Ticket
-              </knod-button>
+              <div class="sidebar-card-actions">
+                <knod-button variant="outline" size="sm" (click)="raiseTicket()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                  </svg>
+                  Raise Ticket
+                </knod-button>
+                <knod-button variant="outline" size="sm" (click)="openAssignmentModal()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  Edit
+                </knod-button>
+              </div>
             } @else {
               <div class="unassigned-state">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -302,7 +341,7 @@ interface HistoryEntry {
                 </svg>
                 Raise Ticket
               </button>
-              <button class="quick-action" (click)="createMaintenance()">
+              <button class="quick-action" (click)="openMaintenanceModal()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
@@ -319,6 +358,139 @@ interface HistoryEntry {
         </div>
       </div>
     </div>
+
+    <!-- ─── Schedule Maintenance Modal ───────────────────────────── -->
+    <app-modal
+      [isOpen]="showMaintenanceModal()"
+      title="Schedule Maintenance"
+      size="lg"
+      (closed)="closeMaintenanceModal()">
+      <div class="maintenance-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Maintenance Type *</label>
+            <select class="form-select" [(ngModel)]="maintenanceForm.type">
+              <option value="">Select type</option>
+              <option value="preventive">Preventive Maintenance</option>
+              <option value="corrective">Corrective Maintenance</option>
+              <option value="inspection">Inspection</option>
+              <option value="calibration">Calibration</option>
+              <option value="cleaning">Cleaning</option>
+              <option value="software-update">Software Update</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Scheduled Date *</label>
+            <input type="date" class="form-input" [(ngModel)]="maintenanceForm.scheduledDate" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <textarea class="form-textarea" rows="3" [(ngModel)]="maintenanceForm.description" placeholder="Describe the maintenance work to be performed..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Vendor / Service Provider</label>
+            <input type="text" class="form-input" [(ngModel)]="maintenanceForm.vendor" placeholder="Enter vendor name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estimated Cost</label>
+            <input type="number" class="form-input" [(ngModel)]="maintenanceForm.cost" placeholder="Enter estimated cost" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Recurrence</label>
+            <select class="form-select" [(ngModel)]="maintenanceForm.recurrence">
+              <option value="once">One-time</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="semi-annual">Semi-annually</option>
+              <option value="annual">Annually</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-textarea" rows="2" [(ngModel)]="maintenanceForm.notes" placeholder="Additional notes or instructions..."></textarea>
+        </div>
+      </div>
+      <div slot="footer" class="modal-actions">
+        <knod-button variant="outline" (click)="closeMaintenanceModal()">Cancel</knod-button>
+        <knod-button variant="primary" (click)="saveMaintenance()">Schedule Maintenance</knod-button>
+      </div>
+    </app-modal>
+
+    <!-- ─── Edit Assignment Modal ────────────────────────────────── -->
+    <app-modal
+      [isOpen]="showAssignmentModal()"
+      title="Edit Assignment"
+      size="lg"
+      (closed)="closeAssignmentModal()">
+      <div class="assignment-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Employee Name *</label>
+            <input type="text" class="form-input" [(ngModel)]="assignmentForm.assignedToName" placeholder="Enter employee name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employee ID</label>
+            <input type="text" class="form-input" [(ngModel)]="assignmentForm.assignedTo" placeholder="EMP-XXXX" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Department *</label>
+            <select class="form-select" [(ngModel)]="assignmentForm.department">
+              <option value="">Select department</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Human Resources">Human Resources</option>
+              <option value="Finance">Finance</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Operations">Operations</option>
+              <option value="Sales">Sales</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Designation *</label>
+            <input type="text" class="form-input" [(ngModel)]="assignmentForm.designation" placeholder="Enter designation" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Assigned Location</label>
+          <input type="text" class="form-input" [(ngModel)]="assignmentForm.assignedLocation" placeholder="e.g., 3rd Floor, Desk 24" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Assigned Date *</label>
+            <input type="date" class="form-input" [(ngModel)]="assignmentForm.assignedDate" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expected Return Date</label>
+            <input type="date" class="form-input" [(ngModel)]="assignmentForm.expectedReturn" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Manager</label>
+          <input type="text" class="form-input" [(ngModel)]="assignmentForm.manager" placeholder="Enter manager name" />
+        </div>
+      </div>
+      <div slot="footer" class="modal-actions">
+        <knod-button variant="outline" (click)="closeAssignmentModal()">Cancel</knod-button>
+        <knod-button variant="primary" (click)="saveAssignment()">Save Changes</knod-button>
+      </div>
+    </app-modal>
 
     <!-- ─── Tab Templates ──────────────────────────────────────── -->
 
@@ -444,6 +616,7 @@ interface HistoryEntry {
               </div>
             </div>
             <div class="assignment-actions">
+              <knod-button variant="outline" [icon]="editIcon" (click)="openAssignmentModal()">Edit Assignment</knod-button>
               <knod-button variant="outline" [icon]="transferIcon">Transfer</knod-button>
               <knod-button variant="outline" [icon]="returnIcon">Mark Returned</knod-button>
               <knod-button variant="outline" [icon]="ticketIcon">Raise Ticket</knod-button>
@@ -473,7 +646,7 @@ interface HistoryEntry {
             </div>
             <h3>No Current Assignment</h3>
             <p>This asset is currently available and not assigned to anyone.</p>
-            <knod-button variant="primary" [icon]="assignIcon">Assign to Employee</knod-button>
+            <knod-button variant="primary" [icon]="assignIcon" (click)="openAssignmentModal()">Assign to Employee</knod-button>
           </div>
         }
       </div>
@@ -544,7 +717,7 @@ interface HistoryEntry {
             }
           </div>
           <div class="card-footer">
-            <knod-button variant="primary" [icon]="addIcon">Schedule Maintenance</knod-button>
+            <knod-button variant="primary" [icon]="addIcon" (click)="openMaintenanceModal()">Schedule Maintenance</knod-button>
           </div>
         </knod-card>
       </div>
@@ -1590,6 +1763,113 @@ interface HistoryEntry {
     .detail-label { font-size: 12px; color: var(--text-secondary); }
     .detail-value { font-size: 15px; font-weight: 500; color: var(--text-primary); }
 
+    /* ─── Edit Assignment Button ────────────────────────────────── */
+    .edit-assignment-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-left: auto;
+    }
+
+    .edit-assignment-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* ─── Sidebar Card Actions ──────────────────────────────────── */
+    .sidebar-card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sidebar-card-actions :deep(knod-button) {
+      flex: 1;
+      min-width: 100px;
+    }
+
+    /* ─── Modal Forms ───────────────────────────────────────────── */
+    .maintenance-form,
+    .assignment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: var(--font-family);
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all var(--transition);
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 40px;
+    }
+
+    .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
     /* ─── Responsive ────────────────────────────────────────────── */
     /* Large screens - optimized spacing */
     @media (min-width: 1601px) {
@@ -1598,146 +1878,165 @@ interface HistoryEntry {
 
     /* Standard laptop screens (1440px - 1600px) */
     @media (max-width: 1600px) {
-      .asset-details-page { max-width: 1400px; padding: 28px; }
-      .quick-stat { padding: 20px; }
-      .tab-content { padding: 24px; }
+      .asset-details-page { max-width: 100%; padding: 24px; }
+      .quick-stat { padding: 18px; }
+      .tab-content { padding: 20px; }
     }
 
     /* Laptop screens (1280px - 1440px) - Primary optimization target */
     @media (max-width: 1440px) {
       .asset-details-page { 
-        max-width: 1200px; 
-        padding: 24px; 
-        gap: 20px;
+        max-width: 100%; 
+        padding: 20px; 
+        gap: 16px;
       }
-      .asset-name { font-size: 28px; }
-      .asset-icon { width: 60px; height: 60px; border-radius: 16px; }
-      .asset-icon :deep(svg) { width: 28px; height: 28px; }
-      .quick-stats-row { grid-template-columns: repeat(5, 1fr); gap: 12px; }
-      .quick-stat { padding: 18px; }
-      .quick-stat .stat-value { font-size: 16px; }
-      .content-layout { grid-template-columns: 1fr 320px; gap: 20px; }
-      .tab-btn { padding: 16px 16px; font-size: 13px; }
-      .tab-content { padding: 22px; }
+      .asset-name { font-size: 26px; }
+      .asset-icon { width: 56px; height: 56px; border-radius: 14px; }
+      .asset-icon :deep(svg) { width: 26px; height: 26px; }
+      .quick-stats-row { 
+        grid-template-columns: repeat(5, 1fr); 
+        gap: 12px; 
+      }
+      .quick-stat { padding: 16px; }
+      .quick-stat .stat-value { font-size: 15px; }
+      .content-layout { grid-template-columns: 1fr 280px; gap: 16px; }
+      .tab-btn { padding: 14px 14px; font-size: 13px; }
+      .tab-content { padding: 18px; }
+      .assignment-meta-grid { grid-template-columns: repeat(2, 1fr); }
+      .specs-grid { grid-template-columns: repeat(2, 1fr); }
+      .info-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     /* Smaller laptop screens (1024px - 1280px) */
     @media (max-width: 1280px) {
       .asset-details-page { 
-        max-width: 1000px; 
-        padding: 20px; 
-        gap: 16px;
+        max-width: 100%; 
+        padding: 16px; 
+        gap: 14px;
       }
-      .asset-name { font-size: 24px; }
-      .asset-icon { width: 52px; height: 52px; border-radius: 14px; }
-      .asset-icon :deep(svg) { width: 24px; height: 24px; }
-      .asset-meta-row { font-size: 13px; }
-      .quick-stats-row { grid-template-columns: repeat(5, 1fr); gap: 10px; }
-      .quick-stat { padding: 16px; }
-      .quick-stat .stat-label { font-size: 12px; }
-      .quick-stat .stat-value { font-size: 15px; }
-      .content-layout { grid-template-columns: 1fr 300px; gap: 16px; }
-      .tab-btn { padding: 14px 14px; font-size: 13px; }
-      .tab-content { padding: 20px; }
-      .tab-content :deep(.info-grid) { gap: 16px; }
-      .tab-content :deep(.info-item) { padding: 16px; }
-      .tab-content :deep(.info-label) { font-size: 12px; }
-      .tab-content :deep(.info-value) { font-size: 14px; }
+      .asset-name { font-size: 22px; }
+      .asset-icon { width: 50px; height: 50px; border-radius: 12px; }
+      .asset-icon :deep(svg) { width: 22px; height: 22px; }
+      .asset-meta-row { font-size: 12px; }
+      .quick-stats-row { 
+        grid-template-columns: repeat(5, 1fr); 
+        gap: 8px; 
+      }
+      .quick-stat { padding: 14px; }
+      .quick-stat .stat-label { font-size: 11px; }
+      .quick-stat .stat-value { font-size: 14px; }
+      .content-layout { grid-template-columns: 1fr 260px; gap: 14px; }
+      .tab-btn { padding: 12px 12px; font-size: 12px; }
+      .tab-content { padding: 16px; }
+      .sidebar-content :deep(knod-card) { 
+        padding: 16px; 
+      }
+      .sidebar-card-actions { flex-direction: column; }
+      .sidebar-card-actions :deep(knod-button) { min-width: 100%; }
+      .assignment-meta-grid { grid-template-columns: 1fr; }
+      .specs-grid { grid-template-columns: repeat(2, 1fr); }
+      .info-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
     }
 
     /* Tablet landscape (768px - 1024px) */
     @media (max-width: 1024px) {
       .asset-details-page { 
         max-width: 100%; 
-        padding: 20px; 
-        gap: 16px;
+        padding: 16px; 
+        gap: 12px;
       }
-      .asset-header { flex-direction: column; align-items: flex-start; }
-      .asset-name { font-size: 24px; }
+      .asset-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .asset-name { font-size: 22px; }
       .asset-icon { width: 48px; height: 48px; border-radius: 12px; }
       .asset-icon :deep(svg) { width: 22px; height: 22px; }
       .asset-meta-row { flex-wrap: wrap; }
-      .header-actions { flex-wrap: wrap; }
-      .quick-stats-row { grid-template-columns: repeat(5, 1fr); gap: 10px; }
-      .quick-stat { padding: 14px; }
-      .content-layout { grid-template-columns: 1fr; gap: 16px; }
-      .sidebar-content { flex-direction: row; flex-wrap: wrap; gap: 16px; }
-      .sidebar-content :deep(knod-card) { flex: 1 1 280px; }
-      .detail-tabs { padding: 0 6px; }
-      .tab-btn { padding: 12px 12px; font-size: 12px; }
-      .tab-content { padding: 18px; }
-      .specs-grid { grid-template-columns: repeat(2, 1fr); }
-      .assignment-meta-grid { grid-template-columns: repeat(2, 1fr); }
-      .location-details-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-
-    /* Tablet portrait (768px and below) */
-    @media (max-width: 768px) {
-      .asset-details-page { padding: 16px; gap: 14px; }
-      .breadcrumb-row { margin-bottom: 12px; }
-      .back-btn { padding: 10px 16px; font-size: 13px; }
-      .asset-header { flex-direction: column; gap: 16px; }
-      .asset-info { gap: 14px; }
-      .asset-name { font-size: 22px; }
-      .asset-title-row { flex-wrap: wrap; gap: 10px; }
-      .asset-meta-row { flex-wrap: wrap; gap: 8px; font-size: 12px; }
-      .header-actions { gap: 8px; }
-      .header-actions :deep(knod-button) { padding: 10px 14px; font-size: 12px; }
+      .header-actions { flex-wrap: wrap; gap: 8px; }
       .quick-stats-row { 
         grid-template-columns: repeat(3, 1fr); 
         gap: 10px; 
       }
-      .quick-stat { padding: 14px; }
-      .quick-stat .stat-label { font-size: 11px; }
-      .quick-stat .stat-value { font-size: 14px; }
+      .quick-stat { padding: 12px; }
+      .content-layout { grid-template-columns: 1fr; gap: 14px; }
+      .sidebar-content { flex-direction: row; flex-wrap: wrap; gap: 12px; }
+      .sidebar-content :deep(knod-card) { flex: 1 1 calc(50% - 6px); }
+      .detail-tabs { padding: 0 4px; gap: 0; overflow-x: auto; }
+      .tab-btn { padding: 10px 12px; font-size: 12px; white-space: nowrap; }
+      .tab-content { padding: 16px; }
+      .specs-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .assignment-meta-grid { grid-template-columns: 1fr; gap: 12px; }
+      .location-details-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .info-grid { grid-template-columns: 1fr; gap: 12px; }
+    }
+
+    /* Tablet portrait (768px and below) */
+    @media (max-width: 768px) {
+      .asset-details-page { padding: 12px; gap: 12px; }
+      .breadcrumb-row { margin-bottom: 12px; }
+      .back-btn { padding: 8px 14px; font-size: 12px; }
+      .asset-header { flex-direction: column; gap: 14px; }
+      .asset-info { gap: 12px; }
+      .asset-name { font-size: 20px; }
+      .asset-title-row { flex-wrap: wrap; gap: 8px; }
+      .asset-meta-row { flex-wrap: wrap; gap: 6px; font-size: 12px; }
+      .header-actions { gap: 8px; }
+      .header-actions :deep(knod-button) { padding: 8px 12px; font-size: 12px; }
+      .quick-stats-row { 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 8px; 
+      }
+      .quick-stat { padding: 12px; }
+      .quick-stat .stat-label { font-size: 10px; }
+      .quick-stat .stat-value { font-size: 13px; }
       .detail-tabs { 
         padding: 0 4px; 
         gap: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
-      .tab-btn { padding: 12px 10px; font-size: 12px; }
-      .tab-content { padding: 16px; }
+      .tab-btn { padding: 10px 10px; font-size: 12px; }
+      .tab-content { padding: 14px; }
       .sidebar-content { flex-direction: column; }
       .sidebar-content :deep(knod-card) { flex: none; width: 100%; }
-      .info-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .info-item { padding: 14px; }
-      .info-label { font-size: 11px; }
-      .info-value { font-size: 13px; }
-      .specs-grid { grid-template-columns: 1fr; gap: 12px; }
-      .location-details-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .assignment-meta-grid { grid-template-columns: 1fr; gap: 12px; }
+      .info-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .info-item { padding: 12px; }
+      .specs-grid { grid-template-columns: 1fr; gap: 10px; }
+      .location-details-grid { grid-template-columns: 1fr; gap: 10px; }
+      .assignment-meta-grid { grid-template-columns: 1fr; gap: 10px; }
     }
 
     /* Mobile (480px and below) */
     @media (max-width: 480px) {
-      .asset-details-page { padding: 12px; gap: 12px; }
+      .asset-details-page { padding: 10px; gap: 10px; }
       .back-btn { width: 100%; justify-content: center; }
       .asset-info { flex-direction: column; align-items: flex-start; }
-      .asset-icon { width: 48px; height: 48px; }
-      .asset-name { font-size: 20px; }
-      .asset-title-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .asset-meta-row { flex-direction: column; gap: 6px; }
+      .asset-icon { width: 44px; height: 44px; }
+      .asset-name { font-size: 18px; }
+      .asset-title-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .asset-meta-row { flex-direction: column; gap: 4px; }
       .separator { display: none; }
       .header-actions { width: 100%; justify-content: flex-start; }
       .header-actions :deep(knod-button) { flex: 1; }
       .action-dropdown { width: 100%; }
       .action-menu-btn { width: 100%; }
       .quick-stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .quick-stat { padding: 12px; }
+      .quick-stat { padding: 10px; }
       .quick-stat .stat-label { font-size: 10px; }
-      .quick-stat .stat-value { font-size: 13px; }
+      .quick-stat .stat-value { font-size: 12px; }
       .detail-tabs { 
         overflow-x: auto; 
         -webkit-overflow-scrolling: touch;
       }
-      .tab-btn { padding: 10px 12px; font-size: 11px; white-space: nowrap; }
-      .tab-content { padding: 14px; }
-      .info-grid { grid-template-columns: 1fr; gap: 10px; }
-      .info-item { padding: 12px; }
+      .tab-btn { padding: 8px 10px; font-size: 11px; white-space: nowrap; }
+      .tab-content { padding: 12px; }
+      .info-grid { grid-template-columns: 1fr; gap: 8px; }
+      .info-item { padding: 10px; }
       .location-details-grid { grid-template-columns: 1fr; }
       .current-assignment { flex-direction: column; }
       .assignment-actions { flex-direction: column; }
       .maintenance-item { flex-direction: column; }
       .document-item { flex-wrap: wrap; }
+      .form-row { grid-template-columns: 1fr; }
     }
   `]
 })
@@ -1756,6 +2055,28 @@ export class AssetDetailsComponent {
 
   readonly activeTab = signal('overview');
   readonly showActionMenu = signal(false);
+  readonly showMaintenanceModal = signal(false);
+  readonly showAssignmentModal = signal(false);
+
+  maintenanceForm: MaintenanceFormData = {
+    type: '',
+    description: '',
+    scheduledDate: '',
+    vendor: '',
+    cost: '',
+    recurrence: 'once',
+    notes: ''
+  };
+
+  assignmentForm: AssignmentFormData = {
+    assignedToName: '',
+    department: '',
+    designation: '',
+    assignedLocation: '',
+    assignedDate: '',
+    expectedReturn: '',
+    manager: ''
+  };
 
   readonly detailTabs = [
     { key: 'overview', label: 'Overview' },
@@ -1933,7 +2254,80 @@ export class AssetDetailsComponent {
     this.router.navigate(['/raise-ticket'], { queryParams: { assetId: this.asset().id } });
   }
 
-  createMaintenance(): void { }
+  openMaintenanceModal(): void {
+    this.maintenanceForm = {
+      type: '',
+      description: '',
+      scheduledDate: '',
+      vendor: '',
+      cost: '',
+      recurrence: 'once',
+      notes: ''
+    };
+    this.showMaintenanceModal.set(true);
+  }
+
+  closeMaintenanceModal(): void {
+    this.showMaintenanceModal.set(false);
+  }
+
+  saveMaintenance(): void {
+    if (!this.maintenanceForm.type || !this.maintenanceForm.description || !this.maintenanceForm.scheduledDate) {
+      return;
+    }
+    const newRecord: MaintenanceRecord = {
+      id: String(Date.now()),
+      type: this.maintenanceForm.type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      description: this.maintenanceForm.description,
+      status: 'scheduled',
+      scheduledDate: this.maintenanceForm.scheduledDate,
+      vendor: this.maintenanceForm.vendor || undefined,
+      cost: this.maintenanceForm.cost ? parseFloat(this.maintenanceForm.cost) : undefined
+    };
+    this.maintenanceRecords.update(records => [...records, newRecord]);
+    this.closeMaintenanceModal();
+  }
+
+  openAssignmentModal(): void {
+    this.assignmentForm = {
+      assignedToName: this.asset().assignedToName,
+      assignedTo: this.asset().assignedTo,
+      department: this.asset().department,
+      designation: this.asset().designation,
+      assignedLocation: this.asset().assignedLocation,
+      assignedDate: this.asset().assignedDate,
+      expectedReturn: this.asset().expectedReturn,
+      manager: this.asset().manager
+    };
+    this.showAssignmentModal.set(true);
+  }
+
+  closeAssignmentModal(): void {
+    this.showAssignmentModal.set(false);
+  }
+
+  saveAssignment(): void {
+    if (!this.assignmentForm.assignedToName || !this.assignmentForm.department || !this.assignmentForm.designation || !this.assignmentForm.assignedDate) {
+      return;
+    }
+    const currentAsset = this.asset();
+    this.asset.set({
+      ...currentAsset,
+      assignedToName: this.assignmentForm.assignedToName,
+      assignedTo: this.assignmentForm.assignedTo || currentAsset.assignedTo,
+      department: this.assignmentForm.department,
+      designation: this.assignmentForm.designation,
+      assignedLocation: this.assignmentForm.assignedLocation,
+      assignedDate: this.assignmentForm.assignedDate,
+      expectedReturn: this.assignmentForm.expectedReturn,
+      manager: this.assignmentForm.manager
+    });
+    this.closeAssignmentModal();
+  }
+
+  createMaintenance(): void {
+    this.openMaintenanceModal();
+  }
 
   viewHistory(): void { this.activeTab.set('history'); }
 }
