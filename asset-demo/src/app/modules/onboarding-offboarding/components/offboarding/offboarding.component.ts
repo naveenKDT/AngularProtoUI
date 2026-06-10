@@ -65,50 +65,9 @@ interface OffboardingRecord {
   approvals: OffboardingApproval[];
 }
 
-interface TaskTemplate {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  assignedTo: string;
-  defaultChecked: boolean;
-}
-
-interface InitiateFormData {
-  // Step 1
-  employeeId: string;
-  employeeName: string;
-  employeeEmail: string;
-  department: string;
-  position: string;
-  manager: string;
-  managerEmail: string;
-  joiningDate: string;
-  // Step 2
-  separationType: string;
-  lastWorkingDay: string;
-  noticePeriod: string;
-  noticeStatus: string;
-  reason: string;
-  resignationLetterReceived: string;
-  exitInterviewRequired: string;
-  hrNotes: string;
-  // Step 3
-  selectedTasks: Record<string, boolean>;
-}
-
-const TASK_TEMPLATES: TaskTemplate[] = [
-  { id: 'kt', title: 'Knowledge transfer', description: 'Complete documentation and KT sessions with the team', category: 'HR', assignedTo: 'Reporting Manager', defaultChecked: true },
-  { id: 'ph', title: 'Project handover', description: 'Hand over all active projects, code, and ongoing work', category: 'HR', assignedTo: 'Reporting Manager', defaultChecked: true },
-  { id: 'ei', title: 'Exit interview', description: 'Conduct structured exit interview and record feedback', category: 'HR', assignedTo: 'HR Team', defaultChecked: true },
-  { id: 'ar', title: 'Asset recovery', description: 'Collect laptop, ID card, access cards, and peripherals', category: 'IT', assignedTo: 'IT Asset Team', defaultChecked: true },
-  { id: 'ax', title: 'Access revocation', description: 'Revoke all system, email, app, and tool access', category: 'IT', assignedTo: 'IT Admin', defaultChecked: true },
-  { id: 'fs', title: 'Final settlement', description: 'Process last payslip, PF, gratuity, and reimbursements', category: 'Finance', assignedTo: 'Finance Team', defaultChecked: true },
-  { id: 'lh', title: 'LMS / HR portal deactivation', description: 'Deactivate all HR system accounts and subscriptions', category: 'IT', assignedTo: 'IT Admin', defaultChecked: false },
-  { id: 'bg', title: 'Background verification closure', description: 'Close any open background verification cases', category: 'HR', assignedTo: 'HR Team', defaultChecked: false },
-];
-
-const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Review & submit'];
+// Removed duplicate interfaces: TaskTemplate, InitiateFormData
+// Removed duplicate constants: TASK_TEMPLATES, STEP_LABELS
+// These were duplicated from initiate-offboarding.component.ts
 
 @Component({
   selector: 'knodtec-offboarding',
@@ -132,36 +91,83 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       <!-- Top bar -->
       <div class="ob-topbar">
         <div class="ob-topbar-left">
-          <h1 class="ob-title">Employee offboarding</h1>
-          <p class="ob-subtitle">HR workspace — manage exit lifecycle, tasks, approvals, and clearances</p>
+          <div class="ob-icon-badge">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="ob-title">Employee Offboarding</h1>
+            <p class="ob-subtitle">Manage the complete exit lifecycle with ease</p>
+          </div>
         </div>
         <div class="ob-topbar-actions">
-          <knod-button variant="outline" [icon]="downloadIcon" (click)="exportReport()">Export report</knod-button>
-          <knod-button variant="primary" [icon]="plusIcon" (click)="openInitiateModal()">Initiate offboarding</knod-button>
+          <knod-button variant="outline" [icon]="downloadIcon" (click)="exportReport()">Export Report</knod-button>
+          <knod-button variant="primary" [icon]="plusIcon" (click)="openInitiateModal()">Initiate Offboarding</knod-button>
         </div>
       </div>
 
       <!-- Stats -->
       <div class="ob-stats-row">
         <div class="ob-stat-card" (click)="quickFilter('initiated')">
-          <div class="ob-stat-val">{{ initiatedCount() }}</div>
-          <div class="ob-stat-lbl">Initiated</div>
-          <div class="ob-stat-bar" style="background: var(--color-primary-500)"></div>
+          <div class="stat-icon initiated">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="ob-stat-val">{{ initiatedCount() }}</div>
+            <div class="ob-stat-lbl">Initiated</div>
+          </div>
+          <div class="stat-glow"></div>
+          <div class="ob-stat-bar"></div>
         </div>
         <div class="ob-stat-card" (click)="quickFilter('in_progress')">
-          <div class="ob-stat-val">{{ inProgressCount() }}</div>
-          <div class="ob-stat-lbl">In progress</div>
-          <div class="ob-stat-bar" style="background: var(--color-amber-500)"></div>
+          <div class="stat-icon progress">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="ob-stat-val">{{ inProgressCount() }}</div>
+            <div class="ob-stat-lbl">In Progress</div>
+          </div>
+          <div class="stat-glow"></div>
+          <div class="ob-stat-bar"></div>
         </div>
         <div class="ob-stat-card" (click)="quickFilter('pending_approval')">
-          <div class="ob-stat-val">{{ pendingApprovalCount() }}</div>
-          <div class="ob-stat-lbl">Pending approval</div>
-          <div class="ob-stat-bar" style="background: var(--color-violet-500)"></div>
+          <div class="stat-icon pending">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="ob-stat-val">{{ pendingApprovalCount() }}</div>
+            <div class="ob-stat-lbl">Pending Approval</div>
+          </div>
+          <div class="stat-glow"></div>
+          <div class="ob-stat-bar"></div>
         </div>
         <div class="ob-stat-card" (click)="quickFilter('completed')">
-          <div class="ob-stat-val">{{ completedCount() }}</div>
-          <div class="ob-stat-lbl">Completed</div>
-          <div class="ob-stat-bar" style="background: var(--color-success-500)"></div>
+          <div class="stat-icon completed">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="ob-stat-val">{{ completedCount() }}</div>
+            <div class="ob-stat-lbl">Completed</div>
+          </div>
+          <div class="stat-glow"></div>
+          <div class="ob-stat-bar"></div>
         </div>
       </div>
 
@@ -539,241 +545,6 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
         }
       </div>
     </ng-template>
-
-    <!-- ───────── INITIATE OFFBOARDING MODAL ───────── -->
-    @if (showModal()) {
-      <div class="ob-modal-overlay" (click)="closeModalOutside($event)">
-        <div class="ob-modal" (click)="$event.stopPropagation()">
-
-          <div class="ob-modal-header">
-            <div class="ob-modal-header-content">
-              <h2 class="ob-modal-title">Initiate Offboarding</h2>
-              <span class="ob-modal-step-label">{{ stepLabels[modalStep() - 1] }}</span>
-            </div>
-            <button class="ob-modal-close-btn" (click)="closeModal()" aria-label="Close modal">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Step indicator -->
-          <div class="ob-step-bar">
-            @for (label of stepLabels; track label; let i = $index) {
-              <div class="ob-step-dot">
-                <div class="ob-step-circle"
-                  [class.done]="i + 1 < modalStep()"
-                  [class.active]="i + 1 === modalStep()"
-                  [class.inactive]="i + 1 > modalStep()">
-                  @if (i + 1 < modalStep()) {
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                  } @else {
-                    {{ i + 1 }}
-                  }
-                </div>
-                <span class="ob-step-label" [class.active]="i + 1 === modalStep()">{{ label }}</span>
-              </div>
-              @if (i < stepLabels.length - 1) {
-                <div class="ob-step-line" [class.done]="i + 1 < modalStep()"></div>
-              }
-            }
-          </div>
-
-          <div class="ob-modal-body">
-
-            <!-- Step 1: Employee info -->
-            @if (modalStep() === 1) {
-              <div class="ob-form-row">
-                <div class="ob-form-field">
-                  <label>Employee ID <span class="ob-required">*</span></label>
-                  <input [(ngModel)]="formData().employeeId" placeholder="e.g. EMP-0234">
-                </div>
-                <div class="ob-form-field">
-                  <label>Full name <span class="ob-required">*</span></label>
-                  <input [(ngModel)]="formData().employeeName" placeholder="Full legal name">
-                </div>
-              </div>
-              <div class="ob-form-row">
-                <div class="ob-form-field">
-                  <label>Work email <span class="ob-required">*</span></label>
-                  <input [(ngModel)]="formData().employeeEmail" placeholder="name@company.com" type="email">
-                </div>
-                <div class="ob-form-field">
-                  <label>Department <span class="ob-required">*</span></label>
-                  <select [(ngModel)]="formData().department">
-                    <option value="">Select…</option>
-                    @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
-                  </select>
-                </div>
-              </div>
-              <div class="ob-form-row">
-                <div class="ob-form-field">
-                  <label>Position / Role <span class="ob-required">*</span></label>
-                  <input [(ngModel)]="formData().position" placeholder="Job title">
-                </div>
-                <div class="ob-form-field">
-                  <label>Reporting manager <span class="ob-required">*</span></label>
-                  <input [(ngModel)]="formData().manager" placeholder="Manager full name">
-                </div>
-              </div>
-              <div class="ob-form-row">
-                <div class="ob-form-field">
-                  <label>Date of joining</label>
-                  <input [(ngModel)]="formData().joiningDate" type="date">
-                </div>
-                <div class="ob-form-field">
-                  <label>Manager email</label>
-                  <input [(ngModel)]="formData().managerEmail" placeholder="manager@company.com" type="email">
-                </div>
-              </div>
-            }
-
-            <!-- Step 2: Separation details -->
-            @if (modalStep() === 2) {
-              <div class="ob-form-row">
-                <div class="ob-form-field">
-                  <label>Separation type <span class="ob-required">*</span></label>
-                  <select [(ngModel)]="formData().separationType">
-                    <option value="">Select…</option>
-                    @for (t of separationTypes; track t) { <option [value]="t">{{ t }}</option> }
-                  </select>
-                </div>
-                <div class="ob-form-field">
-                  <label>Last working day <span class="ob-required">*</span></label>
-                  <input [(ngModel)]="formData().lastWorkingDay" type="date">
-                </div>
-              </div>
-              <div class="ob-form-row">
-                <div class="ob-form-field">
-                  <label>Notice period</label>
-                  <input [(ngModel)]="formData().noticePeriod" placeholder="e.g. 60 days">
-                </div>
-                <div class="ob-form-field">
-                  <label>Notice period status</label>
-                  <select [(ngModel)]="formData().noticeStatus">
-                    <option value="">Select…</option>
-                    @for (s of noticeStatuses; track s) { <option [value]="s">{{ s }}</option> }
-                  </select>
-                </div>
-              </div>
-              <div class="ob-form-row ob-form-row-single">
-                <div class="ob-form-field">
-                  <label>Reason for separation</label>
-                  <textarea [(ngModel)]="formData().reason" placeholder="Brief description of reason for leaving…" rows="3"></textarea>
-                </div>
-              </div>
-              <div class="ob-form-row">
-                <div class="ob-form-field">
-                  <label>Resignation letter received</label>
-                  <select [(ngModel)]="formData().resignationLetterReceived">
-                    <option value="">Select…</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="N/A">N/A</option>
-                  </select>
-                </div>
-                <div class="ob-form-field">
-                  <label>Exit interview required</label>
-                  <select [(ngModel)]="formData().exitInterviewRequired">
-                    <option value="">Select…</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-              </div>
-              <div class="ob-form-row ob-form-row-single">
-                <div class="ob-form-field">
-                  <label>Additional HR notes</label>
-                  <textarea [(ngModel)]="formData().hrNotes" placeholder="Any additional context, instructions, or flags…" rows="2"></textarea>
-                </div>
-              </div>
-            }
-
-            <!-- Step 3: Task setup -->
-            @if (modalStep() === 3) {
-              <p class="ob-form-hint">Select tasks to include in this offboarding checklist. You can adjust assignees and due dates after creating the record.</p>
-              @for (tmpl of taskTemplates; track tmpl.id) {
-                <div class="ob-task-tmpl">
-                  <input type="checkbox" [id]="'tmpl-' + tmpl.id" [checked]="formData().selectedTasks[tmpl.id]" (change)="toggleTemplate(tmpl.id, $any($event.target).checked)">
-                  <label [for]="'tmpl-' + tmpl.id" class="ob-task-tmpl-label">
-                    <span class="ob-task-tmpl-title">{{ tmpl.title }}</span>
-                    <span class="ob-task-tmpl-meta">{{ tmpl.description }} · Assigned to: {{ tmpl.assignedTo }}</span>
-                  </label>
-                  <knod-badge [color]="getTaskCategoryColor(tmpl.category)" size="sm">{{ tmpl.category }}</knod-badge>
-                </div>
-              }
-              <div class="ob-form-divider">
-                <span>Approvals (auto-included in all workflows)</span>
-              </div>
-              @for (a of autoApprovals; track a) {
-                <div class="ob-task-tmpl ob-task-tmpl-disabled">
-                  <input type="checkbox" checked disabled>
-                  <label class="ob-task-tmpl-label">
-                    <span class="ob-task-tmpl-title">{{ a }}</span>
-                    <span class="ob-task-tmpl-meta">Automatically added to every offboarding record</span>
-                  </label>
-                </div>
-              }
-            }
-
-            <!-- Step 4: Review -->
-            @if (modalStep() === 4) {
-              <div class="ob-review-section">
-                <div class="ob-review-label">Employee details</div>
-                @for (row of getReviewEmployeeRows(); track row.key) {
-                  <div class="ob-review-row">
-                    <span>{{ row.key }}</span>
-                    <span>{{ row.val || '—' }}</span>
-                  </div>
-                }
-              </div>
-              <div class="ob-review-section">
-                <div class="ob-review-label">Separation details</div>
-                @for (row of getReviewSeparationRows(); track row.key) {
-                  <div class="ob-review-row">
-                    <span>{{ row.key }}</span>
-                    <span>{{ row.val || '—' }}</span>
-                  </div>
-                }
-                @if (formData().reason) {
-                  <div class="ob-reason-box" style="margin-top: 8px">{{ formData().reason }}</div>
-                }
-              </div>
-              <div class="ob-review-section">
-                <div class="ob-review-label">Tasks included</div>
-                <div class="ob-review-tasks">
-                  @for (tmpl of taskTemplates; track tmpl.id) {
-                    @if (formData().selectedTasks[tmpl.id]) {
-                      <knod-badge [color]="getTaskCategoryColor(tmpl.category)" size="sm">{{ tmpl.title }}</knod-badge>
-                    }
-                  }
-                </div>
-              </div>
-              <div class="ob-submit-notice">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Submitting will create the offboarding record, notify the manager and relevant stakeholders, and start the approval workflow.
-              </div>
-            }
-
-          </div>
-
-          <div class="ob-modal-footer">
-            @if (modalStep() > 1) {
-              <knod-button variant="outline" (click)="prevStep()">← Back</knod-button>
-            } @else {
-              <knod-button variant="outline" (click)="closeModal()">Cancel</knod-button>
-            }
-            @if (modalStep() < 4) {
-              <knod-button variant="primary" (click)="nextStep()">Next →</knod-button>
-            } @else {
-              <knod-button variant="primary" [icon]="checkIcon" (click)="submitOffboarding()">Initiate offboarding</knod-button>
-            }
-          </div>
-
-        </div>
-      </div>
-    }
   `,
   styles: [`
     /* ─── Page shell ─── */
@@ -782,8 +553,34 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       flex-direction: column;
       height: 100%;
       min-height: 0;
-      background: #F3F6FB;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
       padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ob-page::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+      border-radius: 50%;
+      filter: blur(60px);
+    }
+
+    .ob-page::after {
+      content: '';
+      position: absolute;
+      bottom: -50px;
+      left: -50px;
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, rgba(240,147,251,0.3) 0%, rgba(245,87,108,0.3) 100%);
+      border-radius: 50%;
+      filter: blur(60px);
     }
 
     /* ─── Top bar ─── */
@@ -793,17 +590,33 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 16px;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
     }
+
+    .ob-icon-badge {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #667eea;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
     .ob-title {
-      font-size: 36px;
+      font-size: 32px;
       font-weight: 700;
-      color: #0F172A;
+      color: white;
       margin: 0 0 4px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
     }
     .ob-subtitle {
-      font-size: 16px;
-      color: #64748B;
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.85);
       margin: 0;
     }
     .ob-topbar-actions {
@@ -817,7 +630,9 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 20px;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
     }
     @media (max-width: 1024px) {
       .ob-stats-row { grid-template-columns: repeat(2, 1fr); }
@@ -832,27 +647,91 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
-      transition: all 200ms ease;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+      transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
     }
     .ob-stat-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12);
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
     }
-    .ob-stat-val { font-size: 28px; font-weight: 700; color: #0F172A; }
-    .ob-stat-lbl { font-size: 14px; color: #64748B; margin-top: 4px; }
-    .ob-stat-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; }
+
+    .stat-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.initiated {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .stat-icon.progress {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .stat-icon.pending {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+    }
+
+    .stat-icon.completed {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      color: white;
+    }
+
+    .stat-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-glow {
+      position: absolute;
+      bottom: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      opacity: 0.15;
+    }
+
+    .ob-stat-card:nth-child(1) .stat-glow { background: #667eea; }
+    .ob-stat-card:nth-child(2) .stat-glow { background: #f093fb; }
+    .ob-stat-card:nth-child(3) .stat-glow { background: #4facfe; }
+    .ob-stat-card:nth-child(4) .stat-glow { background: #43e97b; }
+
+    .ob-stat-val { font-size: 32px; font-weight: 700; color: #1a1a2e; }
+    .ob-stat-lbl { font-size: 13px; color: #6b7280; margin-top: 4px; font-weight: 500; }
+    .ob-stat-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      border-radius: 0 0 24px 24px;
+    }
+    .ob-stat-card:nth-child(1) .ob-stat-bar { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); }
+    .ob-stat-card:nth-child(2) .ob-stat-bar { background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%); }
+    .ob-stat-card:nth-child(3) .ob-stat-bar { background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); }
+    .ob-stat-card:nth-child(4) .ob-stat-bar { background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%); }
 
     /* ─── Main layout ─── */
     .ob-main {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 360px 1fr;
       gap: 24px;
       flex: 1;
       min-height: 0;
+      position: relative;
+      z-index: 1;
     }
     @media (max-width: 1200px) {
-      .ob-main { grid-template-columns: 280px 1fr; gap: 16px; }
+      .ob-main { grid-template-columns: 300px 1fr; gap: 16px; }
     }
     @media (max-width: 1024px) {
       .ob-main { grid-template-columns: 1fr; }
@@ -862,53 +741,85 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
     .ob-sidebar {
       background: white;
       border-radius: 24px;
-      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      position: relative;
+      z-index: 1;
     }
-    .ob-sidebar-search { padding: 20px; border-bottom: 1px solid #E5EAF3; }
+
+    .ob-sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .record-count {
+      font-size: 11px;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .ob-sidebar-search {
+      padding: 16px 20px;
+      border-bottom: 1px solid #E5EAF3;
+    }
     .ob-sidebar-filters {
       display: flex;
       gap: 8px;
-      padding: 16px 20px;
+      padding: 12px 20px;
       border-bottom: 1px solid #E5EAF3;
     }
     .ob-fchip {
       padding: 6px 14px;
-      border-radius: 999px;
+      border-radius: 20px;
       font-size: 12px;
       font-weight: 500;
-      background: #F1F5F9;
-      color: #64748B;
-      border: none;
+      background: #f3f4f6;
+      color: #6b7280;
+      border: 2px solid transparent;
       cursor: pointer;
       transition: all 200ms ease;
     }
-    .ob-fchip:hover { background: #E5EAF3; color: #0F172A; }
-    .ob-fchip.active { background: #3B82F6; color: white; }
+    .ob-fchip:hover { border-color: #667eea; color: #667eea; }
+    .ob-fchip.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
     .ob-emp-list { flex: 1; overflow-y: auto; }
     .ob-emp-item {
-      padding: 16px 20px;
+      padding: 14px 20px;
       border-bottom: 1px solid #E5EAF3;
       cursor: pointer;
       transition: all 200ms ease;
+      border-left: 3px solid transparent;
     }
-    .ob-emp-item:hover { background: #F8FAFC; }
+    .ob-emp-item:hover { background: #f9fafb; }
     .ob-emp-item.active {
-      background: #EFF6FF;
-      border-left: 3px solid #3B82F6;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-left: 3px solid #667eea;
     }
     .ob-emp-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
     .ob-emp-info { flex: 1; min-width: 0; }
-    .ob-emp-name { font-size: 14px; font-weight: 600; color: #0F172A; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ob-emp-role { font-size: 12px; color: #64748B; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ob-emp-name { font-size: 14px; font-weight: 600; color: #1a1a2e; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ob-emp-role { font-size: 12px; color: #6b7280; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ob-emp-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .ob-emp-lwd { font-size: 12px; color: #64748B; display: flex; align-items: center; gap: 6px; }
     .ob-emp-prog { display: flex; align-items: center; gap: 10px; }
-    .ob-emp-prog-val { font-size: 12px; color: #64748B; }
-    .ob-emp-prog-bar { flex: 1; height: 6px; background: #E5EAF3; border-radius: 3px; overflow: hidden; }
-    .ob-emp-prog-fill { height: 100%; background: #3B82F6; border-radius: 3px; transition: width 300ms ease; }
+    .ob-emp-prog-val { font-size: 11px; color: #667eea; font-weight: 600; }
+    .ob-emp-prog-bar { flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+    .ob-emp-prog-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 3px; transition: width 300ms ease; }
     .ob-emp-tasks { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-top: 1px solid #E5EAF3; }
     .ob-emp-task-chip { font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 500; }
     .ob-emp-task-chip.hr { background: #EFF6FF; color: #3B82F6; }
@@ -922,7 +833,9 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       overflow: hidden;
       background: white;
       border-radius: 24px;
-      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 1;
     }
     .ob-detail-empty {
       flex: 1;
@@ -930,13 +843,13 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      color: var(--color-slate-400);
+      gap: 16px;
+      color: #d1d5db;
       text-align: center;
       padding: 60px 20px;
     }
-    .ob-detail-empty h3 { font-size: 15px; font-weight: 600; color: var(--color-slate-700); margin: 0; }
-    .ob-detail-empty p { font-size: 13px; color: var(--color-slate-500); margin: 0; }
+    .ob-detail-empty h3 { font-size: 18px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .ob-detail-empty p { font-size: 14px; color: #6b7280; margin: 0; }
 
     /* ─── Record header ─── */
     .ob-rec-header {
@@ -1216,252 +1129,6 @@ const STEP_LABELS = ['Employee info', 'Separation details', 'Task setup', 'Revie
     .ob-action-btn:hover { background: var(--color-slate-50); border-color: var(--color-slate-300); }
     .ob-action-btn-danger { color: var(--color-red-600); border-color: var(--color-red-300); }
     .ob-action-btn-danger:hover { background: var(--color-red-50); }
-
-    /* ─── Modal ─── */
-    .ob-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 24px;
-    }
-
-    .ob-modal {
-      background: white;
-      border-radius: 28px;
-      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
-      width: 100%;
-      max-width: 640px;
-      max-height: 90vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      animation: modalEntry 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @keyframes modalEntry {
-      from {
-        opacity: 0;
-        transform: scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .ob-modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 24px 28px;
-      border-bottom: 1px solid #E5EAF3;
-      flex-shrink: 0;
-    }
-    .ob-modal-title { font-size: 20px; font-weight: 700; color: #0F172A; margin: 0; }
-    .ob-modal-step-label { font-size: 14px; color: #64748B; margin-top: 4px; }
-    .ob-modal-header-content { display: flex; flex-direction: column; }
-    .ob-modal-close-btn {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #F1F5F9;
-      border: none;
-      border-radius: 10px;
-      color: #64748B;
-      cursor: pointer;
-      transition: all 200ms ease;
-    }
-    .ob-modal-close-btn:hover {
-      background: #E5EAF3;
-      color: #0F172A;
-    }
-    .ob-modal-body { flex: 1; overflow-y: auto; padding: 24px 28px; }
-    .ob-modal-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 20px 28px;
-      border-top: 1px solid #E5EAF3;
-      background: #F3F6FB;
-      flex-shrink: 0;
-    }
-
-    /* ─── Step bar ─── */
-    .ob-step-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px 28px;
-      border-bottom: 1px solid #E5EAF3;
-      flex-shrink: 0;
-      flex-wrap: nowrap;
-      gap: 8px;
-    }
-    .ob-step-dot { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .ob-step-circle {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 600;
-      flex-shrink: 0;
-      transition: all 200ms ease;
-    }
-    .ob-step-circle.done { background: #DCFCE7; color: #22C55E; border: 2px solid #22C55E; }
-    .ob-step-circle.active { background: #3B82F6; color: white; border: 2px solid #3B82F6; }
-    .ob-step-circle.inactive { background: #F1F5F9; color: #64748B; border: 2px solid #E5EAF3; }
-    .ob-step-label { font-size: 12px; color: #64748B; white-space: nowrap; font-weight: 500; }
-    .ob-step-label.active { color: #0F172A; font-weight: 600; }
-    .ob-step-line { flex: 1; height: 2px; background: #E5EAF3; max-width: 60px; transition: all 200ms ease; }
-    .ob-step-line.done { background: #22C55E; }
-
-    /* ─── Form fields ─── */
-    .ob-form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .ob-form-row-single { grid-template-columns: 1fr; }
-    .ob-form-field label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: #0F172A;
-      margin-bottom: 6px;
-    }
-    .ob-required { color: #EF4444; }
-    .ob-form-field input,
-    .ob-form-field select,
-    .ob-form-field textarea {
-      width: 100%;
-      height: 48px;
-      padding: 0 16px;
-      font-size: 14px;
-      color: #0F172A;
-      background: white;
-      border: 2px solid #CBD5E1;
-      border-radius: 14px;
-      font-family: inherit;
-      transition: all 200ms ease;
-      outline: none;
-    }
-    .ob-form-field input::placeholder,
-    .ob-form-field textarea::placeholder {
-      color: #94A3B8;
-    }
-    .ob-form-field input:hover,
-    .ob-form-field select:hover,
-    .ob-form-field textarea:hover {
-      border-color: #94A3B8;
-    }
-    .ob-form-field input:focus,
-    .ob-form-field select:focus,
-    .ob-form-field textarea:focus {
-      border-color: #3B82F6;
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-    }
-    .ob-form-field textarea { 
-      height: auto;
-      min-height: 100px;
-      padding: 12px 16px;
-      resize: vertical; 
-    }
-    .ob-form-hint { font-size: 14px; color: #64748B; margin-bottom: 16px; line-height: 1.5; }
-    .ob-form-divider {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin: 20px 0 16px;
-    }
-    .ob-form-divider span { font-size: 12px; font-weight: 500; color: #64748B; white-space: nowrap; }
-    .ob-form-divider::before,
-    .ob-form-divider::after { content: ''; flex: 1; height: 1px; background: #E5EAF3; }
-
-    /* ─── Task template picker ─── */
-    .ob-task-tmpl {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 16px;
-      border: 2px solid #E5EAF3;
-      border-radius: 14px;
-      margin-bottom: 8px;
-      background: white;
-      transition: all 200ms ease;
-      cursor: pointer;
-    }
-    .ob-task-tmpl:hover {
-      border-color: #CBD5E1;
-      transform: translateY(-2px);
-    }
-    .ob-task-tmpl input[type="checkbox"] { 
-      margin-top: 2px; 
-      flex-shrink: 0; 
-      width: 18px;
-      height: 18px;
-      accent-color: #3B82F6;
-      cursor: pointer;
-    }
-    .ob-task-tmpl-label { flex: 1; cursor: pointer; }
-    .ob-task-tmpl-title { font-size: 14px; font-weight: 500; color: #0F172A; display: block; margin-bottom: 4px; }
-    .ob-task-tmpl-meta { font-size: 12px; color: #64748B; display: block; line-height: 1.4; }
-    .ob-task-tmpl-disabled { opacity: 0.6; }
-    .ob-task-tmpl-disabled input { cursor: not-allowed; }
-
-    /* ─── Review step ─── */
-    .ob-review-section { 
-      margin-bottom: 20px;
-      padding: 20px;
-      background: #F3F6FB;
-      border-radius: 16px;
-    }
-    .ob-review-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      font-weight: 600;
-      color: #64748B;
-      margin-bottom: 12px;
-    }
-    .ob-review-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #E5EAF3;
-      font-size: 14px;
-    }
-    .ob-review-row:last-child { border-bottom: none; }
-    .ob-review-row span:first-child { color: #64748B; }
-    .ob-review-row span:last-child { font-weight: 500; color: #0F172A; }
-    .ob-review-tasks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    .ob-submit-notice {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 16px;
-      background: #EFF6FF;
-      border: 1px solid #BFDBFE;
-      border-radius: 14px;
-      font-size: 14px;
-      color: #2563EB;
-      margin-top: 8px;
-    }
-    .ob-submit-notice svg { flex-shrink: 0; margin-top: 2px; }
   `]
 })
 export class OffboardingComponent {
@@ -1473,12 +1140,8 @@ export class OffboardingComponent {
   readonly checkIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`;
   readonly closeIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
 
-  readonly stepLabels = STEP_LABELS;
-  readonly taskTemplates = TASK_TEMPLATES;
-  readonly departments = ['Engineering', 'Design', 'Marketing', 'Finance', 'HR', 'Operations', 'Sales', 'Legal'];
-  readonly separationTypes = ['Resignation', 'Termination', 'Contract End', 'Retirement', 'Mutual Separation'];
-  readonly noticeStatuses = ['Fully served', 'Partially served', 'Buyout', 'Waived'];
-  readonly autoApprovals = ['Manager approval', 'HR approval', 'Finance clearance', 'IT clearance'];
+  // Removed: stepLabels, taskTemplates, departments, separationTypes, noticeStatuses, autoApprovals
+  // These were duplicated from initiate-offboarding.component.ts
 
   readonly detailTabs = [
     { key: 'overview', label: 'Overview' },
@@ -1492,11 +1155,9 @@ export class OffboardingComponent {
   readonly statusFilter = signal('all');
   readonly activeTab = signal('overview');
   readonly taskFilter = signal('all');
-  readonly showModal = signal(false);
-  readonly modalStep = signal(1);
 
-  private readonly _formData = signal<InitiateFormData>(this.emptyForm());
-  readonly formData = this._formData.asReadonly();
+  // Removed: showModal, modalStep, _formData, formData
+  // Modal functionality is now handled by navigate to initiate-offboarding component
 
   readonly records = signal<OffboardingRecord[]>([
     {
@@ -1897,166 +1558,10 @@ export class OffboardingComponent {
     return status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
 
-  // ─── Modal ───
+  // ─── Navigation ───
 
   openInitiateModal(): void {
-      console.log('OPEN MODAL CLICKED');
-    this._formData.set(this.emptyForm());
-    this.modalStep.set(1);
-    this.showModal.set(true);
-  }
-
-  closeModal(): void {
-    this.showModal.set(false);
-  }
-
-  closeModalOutside(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('ob-modal-overlay')) {
-      this.closeModal();
-    }
-  }
-
-  nextStep(): void {
-    const fd = this._formData();
-    if (this.modalStep() === 1) {
-      if (!fd.employeeId || !fd.employeeName || !fd.employeeEmail || !fd.department || !fd.position || !fd.manager) {
-        window.alert('Please fill all required fields before proceeding.');
-        return;
-      }
-    }
-    if (this.modalStep() === 2) {
-      if (!fd.separationType || !fd.lastWorkingDay) {
-        window.alert('Separation type and last working day are required.');
-        return;
-      }
-    }
-    if (this.modalStep() === 3) {
-      if (!TASK_TEMPLATES.some(t => fd.selectedTasks[t.id])) {
-        window.alert('Please select at least one task.');
-        return;
-      }
-    }
-    this.modalStep.update(s => s + 1);
-  }
-
-  prevStep(): void {
-    this.modalStep.update(s => s - 1);
-  }
-
-  toggleTemplate(id: string, checked: boolean): void {
-    const fd = this._formData();
-    this._formData.set({
-      ...fd,
-      selectedTasks: { ...fd.selectedTasks, [id]: checked },
-    });
-  }
-
-  submitOffboarding(): void {
-    const fd = this._formData();
-    const today = new Date().toISOString().split('T')[0];
-    const newId = `OFF-${String(this.records().length + 1).padStart(3, '0')}`;
-
-    const selectedTemplates = TASK_TEMPLATES.filter(t => fd.selectedTasks[t.id]);
-
-    const newRecord: OffboardingRecord = {
-      id: newId,
-      employeeId: fd.employeeId,
-      employeeName: fd.employeeName,
-      employeeEmail: fd.employeeEmail,
-      position: fd.position,
-      department: fd.department,
-      manager: fd.manager,
-      managerEmail: fd.managerEmail,
-      joiningDate: fd.joiningDate || today,
-      lastWorkingDay: fd.lastWorkingDay,
-      separationType: fd.separationType as OffboardingRecord['separationType'],
-      noticePeriod: fd.noticePeriod,
-      noticeStatus: fd.noticeStatus,
-      exitInterviewRequired: fd.exitInterviewRequired === 'Yes',
-      resignationLetterReceived: fd.resignationLetterReceived,
-      status: 'initiated',
-      initiatedOn: today,
-      initiatedBy: 'HR Admin',
-      progress: 0,
-      reason: fd.reason,
-      hrNotes: fd.hrNotes,
-      tasks: selectedTemplates.map((t, i) => ({
-        id: `t${i + 1}`,
-        title: t.title,
-        description: t.description,
-        category: t.category,
-        assignedTo: t.assignedTo,
-        dueDate: fd.lastWorkingDay,
-        status: 'pending',
-      })),
-      documents: [
-        { name: 'Experience letter', status: 'pending' },
-        { name: 'Relieving letter', status: 'pending' },
-        { name: 'Full & final settlement', status: 'pending' },
-        ...(fd.exitInterviewRequired === 'Yes' ? [{ name: 'Exit interview form', status: 'pending' }] : []),
-      ],
-      approvals: [
-        { role: 'Manager approval', status: 'pending' },
-        { role: 'HR approval', status: 'pending' },
-        { role: 'Finance clearance', status: 'pending' },
-        { role: 'IT clearance', status: 'pending' },
-      ],
-    };
-
-    this.records.update(r => [newRecord, ...r]);
-    this.selectedRecord.set(newRecord);
-    this.activeTab.set('overview');
-    this.closeModal();
-    window.alert(`Offboarding initiated for ${fd.employeeName}. Record ID: ${newId}`);
-  }
-
-  // ─── Review rows ───
-
-  getReviewEmployeeRows(): Array<{ key: string; val: string }> {
-    const fd = this._formData();
-    return [
-      { key: 'Name', val: fd.employeeName },
-      { key: 'Employee ID', val: fd.employeeId },
-      { key: 'Email', val: fd.employeeEmail },
-      { key: 'Department', val: fd.department },
-      { key: 'Position', val: fd.position },
-      { key: 'Manager', val: fd.manager },
-    ];
-  }
-
-  getReviewSeparationRows(): Array<{ key: string; val: string }> {
-    const fd = this._formData();
-    return [
-      { key: 'Type', val: fd.separationType },
-      { key: 'Last working day', val: fd.lastWorkingDay },
-      { key: 'Notice period', val: fd.noticePeriod },
-      { key: 'Notice status', val: fd.noticeStatus },
-      { key: 'Resignation letter', val: fd.resignationLetterReceived },
-      { key: 'Exit interview', val: fd.exitInterviewRequired },
-    ];
-  }
-
-  // ─── Helpers ───
-
-  private emptyForm(): InitiateFormData {
-    return {
-      employeeId: '',
-      employeeName: '',
-      employeeEmail: '',
-      department: '',
-      position: '',
-      manager: '',
-      managerEmail: '',
-      joiningDate: '',
-      separationType: '',
-      lastWorkingDay: '',
-      noticePeriod: '',
-      noticeStatus: '',
-      reason: '',
-      resignationLetterReceived: '',
-      exitInterviewRequired: '',
-      hrNotes: '',
-      selectedTasks: Object.fromEntries(TASK_TEMPLATES.map(t => [t.id, t.defaultChecked])),
-    };
+    // Navigate to the dedicated initiate-offboarding page instead of showing modal
+    this.router.navigate(['/initiate-offboarding']);
   }
 }

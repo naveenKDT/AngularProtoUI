@@ -59,6 +59,10 @@ export const routes: Routes = [
         path: 'offboarding',
         loadComponent: () => import('./modules/onboarding-offboarding/components/offboarding/offboarding.component').then(m => m.OffboardingComponent)
       },
+      {
+        path: 'initiate-offboarding',
+        loadComponent: () => import('./modules/onboarding-offboarding/components/offboarding/initiate-offboarding.component').then(m => m.InitiateOffboardingComponent)
+      },
       // Asset Management Routes
       {
         path: 'assets',
