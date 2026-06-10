@@ -357,112 +357,7 @@ interface AssetCategory {
             </div>
           </div>
         </knod-card>
-
-        <!-- Section 3: Ownership & Financial Information -->
-        <knod-card title="Ownership & Financial Information">
-          <div class="form-grid">
-            <!-- Asset Owner (Company/Department) -->
-            <div class="form-group">
-              <label class="form-label">Asset Owner (Company/Department)</label>
-              <select class="form-select" [ngModel]="assetOwner()" (ngModelChange)="assetOwner.set($event)">
-                <option value="">Select owner</option>
-                <option value="Company">Company Owned</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Design">Design</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Sales">Sales</option>
-                <option value="Finance">Finance</option>
-                <option value="HR">Human Resources</option>
-                <option value="Operations">Operations</option>
-                <option value="IT">Information Technology</option>
-              </select>
-            </div>
-
-            <!-- Cost Center -->
-            <div class="form-group">
-              <label class="form-label">Cost Center</label>
-              <input 
-                type="text" 
-                class="form-input"
-                placeholder="E.g., CC-001"
-                [ngModel]="costCenter()"
-                (ngModelChange)="costCenter.set($event)">
-            </div>
-
-            <!-- Budget Code -->
-            <div class="form-group">
-              <label class="form-label">Budget Code</label>
-              <input 
-                type="text" 
-                class="form-input"
-                placeholder="E.g., BUD-2025-IT-001"
-                [ngModel]="budgetCode()"
-                (ngModelChange)="budgetCode.set($event)">
-            </div>
-
-            <!-- Depreciation Method -->
-            <div class="form-group">
-              <label class="form-label">Depreciation Method</label>
-              <select class="form-select" [ngModel]="depreciationMethod()" (ngModelChange)="depreciationMethod.set($event)">
-                <option value="">Select method</option>
-                <option value="straight-line">Straight Line</option>
-                <option value="declining-balance">Declining Balance</option>
-                <option value="double-declining">Double Declining</option>
-                <option value="sum-of-years">Sum of Years Digits</option>
-                <option value="units-of-production">Units of Production</option>
-                <option value="none">No Depreciation</option>
-              </select>
-            </div>
-
-            <!-- Depreciation Period -->
-            <div class="form-group">
-              <label class="form-label">Depreciation Period (Years)</label>
-              <select class="form-select" [ngModel]="depreciationPeriod()" (ngModelChange)="depreciationPeriod.set($event)">
-                <option value="">Select period</option>
-                <option value="1">1 Year</option>
-                <option value="2">2 Years</option>
-                <option value="3">3 Years</option>
-                <option value="4">4 Years</option>
-                <option value="5">5 Years</option>
-                <option value="7">7 Years</option>
-                <option value="10">10 Years</option>
-              </select>
-            </div>
-
-            <!-- Current Asset Value -->
-            <div class="form-group">
-              <label class="form-label">Current Asset Value</label>
-              <div class="budget-input">
-                <span class="currency">{{ getCurrencySymbol() }}</span>
-                <input 
-                  type="number" 
-                  class="form-input"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  [ngModel]="currentAssetValue()"
-                  (ngModelChange)="currentAssetValue.set($event)">
-              </div>
-            </div>
-
-            <!-- Residual Value -->
-            <div class="form-group">
-              <label class="form-label">Residual Value</label>
-              <div class="budget-input">
-                <span class="currency">{{ getCurrencySymbol() }}</span>
-                <input 
-                  type="number" 
-                  class="form-input"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  [ngModel]="residualValue()"
-                  (ngModelChange)="residualValue.set($event)">
-              </div>
-            </div>
-          </div>
-        </knod-card>
-
+        
         <!-- Section 4: Warranty Information -->
         <knod-card title="Warranty Information">
           <div class="form-grid">
@@ -925,73 +820,6 @@ interface AssetCategory {
           </div>
         </knod-card>
 
-        <!-- Section 8: Security Information -->
-        <knod-card title="Security Information">
-          <div class="form-grid">
-            <!-- Encryption Enabled -->
-            <div class="form-group">
-              <label class="form-label">Encryption Enabled</label>
-              <select class="form-select" [ngModel]="encryptionEnabled()" (ngModelChange)="encryptionEnabled.set($event)">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-                <option value="na">Not Applicable</option>
-              </select>
-            </div>
-
-            <!-- Antivirus Installed -->
-            <div class="form-group">
-              <label class="form-label">Antivirus Installed</label>
-              <select class="form-select" [ngModel]="antivirusInstalled()" (ngModelChange)="antivirusInstalled.set($event)">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-                <option value="na">Not Applicable</option>
-              </select>
-            </div>
-
-            @if (antivirusInstalled() === 'yes') {
-              <!-- Antivirus Expiry Date -->
-              <div class="form-group">
-                <label class="form-label">Antivirus Expiry Date</label>
-                <input 
-                  type="date" 
-                  class="form-input"
-                  [ngModel]="antivirusExpiryDate()"
-                  (ngModelChange)="antivirusExpiryDate.set($event)">
-              </div>
-            }
-
-            <!-- Device Compliance Status -->
-            <div class="form-group">
-              <label class="form-label">Device Compliance Status</label>
-              <select class="form-select" [ngModel]="deviceComplianceStatus()" (ngModelChange)="deviceComplianceStatus.set($event)">
-                <option value="compliant">Compliant</option>
-                <option value="non-compliant">Non-Compliant</option>
-                <option value="pending">Pending Review</option>
-                <option value="na">Not Applicable</option>
-              </select>
-            </div>
-
-            <!-- BitLocker Enabled -->
-            <div class="form-group">
-              <label class="form-label">BitLocker Enabled</label>
-              <select class="form-select" [ngModel]="bitLockerEnabled()" (ngModelChange)="bitLockerEnabled.set($event)">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-                <option value="na">Not Applicable</option>
-              </select>
-            </div>
-
-            <!-- MFA Enabled -->
-            <div class="form-group">
-              <label class="form-label">MFA Enabled</label>
-              <select class="form-select" [ngModel]="mfaEnabled()" (ngModelChange)="mfaEnabled.set($event)">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-                <option value="na">Not Applicable</option>
-              </select>
-            </div>
-          </div>
-        </knod-card>
 
         <!-- Section 9: Maintenance Information -->
         <knod-card title="Maintenance Information">
@@ -1070,110 +898,8 @@ interface AssetCategory {
               </textarea>
             </div>
           </div>
-        </knod-card>
+        </knod-card>     
 
-        <!-- Section 10: Lifecycle Information -->
-        <knod-card title="Lifecycle Information">
-          <div class="form-grid">
-            <!-- Asset Status -->
-            <div class="form-group">
-              <label class="form-label">Asset Status</label>
-              <div class="lifecycle-status-options">
-                @for (status of assetStatuses; track status.value) {
-                  <label class="lifecycle-status-option" [class.selected]="assetStatus() === status.value">
-                    <input 
-                      type="radio" 
-                      name="assetStatus" 
-                      [value]="status.value"
-                      [ngModel]="assetStatus()"
-                      (ngModelChange)="assetStatus.set($event)">
-                    <span class="status-indicator" [class]="'status-' + status.color"></span>
-                    <span class="status-label">{{ status.label }}</span>
-                  </label>
-                }
-              </div>
-            </div>
-
-            <!-- Asset Condition -->
-            <div class="form-group">
-              <label class="form-label">Asset Condition</label>
-              <div class="condition-options">
-                @for (condition of assetConditions; track condition.value) {
-                  <label class="condition-option" [class.selected]="assetCondition() === condition.value">
-                    <input 
-                      type="radio" 
-                      name="assetCondition" 
-                      [value]="condition.value"
-                      [ngModel]="assetCondition()"
-                      (ngModelChange)="assetCondition.set($event)">
-                    <span class="condition-icon" [innerHTML]="condition.icon"></span>
-                    <span class="condition-label">{{ condition.label }}</span>
-                  </label>
-                }
-              </div>
-            </div>
-
-            <!-- Lifecycle Stage -->
-            <div class="form-group full-width">
-              <label class="form-label">Lifecycle Stage</label>
-              <select class="form-select" [ngModel]="lifecycleStage()" (ngModelChange)="lifecycleStage.set($event)">
-                <option value="procurement">Procurement</option>
-                <option value="active">Active</option>
-                <option value="repair">Repair</option>
-                <option value="retired">Retired</option>
-                <option value="disposed">Disposed</option>
-              </select>
-            </div>
-          </div>
-        </knod-card>
-
-        <!-- Section 11: Compliance & Audit -->
-        <knod-card title="Compliance & Audit">
-          <div class="form-grid">
-            <!-- Last Audit Date -->
-            <div class="form-group">
-              <label class="form-label">Last Audit Date</label>
-              <input 
-                type="date" 
-                class="form-input"
-                [ngModel]="lastAuditDate()"
-                (ngModelChange)="lastAuditDate.set($event)">
-            </div>
-
-            <!-- Audit Status -->
-            <div class="form-group">
-              <label class="form-label">Audit Status</label>
-              <select class="form-select" [ngModel]="auditStatus()" (ngModelChange)="auditStatus.set($event)">
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="failed">Failed</option>
-              </select>
-            </div>
-
-            <!-- Compliance Status -->
-            <div class="form-group">
-              <label class="form-label">Compliance Status</label>
-              <select class="form-select" [ngModel]="complianceStatus()" (ngModelChange)="complianceStatus.set($event)">
-                <option value="compliant">Compliant</option>
-                <option value="non-compliant">Non-Compliant</option>
-                <option value="under-review">Under Review</option>
-                <option value="exempt">Exempt</option>
-              </select>
-            </div>
-
-            <!-- Disposal Certificate Number -->
-            <div class="form-group">
-              <label class="form-label">Disposal Certificate Number</label>
-              <input 
-                type="text" 
-                class="form-input"
-                placeholder="Enter certificate number if disposed"
-                [ngModel]="disposalCertificateNumber()"
-                (ngModelChange)="disposalCertificateNumber.set($event)">
-            </div>
-          </div>
-        </knod-card>
 
         <!-- Section 12: Attachments -->
         <knod-card title="Attachments">
@@ -2349,15 +2075,6 @@ export class AddAssetComponent {
   readonly deliveryDate = signal('');
   readonly assetReceivedDate = signal('');
 
-  // Ownership & Financial Information
-  readonly assetOwner = signal('');
-  readonly costCenter = signal('');
-  readonly budgetCode = signal('');
-  readonly depreciationMethod = signal('');
-  readonly depreciationPeriod = signal('');
-  readonly currentAssetValue = signal<number | null>(null);
-  readonly residualValue = signal<number | null>(null);
-
   // Warranty Information
   readonly warrantyProvider = signal('');
   readonly warrantyStartDate = signal('');
@@ -2408,14 +2125,6 @@ export class AddAssetComponent {
   readonly printerType = signal('');
   readonly networkIpAddress = signal('');
 
-  // Security Information
-  readonly encryptionEnabled = signal('na');
-  readonly antivirusInstalled = signal('na');
-  readonly antivirusExpiryDate = signal('');
-  readonly deviceComplianceStatus = signal('pending');
-  readonly bitLockerEnabled = signal('na');
-  readonly mfaEnabled = signal('na');
-
   // Maintenance Information
   readonly amcAvailable = signal('no');
   readonly amcVendor = signal('');
@@ -2424,17 +2133,6 @@ export class AddAssetComponent {
   readonly lastMaintenanceDate = signal('');
   readonly nextMaintenanceDate = signal('');
   readonly maintenanceNotes = signal('');
-
-  // Lifecycle Information
-  readonly assetStatus = signal('available');
-  readonly assetCondition = signal('new');
-  readonly lifecycleStage = signal('procurement');
-
-  // Compliance & Audit
-  readonly lastAuditDate = signal('');
-  readonly auditStatus = signal('pending');
-  readonly complianceStatus = signal('compliant');
-  readonly disposalCertificateNumber = signal('');
 
   // Additional Information
   readonly notes = signal('');
@@ -2641,16 +2339,7 @@ export class AddAssetComponent {
       poNumber: this.poNumber(),
       procurementType: this.procurementType(),
       deliveryDate: this.deliveryDate(),
-      assetReceivedDate: this.assetReceivedDate(),
-
-      // Ownership & Financial Information
-      assetOwner: this.assetOwner(),
-      costCenter: this.costCenter(),
-      budgetCode: this.budgetCode(),
-      depreciationMethod: this.depreciationMethod(),
-      depreciationPeriod: this.depreciationPeriod(),
-      currentAssetValue: this.currentAssetValue(),
-      residualValue: this.residualValue(),
+      assetReceivedDate: this.assetReceivedDate(), 
 
       // Warranty Information
       warrantyProvider: this.warrantyProvider(),
@@ -2693,15 +2382,7 @@ export class AddAssetComponent {
       screenSize: this.screenSize(),
       resolution: this.resolution(),
       printerType: this.printerType(),
-      networkIpAddress: this.networkIpAddress(),
-
-      // Security Information
-      encryptionEnabled: this.encryptionEnabled(),
-      antivirusInstalled: this.antivirusInstalled(),
-      antivirusExpiryDate: this.antivirusExpiryDate(),
-      deviceComplianceStatus: this.deviceComplianceStatus(),
-      bitLockerEnabled: this.bitLockerEnabled(),
-      mfaEnabled: this.mfaEnabled(),
+      networkIpAddress: this.networkIpAddress(),   
 
       // Maintenance Information
       amcAvailable: this.amcAvailable(),
@@ -2710,18 +2391,8 @@ export class AddAssetComponent {
       amcEndDate: this.amcEndDate(),
       lastMaintenanceDate: this.lastMaintenanceDate(),
       nextMaintenanceDate: this.nextMaintenanceDate(),
-      maintenanceNotes: this.maintenanceNotes(),
-
-      // Lifecycle Information
-      assetStatus: this.assetStatus(),
-      assetCondition: this.assetCondition(),
-      lifecycleStage: this.lifecycleStage(),
-
-      // Compliance & Audit
-      lastAuditDate: this.lastAuditDate(),
-      auditStatus: this.auditStatus(),
-      complianceStatus: this.complianceStatus(),
-      disposalCertificateNumber: this.disposalCertificateNumber(),
+      maintenanceNotes: this.maintenanceNotes(), 
+    
 
       // Additional Information
       notes: this.notes(),
