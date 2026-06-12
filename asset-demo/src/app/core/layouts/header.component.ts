@@ -1,5 +1,6 @@
 import { Component, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -23,6 +24,13 @@ import { CommonModule } from '@angular/common';
         <span class="search-shortcut"><kbd>Ctrl</kbd><kbd>K</kbd></span>
       </div>
       <div class="header-right">
+        <button class="admin-btn" title="Administration" (click)="navigateToAdmin()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span class="admin-label">Administration</span>
+        </button>
         <button class="icon-btn" title="Help">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -87,6 +95,9 @@ import { CommonModule } from '@angular/common';
     .header { position: fixed; top: 0; left: var(--sidebar-width-expanded); right: 0; height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--bg-border); display: flex; align-items: center; padding: 0 var(--spacing-5); gap: var(--spacing-4); z-index: var(--z-sticky); box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: left var(--transition-normal); }
     .toggle-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(229,234,243,0.5); border-radius: var(--radius-lg); color: var(--text-secondary); border: none; cursor: pointer; transition: all var(--transition-normal); }
     .toggle-btn:hover { background: var(--bg-border); color: var(--text-primary); }
+    .admin-btn { display: flex; align-items: center; gap: var(--spacing-2); padding: var(--spacing-2) var(--spacing-4); background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%); color: white; border: none; border-radius: var(--radius-xl); cursor: pointer; transition: all var(--transition-normal); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3); }
+    .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4); }
+    .admin-label { margin-left: var(--spacing-1); }
     .search-box { flex: 1; max-width: 360px; height: 40px; display: flex; align-items: center; gap: var(--spacing-2); background: var(--bg-card); border: 1px solid var(--bg-border); border-radius: var(--radius-xl); padding: 0 var(--spacing-4); transition: all var(--transition-normal); }
     .search-box:focus-within { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
     .search-icon { color: var(--text-secondary); flex-shrink: 0; }
@@ -142,6 +153,13 @@ export class HeaderComponent {
   toggleSidebar = output<void>();
   userMenuOpen = signal(false);
   notificationsOpen = signal(false);
+
+  constructor(private router: Router) {}
+
+  navigateToAdmin(): void {
+    this.router.navigate(['/administration']);
+  }
+
   toggleUserMenu(): void { this.userMenuOpen.update(v => !v); this.notificationsOpen.set(false); }
   toggleNotifications(): void { this.notificationsOpen.update(v => !v); this.userMenuOpen.set(false); }
 }

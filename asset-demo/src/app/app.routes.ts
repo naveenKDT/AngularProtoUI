@@ -19,10 +19,30 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () => import('./modules/profile/components/profile.component').then(m => m.ProfileComponent)
       },
+      // Administration Hub
       {
         path: 'administration',
-        loadComponent: () => import('./modules/administration/components/administration.component').then(m => m.AdministrationComponent)
+        loadComponent: () => import('./modules/administration/components/admin-hub.component').then(m => m.AdminHubComponent)
       },
+      // Manage Organization
+      {
+        path: 'administration/organization',
+        loadComponent: () => import('./modules/administration/components/manage-organization.component').then(m => m.ManageOrganizationComponent)
+      },
+      // Module Administration Pages
+      {
+        path: 'administration/workforce',
+        loadComponent: () => import('./modules/administration/components/module-administration.component').then(m => m.ModuleAdministrationComponent)
+      },
+      {
+        path: 'administration/leave',
+        loadComponent: () => import('./modules/administration/components/module-administration.component').then(m => m.ModuleAdministrationComponent)
+      },
+      {
+        path: 'administration/asset',
+        loadComponent: () => import('./modules/administration/components/module-administration.component').then(m => m.ModuleAdministrationComponent)
+      },
+      // Legacy administration routes
       {
         path: 'administration/users',
         loadComponent: () => import('./modules/administration/components/administration.component').then(m => m.AdministrationComponent)
