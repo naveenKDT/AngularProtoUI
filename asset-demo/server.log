@@ -1,381 +1,442 @@
 
 > asset-demo@0.0.0 start
-> ng serve --port 4200
+> ng serve --host 0.0.0.0 --port 4200
 
+
+Warning: This is a simple server for use in testing or debugging Angular applications
+locally. It hasn't been reviewed for security issues.
+
+Binding this server to an open connection can result in compromising your application or
+computer. Using a different host than the one passed to the "--host" flag might result in
+websocket connection issues.
+    
 ❯ Building...
 ✔ Building...
-Initial chunk files | Names                    |  Raw size
-main.js             | main                     |  79.41 kB | 
-styles.css          | styles                   |   8.71 kB | 
-chunk-VUJOFXKG.js   | -                        | 938 bytes | 
-polyfills.js        | polyfills                |  95 bytes | 
+Initial chunk files | Names                          |  Raw size
+main.js             | main                           |  79.04 kB | 
+styles.css          | styles                         |   8.73 kB | 
+chunk-VUJOFXKG.js   | -                              | 938 bytes | 
+polyfills.js        | polyfills                      |  95 bytes | 
 
-                    | Initial total            |  89.15 kB
+                    | Initial total                  |  88.80 kB
 
-Lazy chunk files    | Names                    |  Raw size
-chunk-DFZH736L.js   | it-clearance-component   | 146.82 kB | 
-chunk-AQMZMDQO.js   | asset-details-component  | 141.58 kB | 
-chunk-EA6NQ4U2.js   | -                        | 120.61 kB | 
-chunk-WZVCNXRV.js   | offboarding-component    | 118.97 kB | 
-chunk-WGMPPFAT.js   | requests-component       | 110.94 kB | 
-chunk-VFNGVEB6.js   | tickets-component        | 110.46 kB | 
-chunk-TVU43EZS.js   | reports-component        | 110.39 kB | 
-chunk-UAVWR3DE.js   | -                        |  96.50 kB | 
-chunk-VV5VXRMG.js   | raise-ticket-component   |  80.82 kB | 
-chunk-CH4G5DK2.js   | add-asset-component      |  78.58 kB | 
-chunk-PRYAZ2E3.js   | assets-component         |  65.17 kB | 
-chunk-HJJ26BSM.js   | raise-request-component  |  64.83 kB | 
-chunk-WFTY32H4.js   | leaves-component         |  63.70 kB | 
-chunk-UTBFT2PK.js   | administration-component |  62.76 kB | 
-chunk-CEYR34RI.js   | onboarding-component     |  60.86 kB | 
-...and 2 more lazy chunks files. Use "--verbose" to show all the files.
+Lazy chunk files    | Names                          |  Raw size
+chunk-YQ5B3I2O.js   | add-asset-component            | 199.88 kB | 
+chunk-E5NHU7NO.js   | asset-details-component        | 198.81 kB | 
+chunk-XKPEIIH3.js   | add-employee-component         | 190.07 kB | 
+chunk-LIE37C43.js   | offboarding-component          | 151.38 kB | 
+chunk-T5T2SYYX.js   | requests-component             | 149.11 kB | 
+chunk-DMZYTQ65.js   | it-clearance-component         | 146.90 kB | 
+chunk-W63DRI5H.js   | initiate-offboarding-component | 134.95 kB | 
+chunk-ZMZXPGUF.js   | employee-view-component        | 124.71 kB | 
+chunk-IVON3CHE.js   | tickets-component              | 115.89 kB | 
+chunk-Z7NPTWRT.js   | raise-ticket-component         | 102.92 kB | 
+chunk-T63TTMKT.js   | -                              | 101.58 kB | 
+chunk-ANKXTSUQ.js   | reports-component              |  96.95 kB | 
+chunk-5CVIHQLG.js   | -                              |  94.07 kB | 
+chunk-MALHM6IU.js   | raise-request-component        |  78.04 kB | 
+chunk-L45G5EEF.js   | onboarding-component           |  72.05 kB | 
+...and 7 more lazy chunks files. Use "--verbose" to show all the files.
 
-Application bundle generation complete. [6.411 seconds] - 2026-06-09T06:33:22.297Z
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of DashboardComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/features/dashboard/dashboard.component.ts:21:103:
-[37m      21 │ ...crumbComponent, StatCardComponent, BadgeComponent, [32mCardComponent[37m],
-         ╵                                                       [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of LeavesComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/features/leaves/leaves.component.ts:21:84:
-[37m      21 │ ...derComponent, BreadcrumbComponent, BadgeComponent, [32mCardComponent[37m],
-         ╵                                                       [32m~~~~~~~~~~~~~[0m
-
+Application bundle generation complete. [6.411 seconds] - 2026-06-12T10:21:09.117Z
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of AddAssetComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/add-asset/add-asset.component.ts:26:4:
+    src/app/modules/asset-management/components/add-asset/add-asset.component.ts:26:4:
 [37m      26 │     [32mDatePipe[37m,
          ╵     [32m~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TitleCasePipe is not used within the template of AddAssetComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/add-asset/add-asset.component.ts:27:4:
+    src/app/modules/asset-management/components/add-asset/add-asset.component.ts:27:4:
 [37m      27 │     [32mTitleCasePipe[37m,
          ╵     [32m~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: BadgeComponent is not used within the template of AddAssetComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/add-asset/add-asset.component.ts:29:4:
+    src/app/modules/asset-management/components/add-asset/add-asset.component.ts:29:4:
 [37m      29 │     [32mBadgeComponent[37m,
          ╵     [32m~~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of AddAssetComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/add-asset/add-asset.component.ts:31:4:
+    src/app/modules/asset-management/components/add-asset/add-asset.component.ts:31:4:
 [37m      31 │     [32mInputComponent[37m,
          ╵     [32m~~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SelectComponent is not used within the template of AddAssetComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/add-asset/add-asset.component.ts:32:4:
+    src/app/modules/asset-management/components/add-asset/add-asset.component.ts:32:4:
 [37m      32 │     [32mSelectComponent[37m,
          ╵     [32m~~~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TextareaComponent is not used within the template of AddAssetComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/add-asset/add-asset.component.ts:33:4:
+    src/app/modules/asset-management/components/add-asset/add-asset.component.ts:33:4:
 [37m      33 │     [32mTextareaComponent[37m
          ╵     [32m~~~~~~~~~~~~~~~~~[0m
 
 
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TabsComponent is not used within the template of AssetDetailsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/assets/asset-details.component.ts:77:4:
+[37m      77 │     [32mTabsComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of AssetDetailsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/assets/asset-details.component.ts:79:4:
+[37m      79 │     [32mInputComponent[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/assets/asset-details.component.ts:370:57:
-[37m      370 │ ...   <span class="spec-value">{{ asset().specs?.[32mprocessor[37m }}</span>
+    src/app/modules/asset-management/components/assets/asset-details.component.ts:554:57:
+[37m      554 │ ...   <span class="spec-value">{{ asset().specs?.[32mprocessor[37m }}</span>
           ╵                                                  [32m~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/assets/asset-details.component.ts:374:57:
-[37m      374 │ ...         <span class="spec-value">{{ asset().specs?.[32mram[37m }}</span>
+    src/app/modules/asset-management/components/assets/asset-details.component.ts:558:57:
+[37m      558 │ ...         <span class="spec-value">{{ asset().specs?.[32mram[37m }}</span>
           ╵                                                        [32m~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/assets/asset-details.component.ts:378:57:
-[37m      378 │ ...     <span class="spec-value">{{ asset().specs?.[32mstorage[37m }}</span>
+    src/app/modules/asset-management/components/assets/asset-details.component.ts:562:57:
+[37m      562 │ ...     <span class="spec-value">{{ asset().specs?.[32mstorage[37m }}</span>
           ╵                                                    [32m~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/assets/asset-details.component.ts:382:57:
-[37m      382 │ ...     <span class="spec-value">{{ asset().specs?.[32mdisplay[37m }}</span>
+    src/app/modules/asset-management/components/assets/asset-details.component.ts:566:57:
+[37m      566 │ ...     <span class="spec-value">{{ asset().specs?.[32mdisplay[37m }}</span>
           ╵                                                    [32m~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/assets/asset-details.component.ts:386:57:
-[37m      386 │ ...          <span class="spec-value">{{ asset().specs?.[32mos[37m }}</span>
+    src/app/modules/asset-management/components/assets/asset-details.component.ts:570:57:
+[37m      570 │ ...          <span class="spec-value">{{ asset().specs?.[32mos[37m }}</span>
           ╵                                                         [32m~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator.[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/assets/asset-details.component.ts:390:57:
-[37m      390 │ ...       <span class="spec-value">{{ asset().specs?.[32mcolor[37m }}</span>
+    src/app/modules/asset-management/components/assets/asset-details.component.ts:574:57:
+[37m      574 │ ...       <span class="spec-value">{{ asset().specs?.[32mcolor[37m }}</span>
           ╵                                                      [32m~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of AssetsComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/assets/assets.component.ts:52:4:
-[37m      52 │     [32mDatePipe[37m,
+    src/app/modules/asset-management/components/assets/assets.component.ts:38:4:
+[37m      38 │     [32mDatePipe[37m,
          ╵     [32m~~~~~~~~[0m
 
 
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CurrencyPipe is not used within the template of DashboardComponent[0m [1m[35m[plugin angular-compiler][0m
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of AssetsComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/dashboard/dashboard.component.ts:52:4:
-[37m      52 │     [32mCurrencyPipe[37m,
-         ╵     [32m~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TitleCasePipe is not used within the template of DashboardComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/dashboard/dashboard.component.ts:54:4:
-[37m      54 │     [32mTitleCasePipe[37m,
-         ╵     [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TabsComponent is not used within the template of DashboardComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/dashboard/dashboard.component.ts:60:4:
-[37m      60 │     [32mTabsComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SearchComponent is not used within the template of DashboardComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/dashboard/dashboard.component.ts:61:4:
-[37m      61 │     [32mSearchComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~[0m
+    src/app/modules/asset-management/components/assets/assets.component.ts:46:4:
+[37m      46 │     [32mInputComponent[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of ITClearnaceComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/it-clearance/it-clearance.component.ts:64:4:
+    src/app/modules/asset-management/components/it-clearance/it-clearance.component.ts:64:4:
 [37m      64 │     [32mCardComponent[37m,
          ╵     [32m~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: ProgressComponent is not used within the template of ITClearnaceComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/it-clearance/it-clearance.component.ts:67:4:
+    src/app/modules/asset-management/components/it-clearance/it-clearance.component.ts:67:4:
 [37m      67 │     [32mProgressComponent[37m,
          ╵     [32m~~~~~~~~~~~~~~~~~[0m
 
 
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of InitiateOffboardingComponent[0m [1m[35m[plugin angular-compiler][0m
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/offboarding/initiate-offboarding.component.ts:35:4:
-[37m      35 │     [32mDatePipe[37m,
+    src/app/modules/asset-management/components/raise-request/raise-request.component.ts:25:4:
+[37m      25 │     [32mDatePipe[37m,
          ╵     [32m~~~~~~~~[0m
 
 
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of InitiateOffboardingComponent[0m [1m[35m[plugin angular-compiler][0m
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TitleCasePipe is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/offboarding/initiate-offboarding.component.ts:36:4:
-[37m      36 │     [32mCardComponent[37m,
+    src/app/modules/asset-management/components/raise-request/raise-request.component.ts:26:4:
+[37m      26 │     [32mTitleCasePipe[37m,
          ╵     [32m~~~~~~~~~~~~~[0m
 
 
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: BadgeComponent is not used within the template of InitiateOffboardingComponent[0m [1m[35m[plugin angular-compiler][0m
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: BadgeComponent is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/offboarding/initiate-offboarding.component.ts:37:4:
-[37m      37 │     [32mBadgeComponent[37m,
+    src/app/modules/asset-management/components/raise-request/raise-request.component.ts:30:4:
+[37m      30 │     [32mBadgeComponent[37m,
          ╵     [32m~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/raise-request/raise-request.component.ts:32:4:
+[37m      32 │     [32mInputComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SelectComponent is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/raise-request/raise-request.component.ts:33:4:
+[37m      33 │     [32mSelectComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TextareaComponent is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/raise-request/raise-request.component.ts:34:4:
+[37m      34 │     [32mTextareaComponent[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/raise-ticket/raise-ticket.component.ts:33:4:
+[37m      33 │     [32mDatePipe[37m,
+         ╵     [32m~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TitleCasePipe is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/raise-ticket/raise-ticket.component.ts:34:4:
+[37m      34 │     [32mTitleCasePipe[37m,
+         ╵     [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/raise-ticket/raise-ticket.component.ts:40:4:
+[37m      40 │     [32mInputComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SelectComponent is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/raise-ticket/raise-ticket.component.ts:41:4:
+[37m      41 │     [32mSelectComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TextareaComponent is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/raise-ticket/raise-ticket.component.ts:42:4:
+[37m      42 │     [32mTextareaComponent[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8109: trendAreaAcq is a function and should be invoked: trendAreaAcq()[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/reports/reports.component.html:100:26:
+[37m      100 │           <path [attr.d]="[32mtrendAreaAcq[37m" fill="url(#acqGrad)"/>
+          ╵                           [32m~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of component ReportsComponent.
+
+    src/app/modules/asset-management/components/reports/reports.component.ts:57:15:
+[37m      57 │   templateUrl: [32m'./reports.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8109: trendLineAcq is a function and should be invoked: trendLineAcq()[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/reports/reports.component.html:101:26:
+[37m      101 │           <path [attr.d]="[32mtrendLineAcq[37m" fill="none" stroke="#3B82...
+          ╵                           [32m~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of component ReportsComponent.
+
+    src/app/modules/asset-management/components/reports/reports.component.ts:57:15:
+[37m      57 │   templateUrl: [32m'./reports.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8109: trendAreaRet is a function and should be invoked: trendAreaRet()[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/reports/reports.component.html:103:26:
+[37m      103 │           <path [attr.d]="[32mtrendAreaRet[37m" fill="url(#retGrad)"/>
+          ╵                           [32m~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of component ReportsComponent.
+
+    src/app/modules/asset-management/components/reports/reports.component.ts:57:15:
+[37m      57 │   templateUrl: [32m'./reports.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8109: trendLineRet is a function and should be invoked: trendLineRet()[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/reports/reports.component.html:104:26:
+[37m      104 │           <path [attr.d]="[32mtrendLineRet[37m" fill="none" stroke="#EF44...
+          ╵                           [32m~~~~~~~~~~~~[0m
+
+  Warning occurs in the template of component ReportsComponent.
+
+    src/app/modules/asset-management/components/reports/reports.component.ts:57:15:
+[37m      57 │   templateUrl: [32m'./reports.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of ReportsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/reports/reports.component.ts:51:4:
+[37m      51 │     [32mCardComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: BadgeComponent is not used within the template of ReportsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/reports/reports.component.ts:52:4:
+[37m      52 │     [32mBadgeComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: StatCardComponent is not used within the template of ReportsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/reports/reports.component.ts:55:4:
+[37m      55 │     [32mStatCardComponent[37m
+         ╵     [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/requests/requests.component.ts:44:4:
+[37m      44 │     [32mCardComponent[37m, BadgeComponent, AvatarComponent, ProgressCompon...
+         ╵     [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: AvatarComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/requests/requests.component.ts:44:35:
+[37m      44 │ ...CardComponent, BadgeComponent, [32mAvatarComponent[37m, ProgressComponent,
+         ╵                                   [32m~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: ProgressComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/requests/requests.component.ts:44:52:
+[37m      44 │ ...CardComponent, BadgeComponent, AvatarComponent, [32mProgressComponent[37m,
+         ╵                                                    [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/requests/requests.component.ts:45:36:
+[37m      45 │     TabsComponent, ButtonComponent, [32mInputComponent[37m, SelectComponent,
+         ╵                                     [32m~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SelectComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/requests/requests.component.ts:45:52:
+[37m      45 │     TabsComponent, ButtonComponent, InputComponent, [32mSelectComponent[37m,
+         ╵                                                     [32m~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TextareaComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/requests/requests.component.ts:46:4:
+[37m      46 │     [32mTextareaComponent[37m, SearchComponent
+         ╵     [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TabsComponent is not used within the template of TicketsComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/asset-management/components/tickets/tickets.component.ts:66:4:
+[37m      66 │     [32mTabsComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of DashboardComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/dashboard/components/dashboard.component.ts:21:103:
+[37m      21 │ ...crumbComponent, StatCardComponent, BadgeComponent, [32mCardComponent[37m],
+         ╵                                                       [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of AddEmployeeComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/employees/components/add-employee/add-employee.component.ts:13:4:
+[37m      13 │     [32mDatePipe[37m,
+         ╵     [32m~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: BadgeComponent is not used within the template of AddEmployeeComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/employees/components/add-employee/add-employee.component.ts:15:4:
+[37m      15 │     [32mBadgeComponent[37m
+         ╵     [32m~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of EmployeeListComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/employees/components/employee-list/employee-list.component.ts:39:4:
+[37m      39 │     [32mCardComponent[37m,
+         ╵     [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of EmployeeViewComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/employees/components/employee-view/employee-view.component.ts:15:4:
+[37m      15 │     [32mCardComponent[37m
+         ╵     [32m~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of LeavesComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/leaves/components/leaves.component.ts:21:84:
+[37m      21 │ ...derComponent, BreadcrumbComponent, BadgeComponent, [32mCardComponent[37m],
+         ╵                                                       [32m~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: ProgressComponent is not used within the template of OffboardingComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/offboarding/offboarding.component.ts:61:4:
-[37m      61 │     [32mProgressComponent[37m,
+    src/app/modules/onboarding-offboarding/components/offboarding/offboarding.component.ts:84:4:
+[37m      84 │     [32mProgressComponent[37m,
          ╵     [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TabsComponent is not used within the template of OffboardingComponent[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/onboarding-offboarding/components/offboarding/offboarding.component.ts:86:4:
+[37m      86 │     [32mTabsComponent[37m
+         ╵     [32m~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of OnboardingComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/onboarding/onboarding.component.ts:47:4:
+    src/app/modules/onboarding-offboarding/components/onboarding/onboarding.component.ts:47:4:
 [37m      47 │     [32mCardComponent[37m,
          ╵     [32m~~~~~~~~~~~~~[0m
 
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: ProgressComponent is not used within the template of OnboardingComponent[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/knodtec/features/onboarding/onboarding.component.ts:51:4:
+    src/app/modules/onboarding-offboarding/components/onboarding/onboarding.component.ts:51:4:
 [37m      51 │     [32mProgressComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CurrencyPipe is not used within the template of ProfileComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/profile/profile.component.ts:43:4:
-[37m      43 │     [32mCurrencyPipe[37m,
-         ╵     [32m~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: AvatarComponent is not used within the template of ProfileComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/profile/profile.component.ts:48:4:
-[37m      48 │     [32mAvatarComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: ProgressComponent is not used within the template of ProfileComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/profile/profile.component.ts:49:4:
-[37m      49 │     [32mProgressComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-request/raise-request.component.ts:20:4:
-[37m      20 │     [32mDatePipe[37m,
-         ╵     [32m~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TitleCasePipe is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-request/raise-request.component.ts:21:4:
-[37m      21 │     [32mTitleCasePipe[37m,
-         ╵     [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: BadgeComponent is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-request/raise-request.component.ts:23:4:
-[37m      23 │     [32mBadgeComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-request/raise-request.component.ts:25:4:
-[37m      25 │     [32mInputComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SelectComponent is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-request/raise-request.component.ts:26:4:
-[37m      26 │     [32mSelectComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TextareaComponent is not used within the template of RaiseRequestComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-request/raise-request.component.ts:27:4:
-[37m      27 │     [32mTextareaComponent[37m
-         ╵     [32m~~~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: DatePipe is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-ticket/raise-ticket.component.ts:28:4:
-[37m      28 │     [32mDatePipe[37m,
-         ╵     [32m~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TitleCasePipe is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-ticket/raise-ticket.component.ts:29:4:
-[37m      29 │     [32mTitleCasePipe[37m,
-         ╵     [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-ticket/raise-ticket.component.ts:33:4:
-[37m      33 │     [32mInputComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SelectComponent is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-ticket/raise-ticket.component.ts:34:4:
-[37m      34 │     [32mSelectComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TextareaComponent is not used within the template of RaiseTicketComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/raise-ticket/raise-ticket.component.ts:35:4:
-[37m      35 │     [32mTextareaComponent[37m
-         ╵     [32m~~~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TitleCasePipe is not used within the template of ReportsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/reports/reports.component.ts:45:4:
-[37m      45 │     [32mTitleCasePipe[37m,
-         ╵     [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CurrencyPipe is not used within the template of ReportsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/reports/reports.component.ts:46:4:
-[37m      46 │     [32mCurrencyPipe[37m,
-         ╵     [32m~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TabsComponent is not used within the template of ReportsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/reports/reports.component.ts:51:4:
-[37m      51 │     [32mTabsComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: CardComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/requests/requests.component.ts:54:4:
-[37m      54 │     [32mCardComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: ProgressComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/requests/requests.component.ts:57:4:
-[37m      57 │     [32mProgressComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: InputComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/requests/requests.component.ts:60:4:
-[37m      60 │     [32mInputComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: SelectComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/requests/requests.component.ts:61:4:
-[37m      61 │     [32mSelectComponent[37m,
-         ╵     [32m~~~~~~~~~~~~~~~[0m
-
-
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8113: TextareaComponent is not used within the template of RequestsComponent[0m [1m[35m[plugin angular-compiler][0m
-
-    src/app/knodtec/features/requests/requests.component.ts:62:4:
-[37m      62 │     [32mTextareaComponent[37m,
          ╵     [32m~~~~~~~~~~~~~~~~~[0m
 
 
 Watch mode enabled. Watching for file changes...
 NOTE: Raw file sizes do not reflect development server per-request transformations.
   ➜  Local:   http://localhost:4200/
+  ➜  Network: http://10.2.31.12:4200/
   ➜  press h + enter to show help

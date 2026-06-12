@@ -51,6 +51,46 @@ export const routes: Routes = [
         path: 'leaves',
         loadComponent: () => import('./modules/leaves/components/leaves.component').then(m => m.LeavesComponent)
       },
+      // Workforce Management Routes
+      {
+        path: 'workforce',
+        children: [
+          {
+            path: '',
+            redirectTo: 'employees',
+            pathMatch: 'full'
+          },
+          {
+            path: 'employees',
+            loadComponent: () => import('./modules/employees/components/employee-list/employee-list.component').then(m => m.EmployeeListComponent)
+          },
+          {
+            path: 'employees/add',
+            loadComponent: () => import('./modules/employees/components/add-employee/add-employee.component').then(m => m.AddEmployeeComponent)
+          },
+          {
+            path: 'employees/:id',
+            loadComponent: () => import('./modules/employees/components/employee-view/employee-view.component').then(m => m.EmployeeViewComponent)
+          },
+          {
+            path: 'employees/:id/edit',
+            loadComponent: () => import('./modules/employees/components/add-employee/add-employee.component').then(m => m.AddEmployeeComponent)
+          },
+          {
+            path: 'onboarding',
+            loadComponent: () => import('./modules/onboarding-offboarding/components/onboarding/onboarding.component').then(m => m.OnboardingComponent)
+          },
+          {
+            path: 'offboarding',
+            loadComponent: () => import('./modules/onboarding-offboarding/components/offboarding/offboarding.component').then(m => m.OffboardingComponent)
+          },
+          {
+            path: 'initiate-offboarding',
+            loadComponent: () => import('./modules/onboarding-offboarding/components/offboarding/initiate-offboarding.component').then(m => m.InitiateOffboardingComponent)
+          }
+        ]
+      },
+      // Legacy routes for backward compatibility
       {
         path: 'onboarding',
         loadComponent: () => import('./modules/onboarding-offboarding/components/onboarding/onboarding.component').then(m => m.OnboardingComponent)
