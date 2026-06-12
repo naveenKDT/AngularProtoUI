@@ -553,7 +553,7 @@ interface OffboardingRecord {
       flex-direction: column;
       height: 100%;
       min-height: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      // background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
       padding: 32px;
       position: relative;
       overflow: hidden;
@@ -566,7 +566,7 @@ interface OffboardingRecord {
       right: -100px;
       width: 400px;
       height: 400px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+      // background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
       border-radius: 50%;
       filter: blur(60px);
     }
@@ -610,7 +610,7 @@ interface OffboardingRecord {
     .ob-title {
       font-size: 32px;
       font-weight: 700;
-      color: white;
+      color: black;
       margin: 0 0 4px;
       text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
     }

@@ -25,10 +25,10 @@ interface ModuleCard {
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </div>
-        <div class="hub-title-section">
-          <h1 class="hub-title">Administration Hub</h1>
-          <p class="hub-subtitle">Manage your organization's modules and settings</p>
-        </div>
+        <h1 class="hub-title">Administration</h1>
+          <p class="hub-subtitle">
+            Configure organization structure and HRMS modules
+          </p>
       </div>
 
       <div class="modules-grid">
@@ -74,252 +74,268 @@ interface ModuleCard {
       }
     </div>
   `,
-  styles: [`
-    .admin-hub {
-      padding: var(--spacing-8);
-      max-width: 1400px;
-      margin: 0 auto;
-      animation: fadeIn 400ms ease;
-    }
+ styles: [`
+.admin-hub {
+  padding: 20px 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+/* ===========================
+   HEADER
+=========================== */
 
-    .hub-header {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-6);
-      margin-bottom: var(--spacing-10);
-      padding-bottom: var(--spacing-8);
-      border-bottom: 1px solid var(--bg-border);
-    }
+.hub-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
 
-    .hub-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
-      flex-shrink: 0;
-    }
+.hub-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg,#6366F1,#8B5CF6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
-    .hub-icon svg {
-      width: 40px;
-      height: 40px;
-      color: white;
-    }
+.hub-icon svg {
+  width: 22px;
+  height: 22px;
+  color: white;
+}
 
-    .hub-title-section {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-2);
-    }
+.hub-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+}
 
-    .hub-title {
-      font-size: 36px;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin: 0;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+.hub-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
 
-    .hub-subtitle {
-      font-size: 16px;
-      color: var(--text-secondary);
-      margin: 0;
-    }
+/* ===========================
+   GRID
+=========================== */
 
-    .modules-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: var(--spacing-6);
-    }
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
 
-    .module-card {
-      background: var(--bg-card);
-      border: 1px solid var(--bg-border);
-      border-radius: 24px;
-      padding: var(--spacing-8);
-      cursor: pointer;
-      transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
+/* ===========================
+   CARD
+=========================== */
 
-    .module-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-      transform: scaleX(0);
-      transition: transform 300ms ease;
-    }
+.module-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+  min-height: 160px;
+  cursor: pointer;
+  transition: all .25s ease;
+}
 
-    .module-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
-      border-color: rgba(99, 102, 241, 0.3);
-    }
+.module-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+  border-color: #c7d2fe;
+}
 
-    .module-card:hover::before {
-      transform: scaleX(1);
-    }
+.module-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    #6366F1,
+    #8B5CF6
+  );
+  border-radius: 14px 14px 0 0;
+  opacity: 0;
+  transition: opacity .25s;
+}
 
-    .module-card:hover .module-arrow {
-      opacity: 1;
-      transform: translateX(0);
-    }
+.module-card:hover::before {
+  opacity: 1;
+}
 
-    .module-card.disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+/* ===========================
+   ICON
+=========================== */
 
-    .module-card.disabled:hover {
-      transform: none;
-      box-shadow: none;
-      border-color: var(--bg-border);
-    }
+.module-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
 
-    .module-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: var(--spacing-5);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      transition: transform 300ms ease;
-    }
+.module-icon :deep(svg) {
+  width: 18px;
+  height: 18px;
+  color: white;
+}
 
-    .module-card:hover .module-icon {
-      transform: scale(1.05);
-    }
+/* ===========================
+   CONTENT
+=========================== */
 
-    .module-icon :deep(svg) {
-      width: 32px;
-      height: 32px;
-      color: white;
-    }
+.module-name {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.3;
+}
 
-    .module-name {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin: 0 0 var(--spacing-3) 0;
-      letter-spacing: -0.01em;
-    }
+.module-description {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+}
 
-    .module-description {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin: 0;
-      line-height: 1.6;
-    }
+/* ===========================
+   ARROW
+=========================== */
 
-    .module-arrow {
-      position: absolute;
-      bottom: var(--spacing-8);
-      right: var(--spacing-8);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transform: translateX(-10px);
-      transition: all 300ms ease;
-      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
-    }
+.module-arrow {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
 
-    .module-arrow svg {
-      color: white;
-    }
+  width: 28px;
+  height: 28px;
 
-    .locked-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--spacing-2);
-      padding: var(--spacing-2) var(--spacing-4);
-      background: var(--bg-main);
-      border-radius: 100px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-top: var(--spacing-4);
-    }
+  border-radius: 8px;
+  background: #f8fafc;
 
-    .unavailable-section {
-      margin-top: var(--spacing-12);
-      padding-top: var(--spacing-8);
-      border-top: 1px solid var(--bg-border);
-    }
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin: 0 0 var(--spacing-6) 0;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+  opacity: 0;
+  transform: translateX(-4px);
 
-    .modules-grid.unavailable {
-      opacity: 0.7;
-    }
+  transition: all .25s ease;
+}
 
-    @media (max-width: 768px) {
-      .admin-hub {
-        padding: var(--spacing-5);
-      }
+.module-card:hover .module-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
 
-      .hub-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-4);
-      }
+.module-arrow svg {
+  width: 14px;
+  height: 14px;
+  color: #475569;
+}
 
-      .hub-icon {
-        width: 64px;
-        height: 64px;
-      }
+/* ===========================
+   DISABLED
+=========================== */
 
-      .hub-icon svg {
-        width: 32px;
-        height: 32px;
-      }
+.module-card.disabled {
+  opacity: .65;
+  cursor: not-allowed;
+}
 
-      .hub-title {
-        font-size: 28px;
-      }
+.module-card.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
 
-      .modules-grid {
-        grid-template-columns: 1fr;
-      }
+.locked-badge {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
 
-      .module-card {
-        padding: var(--spacing-6);
-      }
-    }
-  `]
+/* ===========================
+   PURCHASE SECTION
+=========================== */
+
+.unavailable-section {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 1200px) {
+  .modules-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .modules-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-hub {
+    padding: 16px;
+  }
+
+  .hub-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modules-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-title {
+    font-size: 20px;
+  }
+}
+`]
 })
 export class AdminHubComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   modules = signal<ModuleCard[]>([
     {
